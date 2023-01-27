@@ -36,7 +36,7 @@ func ShowNumberedChoices(progBounds consts.ProgBounds, simKeyStream chan string,
 	if err != nil {
 		return "", err
 	}
-	report, err := downloadAndReport(pdescs, thePodcasts, choice-1, progBounds, simKeyStream, mediaFix)
+	report, err := DownloadAndReport(pdescs, thePodcasts, choice-1, progBounds, simKeyStream, mediaFix)
 	if err != nil {
 		return "", err
 	}
@@ -89,7 +89,17 @@ func AddByUrlAndName(url string, osArgs []string, progBounds consts.ProgBounds, 
 	return report, err
 }
 
-func downloadAndReport(pdescs, feed []string, choice int, progBounds consts.ProgBounds, simKeyStream chan string, mediaFix map[string]error) (string, error) {
+func DownloadAndReport(pdescs, feed []string, choice int, progBounds consts.ProgBounds, simKeyStream chan string, mediaFix map[string]error) (string, error) {
+
+	fmt.Println("&&& pdescs", pdescs)
+	fmt.Println("&&& feed", feed)
+	fmt.Println("&&& progBounds", progBounds)
+	fmt.Println("&&& simKeyStream", simKeyStream) // 	simKeyStream := make(chan string)
+	fmt.Println("&&& mediaFix", mediaFix)
+
+	/*
+
+	 */
 	mediaTitle := pdescs[choice]
 	url := feed[choice]
 	podcastResults := podcasts.DownloadPodcast(mediaTitle, url, progBounds, simKeyStream, mediaFix)

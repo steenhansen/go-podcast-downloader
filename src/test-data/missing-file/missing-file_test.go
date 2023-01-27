@@ -1,4 +1,4 @@
-package rss
+package terminal
 
 //      go test ./...
 
@@ -9,17 +9,28 @@ package rss
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
 )
 
 func TestInvalidXml(t *testing.T) {
-	url := consts.TEST_DIR_URL + "invalid-xml/invalid-xml.rss"
-	_, _, _, err := podcasts.ReadUrl(url)
-	//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/test-data/invalid-xml/invalid-xml.rss
+	pdescs := []string{"test pod desc"}
+	feed := []string{consts.TEST_DIR_URL + "test-data/missing-file/missing-file.rss"}
+	choice := 0
+	progBounds := consts.ProgBounds{
+		ProgPath:    "c:\\poddown",
+		LoadOption:  "high",
+		LimitOption: 0,
+		MinDisk:     1000000000,
+	}
+	simKeyStream := make(chan string)
+	mediaFix := map[string]error{}
+	report, err := terminal.DownloadAndReport(pdescs, feed, choice, progBounds, simKeyStream, mediaFix)
+	fmt.Println("test resort ", report)
 	if !errors.Is(err, flaws.InvalidXML) {
 		t.Fatalf(`TestInvalidXml failed`)
 	}

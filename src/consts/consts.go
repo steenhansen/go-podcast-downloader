@@ -16,11 +16,10 @@ type UrlPathLength struct {
 }
 
 type ProgBounds struct {
-	ProgPath         string
-	LoadOption       string
-	LimitOption      int
-	MinDisk          int
-	SimulateKeyPress chan<- string
+	ProgPath    string
+	LoadOption  string
+	LimitOption int
+	MinDisk     int
 }
 
 type PodcastData struct {
