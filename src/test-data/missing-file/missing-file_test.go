@@ -19,7 +19,7 @@ import (
 
 func TestInvalidXml(t *testing.T) {
 	pdescs := []string{"test pod desc"}
-	feed := []string{consts.TEST_DIR_URL + "test-data/missing-file/missing-file.rss"}
+	feed := []string{consts.TEST_DIR_URL + "missing-file/missing-file.rss"}
 	choice := 0
 	progBounds := consts.ProgBounds{
 		ProgPath:    "c:\\poddown",
