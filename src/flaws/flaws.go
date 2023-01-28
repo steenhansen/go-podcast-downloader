@@ -143,7 +143,7 @@ func (e flawError) Error() string {
 	case lowDisk:
 		return fmt.Sprintf("low disk space, %s", e.errMess)
 	case badContent:
-		return fmt.Sprintf(pre+"404 html page, %s", e.errMess)
+		return fmt.Sprintf(pre+"404 or 400 html page, %s", e.errMess)
 	case badLimit:
 		return fmt.Sprintf(pre+"unknown limit option '%s', try '--limit=10' ", e.errMess)
 	case badLoad:

@@ -15,6 +15,8 @@ type UrlPathLength struct {
 	Length int
 }
 
+type VarietiesSet map[string]bool
+
 type ProgBounds struct {
 	ProgPath    string
 	LoadOption  string
@@ -37,6 +39,10 @@ type PodcastResults struct {
 	PodcastTime   time.Duration
 	Err           error
 }
+
+type ReadLineFunc func() string
+
+//type Gmc func() string
 
 const KB_BYTES int64 = 1024
 const MB_BYTES int64 = 1024 * 1024
@@ -73,7 +79,7 @@ const HTML_404_BEGIN = "<!DOCTYPE"
 
 const TEST_FLAG_PREFIX = "-test."
 
-const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/test-data/"
+const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/"
 
 //                https://github.com/steenhansen/react-native-phone-recipes/blob/main/android/gradlew.bat
 // https://raw.githubusercontent.com/steenhansen/react-native-phone-recipes/main/android/gradlew.bat

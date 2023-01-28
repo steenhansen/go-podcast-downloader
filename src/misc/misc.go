@@ -1,19 +1,44 @@
 package misc
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/ricochet2200/go-disk-usage/du"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
 
+var ConsolOutput = ""
+
 func OutputProgress(progressStr string) {
 	fmt.Println(progressStr)
+	if progressStr != consts.CLEAR_SCREEN {
+		ConsolOutput = ConsolOutput + "\n" + progressStr
+	}
+}
+
+var MediaFix2 = map[string]error{}
+
+func MediaFaults2(mediaUrl string, err error) {
+	var mu sync.Mutex
+	mu.Lock()
+	MediaFix2[mediaUrl] = err
+	mu.Unlock()
+}
+
+func GetMediaFaults2() string {
+	badFiles := ""
+	for _, mediaError := range MediaFix2 {
+		badFiles = badFiles + "\t\t" + mediaError.Error() + "\n"
+	}
+	return badFiles
 }
 
 func EmptyPodcastResults(err error) consts.PodcastResults {
@@ -45,26 +70,6 @@ func NameOfFile(furl string) string {
 	return fname
 }
 
-type VarietiesSet map[string]bool
-
-func (varieties VarietiesSet) AddVariety(filename string) {
-	if filename != consts.URL_OF_RSS {
-		pieces := strings.Split(filename, ".")
-		if len(pieces) > 1 {
-			variety := pieces[len(pieces)-1]
-			varieties[variety] = true
-		}
-	}
-}
-
-func (varieties VarietiesSet) VarietiesString(separator string) (vString string) {
-	for k := range varieties {
-		vString = vString + k + " "
-	}
-	vString = strings.TrimSpace(vString)
-	return vString
-}
-
 func DiskPanic(fileSize, min_disk_mbs int) error {
 	usage := du.NewDiskUsage(".")
 	availableUint64 := usage.Available()
@@ -92,21 +97,6 @@ func DiskSpace() (free, size, percent string) {
 	used := usage.Usage() * 100
 	percent = fmt.Sprintf("%.0f%%", used)
 	return free, size, percent
-}
-
-func GbOrMbOLD(length int) string {
-	if length == 0 {
-		return ""
-	} else if int64(length) < consts.MB_BYTES {
-		lenKb := int64(length) / consts.KB_BYTES
-		return fmt.Sprintf("%.0dKB", lenKb)
-	} else if int64(length) < consts.GB_BYTES {
-		lenMb := int64(length) / consts.MB_BYTES
-		return fmt.Sprintf("%.0dMB", lenMb)
-	} else {
-		lenGb := int64(length) / consts.GB_BYTES
-		return fmt.Sprintf("%.0dGB", lenGb)
-	}
 }
 
 func GbOrMb(length int) string {
@@ -191,6 +181,37 @@ func DelRace(osArgs []string) ([]string, error) {
 	return raceArgs, nil
 }
 
+func GetMenuChoice() string {
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	return input
+}
+
+// ///////////////////////////////// moved
+type VarietiesSet map[string]bool
+
+func (varieties VarietiesSet) AddVariety(filename string) {
+	if filename != consts.URL_OF_RSS {
+		pieces := strings.Split(filename, ".")
+		if len(pieces) > 1 {
+			variety := pieces[len(pieces)-1]
+			varieties[variety] = true
+		}
+	}
+}
+
+func (varieties VarietiesSet) VarietiesString(separator string) (vString string) {
+	for k := range varieties {
+		vString = vString + k + " "
+	}
+	vString = strings.TrimSpace(vString)
+	return vString
+}
+
+/////////////////////////////////// moved
+
+/////////////// below are tests
+
 func IsTesting(osArgs []string) bool {
 	for _, arg := range osArgs {
 		if strings.HasPrefix(arg, consts.TEST_FLAG_PREFIX) {
@@ -199,3 +220,44 @@ func IsTesting(osArgs []string) bool {
 	}
 	return false
 }
+
+func GetMenuChoiceTest1() string {
+	return "1"
+}
+
+// ProgBoundsTest
+func TestProgBounds(progPath string) consts.ProgBounds {
+	progBounds := consts.ProgBounds{
+		ProgPath:    progPath,
+		LoadOption:  consts.HIGH_LOAD,
+		LimitOption: 0,
+		MinDisk:     1000000000,
+	}
+	return progBounds
+}
+
+// SameButOutOfOrderTest
+func SameButOutOfOrder(realLines, expectedLines string) bool {
+	realParts := strings.Split(realLines, "\n")
+	expectedParts := strings.Split(expectedLines, "\n")
+	for _, real := range realParts {
+		for _, expected := range expectedParts {
+			if real == expected {
+				realLines = strings.ReplaceAll(realLines, real, "")
+				expectedLines = strings.ReplaceAll(expectedLines, real, "")
+			}
+		}
+	}
+	return realLines == expectedLines
+}
+
+// // ClampStrTest
+// func ClampStr(testStr string) string {
+
+// 	// re := regexp.MustCompile(`\s+`)
+// 	// out := re.ReplaceAllString(testStr, " ")
+// 	// out = strings.TrimSpace(out)
+
+// 	clampStr := "\n~" + testStr + "~"
+// 	return clampStr
+// }

@@ -40,13 +40,11 @@ func ReadRss(url string) ([]byte, error) { // 2 or 3
 	url = rssUrl(url)
 	response, err := http.Get(url)
 	if err != nil {
-		fmt.Println("badURL-1-", url, err)
 		return nil, flaws.BadUrl.ContinueError(url, err)
 	}
 	defer response.Body.Close()
 	rss, err := io.ReadAll(response.Body)
 	if err != nil || len(rss) == 0 {
-		fmt.Println("badURL-2-", url, err)
 		return nil, flaws.BadUrl.StartError(url)
 	}
 	return rss, nil
@@ -55,18 +53,23 @@ func ReadRss(url string) ([]byte, error) { // 2 or 3
 func DownloadAndWriteFile(ctx context.Context, furl, fpath string, min_disk_mbs int) error {
 	req, err := http.NewRequest(http.MethodGet, furl, nil)
 	if err != nil {
-		fmt.Println("badURL-3-", furl, err)
 		return flaws.BadUrl.ContinueError(furl, err)
 	}
 	req = req.WithContext(ctx)
 	c := &http.Client{}
 	response, err := c.Do(req)
+
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			return nil
 		}
 		return flaws.BadUrl.ContinueError(furl, err)
 	}
+	////////////////////////////////////
+	if response.StatusCode != 200 {
+		return flaws.BadContent.StartError(furl)
+	}
+
 	defer response.Body.Close()
 	content, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -81,7 +84,6 @@ func DownloadAndWriteFile(ctx context.Context, furl, fpath string, min_disk_mbs 
 	//////////////////// q*bert
 	contentStr := string(content)
 	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
-		//fmt.Println("*******************************", furl, contentStr)
 		return flaws.BadContent.StartError(furl)
 	}
 
@@ -124,10 +126,11 @@ func ShowError(mediaUrl string) string {
 }
 
 func ShowSaved(savedFiles *int, start time.Time, url string) string {
-	savedTemp := IncGlobalCounters(savedFiles)
+	var savedTemp string = "0"
 	sinceStart := time.Since(start)
 	var roundTime time.Duration
 	if !misc.IsTesting(os.Args) {
+		savedTemp = IncGlobalCounters(savedFiles)
 		roundTime = sinceStart.Round(time.Second) // NB if testing all times are 0s
 	}
 	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
@@ -149,7 +152,11 @@ func PodcastName(Args []string) string {
 }
 
 func ShowProgress(media consts.UrlPathLength, readFiles *int) string {
-	readTemp := IncGlobalCounters(readFiles)
+	var readTemp string = "0"
+	if !misc.IsTesting(os.Args) {
+		readTemp = IncGlobalCounters(readFiles) // NB if testing all times are (read #0
+	}
+
 	mbGbLen := misc.GbOrMb(media.Length)
 	var readNumMess string
 	if mbGbLen == "" {

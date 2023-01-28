@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/eiannone/keyboard"
@@ -54,19 +53,9 @@ sKeyCancel:
 	}
 }
 
-// url err
-func mediaFaults(mediaFix map[string]error, mediaUrl string, err error) {
-	var mu sync.Mutex
-	mu.Lock()
-	mediaFix[mediaUrl] = err
-	//fmt.Println("ERRRORRRRR med", mediaUrl)
-	//fmt.Println("ERRRORRRRR err", err)
-	mu.Unlock()
-}
-
 // readFiles, savedFiles *int, min_disk_mbs int,
 func GoDownloadAndSaveFiles(ctx context.Context, mediaStream <-chan consts.UrlPathLength, dtoFixStream chan<- bool, readFiles, savedFiles *int, min_disk_mbs int,
-	errorStream chan<- error, mediaFix map[string]error) {
+	errorStream chan<- error) {
 downloadCancel:
 	for media := range mediaStream {
 		select {
@@ -75,12 +64,14 @@ downloadCancel:
 		default:
 			start := time.Now()
 			misc.OutputProgress(feed.ShowProgress(media, readFiles))
+
+			// misc.OutputProgress() needs to save to a buffer
+
 			err := feed.DownloadAndWriteFile(ctx, media.Url, media.Path, min_disk_mbs)
 			if err != nil {
 				errorStream <- err
-				mediaFaults(mediaFix, media.Url, err)
+				misc.MediaFaults2(media.Url, err)
 				misc.OutputProgress(feed.ShowError(media.Url))
-				//fmt.Println("ERRRORRRRR ", media.Url, err)
 			} else if ctx.Err() == nil {
 				misc.OutputProgress(feed.ShowSaved(savedFiles, start, media.Url))
 			}
@@ -89,11 +80,10 @@ downloadCancel:
 	dtoFixStream <- true
 }
 
-func DownloadMedia(url string, PodcastData consts.PodcastData, progBounds consts.ProgBounds, simKeyStream chan string, mediaFix map[string]error) consts.PodcastResults {
-	//misc.OutputProgress(consts.CLEAR_SCREEN)
+func DownloadMedia(url string, PodcastData consts.PodcastData, progBounds consts.ProgBounds, simKeyStream chan string) consts.PodcastResults {
+	misc.OutputProgress(consts.CLEAR_SCREEN)
 	allTime := time.Now()
 	workers := misc.NumWorkers(progBounds.LoadOption)
-	//fmt.Println("WWWWWWWWWWWWWWWWWWWWWWWW- ", workers)
 	mediaStream := make(chan consts.UrlPathLength)
 	dtoFixStream := make(chan bool, workers)
 	errorStream := make(chan error, workers)
@@ -108,7 +98,7 @@ func DownloadMedia(url string, PodcastData consts.PodcastData, progBounds consts
 	go GoDownloadError(ctx, cancel, errorStream, toFixStream)
 	go GoStopKey(ctx, cancel, PodcastData.MediaTitle, keysEvents, simKeyStream)
 	for i := 0; i < workers; i++ {
-		go GoDownloadAndSaveFiles(ctx, mediaStream, dtoFixStream, &readFiles, &savedFiles, progBounds.MinDisk, errorStream, mediaFix)
+		go GoDownloadAndSaveFiles(ctx, mediaStream, dtoFixStream, &readFiles, &savedFiles, progBounds.MinDisk, errorStream)
 	}
 	possibleFiles, varietyFiles, err := media.SaveDownloadedMedia(ctx, PodcastData, mediaStream, progBounds.LimitOption)
 	close(mediaStream)

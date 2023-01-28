@@ -1,7 +1,6 @@
 package podcasts
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -59,15 +58,7 @@ func ReadUrl(url string) ([]byte, []string, []int, error) {
 	return xml, files, lengths, nil
 }
 
-/*
-ok, got the  problem
-
-	     ProgBounds.ProgPath        PodcastData.MediaTitle
-			 c:\dir1\dir2               The SFFaudio Public Domain PDF Page
-
-			 == mediaPath
-*/
-func DownloadPodcast(mediaTitle, url string, progBounds consts.ProgBounds, simKeyStream chan string, mediaFix map[string]error) consts.PodcastResults {
+func DownloadPodcast(mediaTitle, url string, progBounds consts.ProgBounds, simKeyStream chan string) consts.PodcastResults {
 	if feed.IsUrl(url) {
 		_, files, lengths, err := ReadUrl(url)
 		if err != nil {
@@ -80,11 +71,7 @@ func DownloadPodcast(mediaTitle, url string, progBounds consts.ProgBounds, simKe
 			Medias:     files,
 			Lengths:    lengths,
 		}
-		podcastResults := processes.DownloadMedia(url, podcastData, progBounds, simKeyStream, mediaFix)
-		//if podcastResults.Err != nil {
-		//fmt.Println(" q*bert the number are already 0 DownloadPodcast podcastResults=", podcastResults)
-		//return misc.EmptyPodcastResults(podcastResults.Err)
-		//	}
+		podcastResults := processes.DownloadMedia(url, podcastData, progBounds, simKeyStream)
 		return podcastResults
 	}
 	return misc.EmptyPodcastResults(flaws.InvalidRssURL.StartError(url))
@@ -116,9 +103,8 @@ func PodChoices(path string, pdescs []string) (choices string, err error) {
 }
 
 // path =>dirname
-func ChoosePod(path string, pdescs []string) (choice int, err error) {
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
+func ChoosePod(path string, pdescs []string, getMenuChoice consts.ReadLineFunc) (choice int, err error) {
+	input := getMenuChoice()
 	text := strings.Trim(input, "\r\n")
 	if text == "q" || text == "Q" {
 		return 0, nil
@@ -171,7 +157,6 @@ func AllPodcasts(path string) ([]string, []string, error) {
 	}
 	pdescs := make([]string, 0)
 	feed := make([]string, 0)
-
 	for _, dir := range dirs {
 		if !dir.Mode().IsRegular() {
 			dirname := dir.Name()

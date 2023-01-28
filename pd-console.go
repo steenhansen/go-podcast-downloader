@@ -45,7 +45,6 @@ func main() {
 		//MinDisk:   consts.MIN_DISK_FAIL_BYTES,
 	}
 	simKeyStream := make(chan string)
-	mediaFix := map[string]error{}
 	// go func() {
 	// 	fmt.Println("************* start sleep")
 	// 	time.Sleep(time.Second * 31)
@@ -55,7 +54,8 @@ func main() {
 
 	if len(cleanArgs) == 1 {
 		for {
-			report, err := menu.DisplayMenu(progBounds, simKeyStream, mediaFix)
+			realKeyboard := misc.GetMenuChoice
+			report, err := menu.DisplayMenu(progBounds, simKeyStream, realKeyboard)
 			if err != nil {
 				panic(err)
 			}
@@ -68,7 +68,7 @@ func main() {
 		helpText := help.HelpText()
 		fmt.Println(helpText)
 	} else {
-		report, err := menu.AddFeed(cleanArgs, progBounds, simKeyStream, mediaFix)
+		report, err := menu.AddFeed(cleanArgs, progBounds, simKeyStream)
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -76,6 +76,6 @@ func main() {
 		}
 	}
 
-	fmt.Println("THE ERRORS: ", mediaFix)
+	fmt.Println("THE ERRORS: ", misc.GetMediaFaults2())
 	fmt.Print("goodbye")
 }

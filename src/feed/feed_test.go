@@ -2,7 +2,6 @@ package feed
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
@@ -38,7 +37,6 @@ func TestIsUrl(t *testing.T) {
 func TestReadRss(t *testing.T) {
 	badUrl := "doesnot.exist/"
 	_, err := ReadRss(badUrl)
-	fmt.Println("badXXXXXXXXXXXXXXXXXXXXXXXXXXXX", err)
 	if !errors.Is(err, flaws.BadUrl) {
 		t.Fatalf(`TestReadRss A failed`)
 	}
