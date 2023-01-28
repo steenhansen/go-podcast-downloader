@@ -20,7 +20,7 @@ import (
 func TestMissingFileFromMenu(t *testing.T) {
 
 	path := media.CurDir()
-	delNotMissing := path + "/test pod desc/not-missing.jpeg"
+	delNotMissing := path + "/local-dest/not-missing.jpg"
 	e := os.Remove(delNotMissing)
 	if e != nil {
 		t.Fatal(e)
