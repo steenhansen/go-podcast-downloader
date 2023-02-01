@@ -7,22 +7,15 @@ import (
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
-
-func CurDir() string {
-	path, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	return path
-}
 
 func dirTitle(podTitle, rssUrl string) string {
 	if podTitle == "" {
 		podTitle = rssUrl
 	}
-	xmlEscaped := regexp.MustCompile(`&[^;]*;`) // &amp
+	xmlEscaped := regexp.MustCompile(`&[^;]*;`) // &amp;
 	safeXml := xmlEscaped.ReplaceAllLiteralString(podTitle, "")
 
 	multSpaces := regexp.MustCompile(`\s\s+`)
@@ -33,48 +26,54 @@ func dirTitle(podTitle, rssUrl string) string {
 	return safeTitle
 }
 
-func InitFolder(progPath, podTitle, rssUrl string) (string, error) {
+func InitFolder(progPath, podTitle, rssUrl string) (string, bool, error) {
 	safeTitle := dirTitle(podTitle, rssUrl)
 	containDir := progPath + "/" + safeTitle
+	dirNotExist := false
 	if _, err := os.Stat(containDir); os.IsNotExist(err) {
 		if err := os.Mkdir(containDir, os.ModePerm); err != nil {
-			return "", flaws.CantCreateDir.ContinueError(containDir, err)
+			return "", false, flaws.CantCreateDirSerious.ContinueError(containDir, err)
 		}
+		dirNotExist = true
 	}
-	originRss := containDir + "/" + consts.URL_OF_RSS
-	f, err := os.Create(originRss)
+	originRss := containDir + "/" + consts.URL_OF_RSS_FN
+	rssAddrFile, err := os.Create(originRss)
 	if err != nil {
-		return "", flaws.CantCreateFile.ContinueError(originRss, err)
+		return "", false, flaws.CantCreateFileSerious.ContinueError(originRss, err)
 	}
-	defer f.Close()
-	_, err = f.Write([]byte(rssUrl))
+	defer rssAddrFile.Close()
+	_, err = rssAddrFile.Write([]byte(rssUrl))
 	if err != nil {
-		return "", flaws.CantWriteFile.ContinueError(originRss, err)
+		return "", false, flaws.CantWriteFileSerious.ContinueError(originRss, err)
 	}
-	return containDir, nil
+	return containDir, dirNotExist, nil
 }
 
-func SaveDownloadedMedia(ctx context.Context, podcastData consts.PodcastData, mediaStream chan<- consts.UrlPathLength, limitFlag int) (int, string, error) {
-	varieties := misc.VarietiesSet{}
+func SaveDownloadedMedia(ctx context.Context, podcastData consts.PodcastData, mediaStream chan<- consts.MediaEnclosure, limitFlag int) (int, string, error) {
+	varietySet := varieties.VarietiesSet{}
 	possibleFiles := 0
 limitCancel:
-	for i, furl := range podcastData.Medias {
+	for mediaIndex, mediaUrl := range podcastData.PodUrls {
 		select {
 		case <-ctx.Done():
 			break limitCancel
 		default:
 			possibleFiles++
-			fname := misc.NameOfFile(furl)
-			fpath := podcastData.MediaPath + "/" + fname
-			_, err := os.Stat(fpath)
+			finalFileName, err := rss.FinalMediaName(ctx, mediaUrl)
+			if err != nil {
+				return 0, "", err
+			}
+			filePath := podcastData.PodPath + "/" + finalFileName
+			_, err = os.Stat(filePath)
 			if err != nil {
 				if os.IsNotExist(err) {
-					newMedia := consts.UrlPathLength{Url: furl,
-						Path:   fpath,
-						Length: podcastData.Lengths[i],
+					newMedia := consts.MediaEnclosure{
+						EnclosureUrl:  mediaUrl,
+						EnclosurePath: filePath,
+						EnclosureSize: podcastData.PodSizes[mediaIndex],
 					}
 					mediaStream <- newMedia
-					varieties.AddVariety(fname)
+					varietySet.AddVariety(finalFileName)
 					limitFlag--
 					if limitFlag == 0 {
 						break limitCancel
@@ -85,6 +84,6 @@ limitCancel:
 			}
 		}
 	}
-	fTypes := varieties.VarietiesString(" ")
-	return possibleFiles, fTypes, nil
+	varietyFiles := varietySet.VarietiesString(" ")
+	return possibleFiles, varietyFiles, nil
 }

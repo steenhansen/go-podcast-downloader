@@ -5,46 +5,25 @@ go run ./ https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
 go run ./pd-console.go https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
 */
 
-//https://stackoverflow.com/questions/61845013/package-xxx-is-not-in-goroot-when-building-a-go-project
 import (
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/help"
-	"github.com/steenhansen/go-podcast-downloader-console/src/media"
 )
 
 func main() {
-	free, size, percent := misc.DiskSpace()
-	fmt.Printf("Current disk has %s free from a total %s which is %s full\n", free, size, percent)
-	raceArgs, err := misc.DelRace(os.Args)
-	if err != nil {
-		panic(err)
-	}
-
-	limitFlag, tempArgs, err := misc.LimitArg(raceArgs)
-	if err != nil {
-		panic(err)
-	}
-	loadFlag, cleanArgs, err := misc.LoadArg(tempArgs)
-	if err != nil {
-		panic(err)
-	}
-
-	path := media.CurDir()
-	progBounds := consts.ProgBounds{
-		ProgPath:    path,
-		LoadOption:  loadFlag,
-		LimitOption: limitFlag,
-		MinDisk:     consts.MIN_DISK_BYTES,
-		//MinDisk:   consts.MIN_DISK_FAIL_BYTES,
-	}
+	diskSize, progBounds, cleanArgs := misc.InitProg(misc.DiskSpace, consts.MIN_DISK_BYTES)
+	fmt.Println(diskSize)
 	simKeyStream := make(chan string)
+
 	// go func() {
 	// 	fmt.Println("************* start sleep")
 	// 	time.Sleep(time.Second * 31)
@@ -54,28 +33,24 @@ func main() {
 
 	if len(cleanArgs) == 1 {
 		for {
-			realKeyboard := misc.GetMenuChoice
-			report, err := menu.DisplayMenu(progBounds, simKeyStream, realKeyboard)
-			if err != nil {
+			report, err := menu.DisplayMenu(progBounds, simKeyStream, misc.KeyboardMenuChoice)
+			if err != nil && !errors.Is(err, flaws.SStop) {
 				panic(err)
-			}
-			if report == "" {
+			} else if report == "" {
 				break // entered "Q" to quit
 			}
 			fmt.Println(report)
+
 		}
 	} else if strings.ToLower(cleanArgs[1]) == consts.HELP_ARG1 {
-		helpText := help.HelpText()
-		fmt.Println(helpText)
+		fmt.Println(help.HelpText())
 	} else {
-		report, err := menu.AddFeed(cleanArgs, progBounds, simKeyStream)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(report)
+		report, err := menu.ByNameOrUrl(cleanArgs, progBounds, simKeyStream)
+		if err != nil && !errors.Is(err, flaws.SStop) {
+			panic(err)
 		}
+		fmt.Println(report, globals.Faults.All())
 	}
 
-	fmt.Println("THE ERRORS: ", misc.GetMediaFaults2())
 	fmt.Print("goodbye")
 }

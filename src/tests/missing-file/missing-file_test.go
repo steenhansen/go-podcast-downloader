@@ -11,50 +11,51 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/media"
+	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
-	"github.com/steenhansen/go-podcast-downloader-console/src/tests/testFuncs"
+	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
 )
 
-func TestMissingFileFromMenu(t *testing.T) {
+func setup() consts.ProgBounds {
+	progPath := misc.CurDir()
+	delNotMissing := progPath + "/local-dest/not-missing.jpg"
+	os.Remove(delNotMissing)
+	progBounds := testings.ProgBounds(progPath)
+	return progBounds
+}
 
-	path := media.CurDir()
-	delNotMissing := path + "/local-dest/not-missing.jpg"
-	e := os.Remove(delNotMissing)
-	if e != nil {
-		t.Fatal(e)
-	}
-	progBounds := misc.TestProgBounds(path)
-	//	simKeyStream := make(chan string)
-	misc.ConsolOutput = ""
-	theMenu, _ := terminal.ShowNumberedChoices(progBounds)
-	misc.ConsolOutput = ""
-	//	report, _ := terminal.AfterMenu(progBounds, simKeyStream, misc.GetMenuChoiceTest1)
-	expectedMenu := ` 1 |              |   0 files |    0MB | test pod desc
+const expectedMenu string = ` 1 |              |   0 files |    0MB | local-dest
  'Q' or a number + enter: `
-	// 	expectedFiles := `Downloading 'test pod desc' podcast, hit 's' to stop
-	// no-such-file.jpeg(read #0)
-	// not-missing.jpeg(read #0)
-	// ERROR no-such-file.jpeg
-	// not-missing.jpeg (save #0, 0s)`
+const expectedConsole string = `Downloading 'local-dest' podcast, hit 's' to stop
+	no-such-file.jpg(read #0)
+	not-missing.jpg(read #0)
+	ERROR no-such-file.jpg
+	not-missing.jpg (save #0, 0s)`
+const expectedAdds = `Added 0 new 'jpg' file(s) from https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/missing-file.rss into 'local-dest' in 0s`
+const expectedBads = "\t\t*** 404 or 400 html page, https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/no-such-file.jpg\n"
 
-	// 	expectedAddition := `Added 0 new 'jpeg' file(s) from https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/missing-file.rss into 'test pod desc' in 0s`
-
-	// 	expectedError := "\t\t*** 404 or 400 html page, https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/no-such-file.jpeg\n"
-
-	// 	badFiles := misc.GetMediaFaults2()
-
-	if theMenu != expectedMenu {
-		t.Fatal(testFuncs.ClampStr(theMenu), testFuncs.ClampStr(expectedMenu))
+func TestMissingFileFromMenu(t *testing.T) {
+	progBounds := setup()
+	simKeyStream := make(chan string)
+	globals.Console.Clear()
+	podcastMenu, _ := terminal.ShowNumberedChoices(progBounds)
+	globals.Console.Clear()
+	addedFiles, _ := terminal.AfterMenu(progBounds, simKeyStream, testings.KeyboardMenuChoice_1)
+	badFiles := globals.Faults.All()
+	if podcastMenu != expectedMenu {
+		t.Fatal(testings.ClampStr(podcastMenu), testings.ClampStr(expectedMenu))
 	}
-	// if misc.SameButOutOfOrder(misc.ConsolOutput, expectedFiles) {
-	// 	t.Fatal(misc.ClampStr(misc.ConsolOutput), misc.ClampStr(expectedFiles))
-	// }
-	// if expectedAddition != report {
-	// 	t.Fatal(misc.ClampStr(expectedAddition), misc.ClampStr(report))
-	// }
-	// if expectedError != badFiles {
-	// 	t.Fatal(misc.ClampStr(expectedError), misc.ClampStr(badFiles))
-	// }
+
+	if !testings.SameButOutOfOrder(globals.Console.All(), expectedConsole) {
+		t.Fatal(testings.ClampStr(globals.Console.All()), testings.ClampStr(expectedConsole))
+	}
+
+	if expectedAdds != addedFiles {
+		t.Fatal(testings.ClampStr(expectedAdds), testings.ClampStr(addedFiles))
+	}
+	if expectedBads != badFiles {
+		t.Fatal(testings.ClampStr(expectedBads), testings.ClampStr(badFiles))
+	}
 }

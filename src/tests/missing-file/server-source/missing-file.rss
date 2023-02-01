@@ -3,10 +3,10 @@
   <channel>
     <title>title tag</title>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/not-missing.jpg" length="0" type="image/jpeg" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/not-missing.jpg" length="0" type="image/jpg" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/no-such-file.jpg" length="0" type="image/jpeg" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/no-such-file.jpg" length="0" type="image/jpg" />
     </item>
   </channel>
 </rss>

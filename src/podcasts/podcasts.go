@@ -12,164 +12,159 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/processes"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
 
-func FindPodcastDirName(path, name string) (string, string, error) {
-	directory, err := os.Open(path)
+func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
+	progDir, err := os.Open(ProgPath)
 	if err != nil {
 		return "", "", err
 	}
-	defer directory.Close()
-
-	dirs, err := directory.Readdir(0)
+	defer progDir.Close()
+	dirOfPodcasts, err := progDir.Readdir(0)
 	if err != nil {
 		return "", "", err
 	}
-	lowername := strings.ToLower(name)
-	for _, dir := range dirs {
-		if !dir.Mode().IsRegular() {
-			MediaTitle := dir.Name()
-			lowerdir := strings.ToLower(MediaTitle)
-			if lowerdir == lowername {
-				mediaPath := path + "/" + dir.Name()
-				return mediaPath, MediaTitle, nil
+	lowerTitle := strings.ToLower(podcastTitle)
+	for _, podDir := range dirOfPodcasts {
+		if !podDir.Mode().IsRegular() {
+			dirName := podDir.Name()
+			lowerDir := strings.ToLower(dirName)
+			if lowerDir == lowerTitle {
+				mediaPath := ProgPath + "/" + podDir.Name()
+				return mediaPath, dirName, nil
 			}
 		}
 	}
-	return "", "", flaws.BadChoice.StartError(name)
+	return "", "", flaws.NoMatchName.StartError(podcastTitle)
 }
 
-func ReadUrl(url string) ([]byte, []string, []int, error) {
-	xml, err := feed.ReadRss(url)
+func ReadUrl(rssUrl string) ([]byte, []string, []int, error) {
+	podcastXml, err := feed.ReadRss(rssUrl)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	title, err := rss.RssTitle(xml)
-	if title == "" {
-		xmlStr := string(xml[0:100])
+	podcastTitle, err := rss.RssTitle(podcastXml)
+	if podcastTitle == "" {
+		xmlStr := string(podcastXml[0:100])
 		return nil, nil, nil, flaws.InvalidXML.StartError(xmlStr)
 	} else if err != nil {
 		return nil, nil, nil, err
 	}
-	files, lengths, err := rss.RssItems(xml)
+	mediaUrls, mediaSizes, err := rss.RssItems(podcastXml)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	return xml, files, lengths, nil
+	return podcastXml, mediaUrls, mediaSizes, nil
 }
 
-func DownloadPodcast(mediaTitle, url string, progBounds consts.ProgBounds, simKeyStream chan string) consts.PodcastResults {
-	if feed.IsUrl(url) {
-		_, files, lengths, err := ReadUrl(url)
+func DownloadPodcast(mediaTitle, rssUrl string, progBounds consts.ProgBounds, simKeyStream chan string) consts.PodcastResults {
+	if feed.IsUrl(rssUrl) {
+		_, mediaUrls, mediaSizes, err := ReadUrl(rssUrl)
 		if err != nil {
 			return misc.EmptyPodcastResults(err)
 		}
 		mediaPath := progBounds.ProgPath + "/" + mediaTitle
 		podcastData := consts.PodcastData{
-			MediaTitle: mediaTitle,
-			MediaPath:  mediaPath,
-			Medias:     files,
-			Lengths:    lengths,
+			PodTitle: mediaTitle,
+			PodPath:  mediaPath,
+			PodUrls:  mediaUrls,
+			PodSizes: mediaSizes,
 		}
-		podcastResults := processes.DownloadMedia(url, podcastData, progBounds, simKeyStream)
+		podcastResults := processes.DownloadMedia(rssUrl, podcastData, progBounds, simKeyStream)
 		return podcastResults
 	}
-	return misc.EmptyPodcastResults(flaws.InvalidRssURL.StartError(url))
+	return misc.EmptyPodcastResults(flaws.InvalidRssURL.StartError(rssUrl))
 }
 
-// path =>dirname
-func PodChoices(path string, pdescs []string) (choices string, err error) {
+func PodChoices(ProgPath string, podDirNames []string) (podChoices string, err error) {
 	var sizedStr string
-	for i, dirdesc := range pdescs {
-		count, size, ftypes, err := countFiles(path, dirdesc)
-		if ftypes == "" && strings.Contains(dirdesc, "[") {
-			fparts := strings.Split(dirdesc, "[")
-			extension := fparts[1]
-			ftypes = extension[0:3]
+	for podIndex, podcastDirName := range podDirNames {
+		podCount, dirSize, fileTypes, err := countFiles(ProgPath, podcastDirName)
+		if fileTypes == "" && strings.Contains(podcastDirName, "[") {
+			nameParts := strings.Split(podcastDirName, "[")
+			extensionInName := nameParts[1]
+			fileTypes = extensionInName[0:3]
 		}
 		if err != nil {
 			return "", err
 		}
-		if size < consts.GB_BYTES {
-			mbs := size / consts.MB_BYTES
+		if dirSize < consts.GB_BYTES {
+			mbs := dirSize / consts.MB_BYTES
 			sizedStr = fmt.Sprintf("%dMB", mbs)
 		} else {
-			gbs := float64(size) / float64(consts.GB_BYTES)
+			gbs := float64(dirSize) / float64(consts.GB_BYTES)
 			sizedStr = fmt.Sprintf("%.2fGB", gbs)
 		}
-		choices += fmt.Sprintf("%2d | %12s |%4d files |%7s | %s\n", i+1, ftypes, count-1, sizedStr, dirdesc)
+		podChoices += fmt.Sprintf("%2d | %16s |%4d files |%7s | %s\n", podIndex+1, fileTypes, podCount-1, sizedStr, podcastDirName)
 	}
-	return choices, nil
+	return podChoices, nil
 }
 
-// path =>dirname
-func ChoosePod(path string, pdescs []string, getMenuChoice consts.ReadLineFunc) (choice int, err error) {
-	input := getMenuChoice()
-	text := strings.Trim(input, "\r\n")
-	if text == "q" || text == "Q" {
+func ChoosePod(podDirNames []string, getMenuChoice consts.ReadLineFunc) (menuChoice int, err error) {
+	lineInput := getMenuChoice()
+	textChoice := strings.Trim(lineInput, "\r\n")
+	textLower := strings.ToLower(textChoice)
+	if textLower == consts.QUIT_KEY_LOWER {
 		return 0, nil
 	}
-	choice, _ = strconv.Atoi(text)
-	if choice < 1 || choice > len(pdescs) {
-		return 0, flaws.BadChoice.StartError(text)
+	menuChoice, _ = strconv.Atoi(textChoice)
+	if menuChoice < 1 || menuChoice > len(podDirNames) {
+		return 0, flaws.BadChoice.StartError(textChoice)
 	}
-	return choice, nil
+	return menuChoice, nil
 }
 
-// path =>dirname
-func countFiles(path, dirName string) (count int, size int64, fTypes string, err error) {
-	varieties := misc.VarietiesSet{}
-	dirPath := path + "/" + dirName
-	directory, err := os.Open(dirPath)
+func countFiles(progPath, dirName string) (fileCount int, dirSize int64, varietyFiles string, err error) {
+	varietySet := varieties.VarietiesSet{}
+	dirPath := progPath + "/" + dirName
+	podDir, err := os.Open(dirPath)
 	if err != nil {
 		return 0, 0, "", err
 	}
-	defer directory.Close()
+	defer podDir.Close()
 
-	dirs, err := directory.Readdir(0)
+	dirFiles, err := podDir.Readdir(0)
 	if err != nil {
 		return 0, 0, "", err
 	}
 
-	for _, afile := range dirs {
-		if afile.Mode().IsRegular() {
-			varieties.AddVariety(afile.Name())
-			size = size + afile.Size()
-			count++
+	for _, mediaFile := range dirFiles {
+		if mediaFile.Mode().IsRegular() {
+			varietySet.AddVariety(mediaFile.Name())
+			dirSize = dirSize + mediaFile.Size()
+			fileCount++
 		}
 	}
-	fTypes = strings.TrimSpace(fTypes)
-	fTypes = varieties.VarietiesString(" ")
-	return count, size, fTypes, nil
+	varietyFiles = varietySet.VarietiesString(" ")
+	return fileCount, dirSize, varietyFiles, nil
 }
 
-// path =>dirname
-func AllPodcasts(path string) ([]string, []string, error) {
-	directory, err := os.Open(path)
+func AllPodcasts(progPath string) ([]string, []string, error) {
+	progDir, err := os.Open(progPath)
 	if err != nil {
 		return nil, nil, err
 	}
-	defer directory.Close()
-
-	dirs, err := directory.Readdir(0)
+	defer progDir.Close()
+	podcastDirs, err := progDir.Readdir(0)
 	if err != nil {
 		return nil, nil, err
 	}
-	pdescs := make([]string, 0)
-	feed := make([]string, 0)
-	for _, dir := range dirs {
+	podDirNames := make([]string, 0)
+	allFeeds := make([]string, 0)
+	for _, dir := range podcastDirs {
 		if !dir.Mode().IsRegular() {
-			dirname := dir.Name()
-			if dirname != consts.SOURCE_FOLDER {
-				origin := path + "/" + dir.Name() + "/" + consts.URL_OF_RSS
-				rss, err := os.ReadFile(origin)
+			dirName := dir.Name()
+			if dirName != consts.SOURCE_FOLDER {
+				rssPath := progPath + "/" + dir.Name() + "/" + consts.URL_OF_RSS_FN
+				rssUrl, err := os.ReadFile(rssPath)
 				if err == nil {
-					pdescs = append(pdescs, dirname)
-					feed = append(feed, string(rss))
+					podDirNames = append(podDirNames, dirName)
+					allFeeds = append(allFeeds, string(rssUrl))
 				}
 
 			}
 		}
 	}
-	return pdescs, feed, nil
+	return podDirNames, allFeeds, nil
 }

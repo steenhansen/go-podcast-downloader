@@ -8,38 +8,11 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/ricochet2200/go-disk-usage/du"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
-
-var ConsolOutput = ""
-
-func OutputProgress(progressStr string) {
-	fmt.Println(progressStr)
-	if progressStr != consts.CLEAR_SCREEN {
-		ConsolOutput = ConsolOutput + "\n" + progressStr
-	}
-}
-
-var MediaFix2 = map[string]error{}
-
-func MediaFaults2(mediaUrl string, err error) {
-	var mu sync.Mutex
-	mu.Lock()
-	MediaFix2[mediaUrl] = err
-	mu.Unlock()
-}
-
-func GetMediaFaults2() string {
-	badFiles := ""
-	for _, mediaError := range MediaFix2 {
-		badFiles = badFiles + "\t\t" + mediaError.Error() + "\n"
-	}
-	return badFiles
-}
 
 func EmptyPodcastResults(err error) consts.PodcastResults {
 	podcastResults := consts.PodcastResults{
@@ -64,104 +37,85 @@ func NumWorkers(loadFlag string) int {
 	return loadProcs
 }
 
-func NameOfFile(furl string) string {
-	fparts := strings.Split(furl, "/")
-	fname := fparts[len(fparts)-1]
-	return fname
-}
-
-func DiskPanic(fileSize, min_disk_mbs int) error {
-	usage := du.NewDiskUsage(".")
-	availableUint64 := usage.Available()
+func DiskPanic(fileSize, minDiskMbs int) error {
+	dUsage := du.NewDiskUsage(".")
+	availableUint64 := dUsage.Available()
 	availableBytes := int(availableUint64)
 	afterWrite := availableBytes - fileSize
-	if afterWrite < min_disk_mbs {
+	if afterWrite < minDiskMbs {
 		freeGmb := GbOrMb(afterWrite)
-		minimumGmb := GbOrMb(min_disk_mbs)
+		minimumGmb := GbOrMb(minDiskMbs)
 		freeNeeded := freeGmb + " free need minimum " + minimumGmb + " to proceed"
-		err := flaws.LowDisk.StartError(freeNeeded)
+		err := flaws.LowDiskSerious.StartError(freeNeeded)
 		return err
 	}
 	return nil
 }
 
-func DiskSpace() (free, size, percent string) {
-	usage := du.NewDiskUsage(".")
-
-	available := usage.Available() / uint64(consts.GB_BYTES)
-	free = fmt.Sprintf("%dGB", available)
-
-	capacity := usage.Size() / uint64(consts.GB_BYTES)
-	size = fmt.Sprintf("%dGB", capacity)
-
-	used := usage.Usage() * 100
-	percent = fmt.Sprintf("%.0f%%", used)
-	return free, size, percent
-}
-
-func GbOrMb(length int) string {
-	if length == 0 {
+func GbOrMb(dirSize int) string {
+	if dirSize == 0 {
 		return ""
-	} else if int64(length) < consts.MB_BYTES {
-		lenKb := int64(length) / consts.KB_BYTES
+	} else if int64(dirSize) < consts.MB_BYTES {
+		lenKb := int64(dirSize) / consts.KB_BYTES
 		return fmt.Sprintf("%.0dKB", lenKb)
-	} else if int64(length) < consts.GB_BYTES {
-		lenMb := int64(length) / consts.MB_BYTES
+	} else if int64(dirSize) < consts.GB_BYTES {
+		lenMb := int64(dirSize) / consts.MB_BYTES
 		return fmt.Sprintf("%.0dMB", lenMb)
-	} else if int64(length) < consts.TB_BYTES {
-		lenGb := int64(length) / consts.GB_BYTES
+	} else if int64(dirSize) < consts.TB_BYTES {
+		lenGb := int64(dirSize) / consts.GB_BYTES
 		return fmt.Sprintf("%.0dGB", lenGb)
 	} else {
-		lenTb := int64(length) / consts.TB_BYTES
+		lenTb := int64(dirSize) / consts.TB_BYTES
 		return fmt.Sprintf("%.0dTB", lenTb)
 	}
 }
 
 func LimitArg(osArgs []string) (int, []string, error) {
-	limit := 0
+	theLimit := 0
 	var err error
-	LIMIT_PLAIN := regexp.MustCompile(consts.LIMIT_PLAIN)
-	LIMIT_AND_NUMBER := regexp.MustCompile(consts.LIMIT_AND_NUMBER)
-	LIMIT_NUMBER := regexp.MustCompile(consts.LIMIT_NUMBER)
+	limitPlain := regexp.MustCompile(consts.LIMIT_PLAIN)
+	limitAndNumber := regexp.MustCompile(consts.LIMIT_AND_NUMBER)
+	limitNumber := regexp.MustCompile(consts.LIMIT_NUMBER)
 	limitArgs := make([]string, 0)
-	for i, arg := range osArgs {
-		if i > 0 && LIMIT_PLAIN.MatchString(arg) {
-			if LIMIT_AND_NUMBER.MatchString(arg) {
-				limitStr := LIMIT_NUMBER.FindString(arg)
-				limit, err = strconv.Atoi(limitStr)
+	for argIndex, anArg := range osArgs {
+		if argIndex > 0 && limitPlain.MatchString(anArg) {
+			if limitAndNumber.MatchString(anArg) {
+				limitStr := limitNumber.FindString(anArg)
+				theLimit, err = strconv.Atoi(limitStr)
 				if err != nil {
 					return 0, nil, err
 				}
 			} else {
-				return 0, nil, flaws.BadLimit.StartError(arg)
+				return 0, nil, flaws.BadLimitSerious.StartError(anArg)
 			}
 		} else {
-			limitArgs = append(limitArgs, arg)
+			limitArgs = append(limitArgs, anArg)
 		}
 	}
-	return limit, limitArgs, nil
+	return theLimit, limitArgs, nil
 }
+
 func LoadArg(osArgs []string) (string, []string, error) {
-	load := consts.HIGH_LOAD
-	LOAD_PLAIN := regexp.MustCompile(consts.LOAD_PLAIN)
-	LOAD_AND_SPEED := regexp.MustCompile(consts.LOAD_AND_SPEED)
-	LOAD_CHOICE := regexp.MustCompile(consts.LOAD_CHOICE)
+	theLoad := consts.HIGH_LOAD
+	loadPlain := regexp.MustCompile(consts.LOAD_PLAIN)
+	loadAndSpeed := regexp.MustCompile(consts.LOAD_AND_SPEED)
+	loadChoice := regexp.MustCompile(consts.LOAD_CHOICE)
 	loadArgs := make([]string, 0)
-	for i, arg := range osArgs {
-		if i > 0 && LOAD_PLAIN.MatchString(arg) {
-			if LOAD_AND_SPEED.MatchString(arg) {
-				load = LOAD_CHOICE.FindString(arg)
-				if load == "" {
-					return "", nil, flaws.BadLoad.StartError(arg)
+	for argIndex, anArg := range osArgs {
+		if argIndex > 0 && loadPlain.MatchString(anArg) {
+			if loadAndSpeed.MatchString(anArg) {
+				theLoad = loadChoice.FindString(anArg)
+				if theLoad == "" {
+					return "", nil, flaws.BadLoadSerious.StartError(anArg)
 				}
 			} else {
-				return "", nil, flaws.BadLoad.StartError(arg)
+				return "", nil, flaws.BadLoadSerious.StartError(anArg)
 			}
 		} else {
-			loadArgs = append(loadArgs, arg)
+			loadArgs = append(loadArgs, anArg)
 		}
 	}
-	return load, loadArgs, nil
+	return theLoad, loadArgs, nil
 }
 
 // go run ./ https://sffaudio.herokuapp.com/pdf/rss --limit=3 --load=medium
@@ -169,95 +123,80 @@ func LoadArg(osArgs []string) (string, []string, error) {
 func DelRace(osArgs []string) ([]string, error) {
 	singleDashAlpha := regexp.MustCompile(consts.SINGLE_DASH_ALPHA)
 	raceArgs := make([]string, 0)
-	for i, arg := range osArgs {
-		if i > 0 && singleDashAlpha.MatchString(arg) {
-			if arg != consts.RACE_DEBUG {
-				return nil, flaws.BadFlag.StartError(arg)
+	for argIndex, anArg := range osArgs {
+		if argIndex > 0 && singleDashAlpha.MatchString(anArg) {
+			if anArg != consts.RACE_DEBUG {
+				return nil, flaws.BadFlagSerious.StartError(anArg)
 			}
 		} else {
-			raceArgs = append(raceArgs, arg)
+			raceArgs = append(raceArgs, anArg)
 		}
 	}
 	return raceArgs, nil
 }
 
-func GetMenuChoice() string {
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	return input
+func KeyboardMenuChoice() string {
+	keyboardReader := bufio.NewReader(os.Stdin)
+	inputText, _ := keyboardReader.ReadString('\n')
+	return inputText
 }
-
-// ///////////////////////////////// moved
-type VarietiesSet map[string]bool
-
-func (varieties VarietiesSet) AddVariety(filename string) {
-	if filename != consts.URL_OF_RSS {
-		pieces := strings.Split(filename, ".")
-		if len(pieces) > 1 {
-			variety := pieces[len(pieces)-1]
-			varieties[variety] = true
-		}
-	}
-}
-
-func (varieties VarietiesSet) VarietiesString(separator string) (vString string) {
-	for k := range varieties {
-		vString = vString + k + " "
-	}
-	vString = strings.TrimSpace(vString)
-	return vString
-}
-
-/////////////////////////////////// moved
-
-/////////////// below are tests
 
 func IsTesting(osArgs []string) bool {
-	for _, arg := range osArgs {
-		if strings.HasPrefix(arg, consts.TEST_FLAG_PREFIX) {
+	for _, anArg := range osArgs {
+		if strings.HasPrefix(anArg, consts.TEST_FLAG_PREFIX) {
 			return true
 		}
 	}
 	return false
 }
 
-func GetMenuChoiceTest1() string {
-	return "1"
+func CurDir() string {
+	progPath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return progPath
 }
 
-// ProgBoundsTest
-func TestProgBounds(progPath string) consts.ProgBounds {
+type diskSpaceFn func() (string, string, string)
+
+func DiskSpace() (dFree, dSize, dPercent string) {
+	dUsage := du.NewDiskUsage(".")
+
+	dAvailable := dUsage.Available() / uint64(consts.GB_BYTES)
+	dFree = fmt.Sprintf("%dGB", dAvailable)
+
+	dCapacity := dUsage.Size() / uint64(consts.GB_BYTES)
+	dSize = fmt.Sprintf("%dGB", dCapacity)
+
+	dUsed := dUsage.Usage() * 100
+	dPercent = fmt.Sprintf("%.0f%%", dUsed)
+	return dFree, dSize, dPercent
+}
+
+func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBounds, []string) {
+	dFree, dSize, dPercent := diskSpace()
+	diskSize := fmt.Sprintf("Current disk has %s free from a total %s which is %s full\n", dFree, dSize, dPercent)
+	raceArgs, err := DelRace(os.Args)
+	if err != nil {
+		panic(err)
+	}
+	limitFlag, tempArgs, err := LimitArg(raceArgs)
+	if err != nil {
+		panic(err)
+	}
+	loadFlag, cleanArgs, err := LoadArg(tempArgs)
+	if err != nil {
+		panic(err)
+	}
+
+	progPath := CurDir()
 	progBounds := consts.ProgBounds{
 		ProgPath:    progPath,
-		LoadOption:  consts.HIGH_LOAD,
-		LimitOption: 0,
-		MinDisk:     1000000000,
+		LoadOption:  loadFlag,
+		LimitOption: limitFlag,
+		MinDisk:     minDiskBytes,
 	}
-	return progBounds
+
+	return diskSize, progBounds, cleanArgs
 }
-
-// SameButOutOfOrderTest
-func SameButOutOfOrder(realLines, expectedLines string) bool {
-	realParts := strings.Split(realLines, "\n")
-	expectedParts := strings.Split(expectedLines, "\n")
-	for _, real := range realParts {
-		for _, expected := range expectedParts {
-			if real == expected {
-				realLines = strings.ReplaceAll(realLines, real, "")
-				expectedLines = strings.ReplaceAll(expectedLines, real, "")
-			}
-		}
-	}
-	return realLines == expectedLines
-}
-
-// // ClampStrTest
-// func ClampStr(testStr string) string {
-
-// 	// re := regexp.MustCompile(`\s+`)
-// 	// out := re.ReplaceAllString(testStr, " ")
-// 	// out = strings.TrimSpace(out)
-
-// 	clampStr := "\n~" + testStr + "~"
-// 	return clampStr
-// }

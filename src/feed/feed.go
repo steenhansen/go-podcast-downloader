@@ -1,9 +1,6 @@
 package feed
 
-// feed
-
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,93 +12,47 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
-// siberiantimes.com/ecology/rss/
-func IsUrl(url string) bool {
-	if strings.HasPrefix(url, "http") {
+func IsUrl(rssUrl string) bool {
+	if strings.HasPrefix(rssUrl, "http") {
 		return true
 	}
-	if strings.Contains(url, ".") && strings.Contains(url, "/") {
+	if strings.Contains(rssUrl, ".") && strings.Contains(rssUrl, "/") {
 		return true
 	}
 	return false
 }
 
-func rssUrl(url string) string {
-	if strings.HasPrefix(url, "http") {
-		return url
+func addHttp(rssUrl string) string {
+	if strings.HasPrefix(rssUrl, "http") {
+		return rssUrl
 	}
-	return "http://" + url
+	return "http://" + rssUrl
 }
 
-// go run pod-down.go https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
-func ReadRss(url string) ([]byte, error) { // 2 or 3
-	url = rssUrl(url)
-	response, err := http.Get(url)
+func ReadRss(rssUrl string) ([]byte, error) {
+	httpUrl := addHttp(rssUrl)
+	rssResponse, err := http.Get(httpUrl)
 	if err != nil {
-		return nil, flaws.BadUrl.ContinueError(url, err)
+		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
 	}
-	defer response.Body.Close()
-	rss, err := io.ReadAll(response.Body)
-	if err != nil || len(rss) == 0 {
-		return nil, flaws.BadUrl.StartError(url)
-	}
-	return rss, nil
-}
-
-func DownloadAndWriteFile(ctx context.Context, furl, fpath string, min_disk_mbs int) error {
-	req, err := http.NewRequest(http.MethodGet, furl, nil)
+	defer rssResponse.Body.Close()
+	rssText, err := io.ReadAll(rssResponse.Body)
 	if err != nil {
-		return flaws.BadUrl.ContinueError(furl, err)
+		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
 	}
-	req = req.WithContext(ctx)
-	c := &http.Client{}
-	response, err := c.Do(req)
-
-	if err != nil {
-		if ctx.Err() == context.Canceled {
-			return nil
-		}
-		return flaws.BadUrl.ContinueError(furl, err)
+	if len(rssText) == 0 {
+		return nil, flaws.EmptyRss.StartError(httpUrl)
 	}
-	////////////////////////////////////
-	if response.StatusCode != 200 {
-		return flaws.BadContent.StartError(furl)
-	}
-
-	defer response.Body.Close()
-	content, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil
-	}
-	f, err := os.Create(fpath)
-	if err != nil {
-		return flaws.CantCreateFile.ContinueError(fpath, err)
-	}
-	defer f.Close()
-
-	//////////////////// q*bert
-	contentStr := string(content)
-	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
-		return flaws.BadContent.StartError(furl)
-	}
-
-	err = misc.DiskPanic(len(content), min_disk_mbs)
-	if err != nil {
-		return err
-	}
-	_, err = f.Write(content)
-	if err != nil {
-		return flaws.CantWriteFile.ContinueError(fpath, err)
-	}
-	return nil
+	return rssText, nil
 }
 
 /* test cancel?
 
 ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*8000))
-mediaStream := make(chan consts.UrlPathLength)
+mediaStream := make(chan consts.MediaEnclosure)
 doneXStream := make(chan bool)
 
 cancel()
@@ -110,60 +61,58 @@ downloaded, viewed := GoDownloadAndSaveFiles(ctx, mediaStream, doneXStream)
 
 */
 
-func IncGlobalCounters(pont *int) string {
+func IncGlobalCounters(incCounter *int) string {
 	var mu sync.Mutex
 	mu.Lock()
-	*pont++
-	readTemp := *pont
+	*incCounter++
+	countTemp := *incCounter
 	mu.Unlock()
-	readStr := fmt.Sprint(readTemp)
-	return readStr
+	countStr := fmt.Sprint(countTemp)
+	return countStr
 }
 
 func ShowError(mediaUrl string) string {
-	savedOut := fmt.Sprint("ERROR " + misc.NameOfFile(mediaUrl))
+	savedOut := fmt.Sprint("ERROR " + rss.NameOfFile(mediaUrl))
 	return savedOut
 }
 
-func ShowSaved(savedFiles *int, start time.Time, url string) string {
+func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string {
 	var savedTemp string = "0"
-	sinceStart := time.Since(start)
 	var roundTime time.Duration
 	if !misc.IsTesting(os.Args) {
 		savedTemp = IncGlobalCounters(savedFiles)
+		sinceStart := time.Since(startProcess)
 		roundTime = sinceStart.Round(time.Second) // NB if testing all times are 0s
 	}
 	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
-	savedOut := fmt.Sprintf("\t\t %s %s", misc.NameOfFile(url), saveNumMess)
+	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess)
 	return savedOut
 }
 
-// ./pd-console NASA, image, of, the, day => "NASA image of the day"
-func PodcastName(Args []string) string {
-	names := make([]string, 0)
-	for i := 1; i < len(Args); i++ {
-		argument := Args[i]
-		if !IsUrl(argument) {
-			names = append(names, argument)
+func PodcastName(progArgs []string) string {
+	titleWords := make([]string, 0)
+	for argInd := 1; argInd < len(progArgs); argInd++ {
+		anArg := progArgs[argInd]
+		if !IsUrl(anArg) {
+			titleWords = append(titleWords, anArg)
 		}
 	}
-	name := strings.Join(names, " ")
-	return name
+	podcastTitle := strings.Join(titleWords, " ")
+	return podcastTitle
 }
 
-func ShowProgress(media consts.UrlPathLength, readFiles *int) string {
-	var readTemp string = "0"
+func ShowProgress(fileEnc consts.MediaEnclosure, readFiles *int) string {
+	var fileCount string = "0"
 	if !misc.IsTesting(os.Args) {
-		readTemp = IncGlobalCounters(readFiles) // NB if testing all times are (read #0
+		fileCount = IncGlobalCounters(readFiles) // NB if testing all times are (read #0
 	}
-
-	mbGbLen := misc.GbOrMb(media.Length)
+	mbGbLen := misc.GbOrMb(fileEnc.EnclosureSize)
 	var readNumMess string
 	if mbGbLen == "" {
-		readNumMess = "(read #" + readTemp + ")"
+		readNumMess = "(read #" + fileCount + ")"
 	} else {
-		readNumMess = "(read #" + readTemp + " " + mbGbLen + ")"
+		readNumMess = "(read #" + fileCount + " " + mbGbLen + ")"
 	}
-	progress := "\t" + misc.NameOfFile(media.Url) + readNumMess
-	return progress
+	curMedia := "\t" + rss.NameOfFile(fileEnc.EnclosurePath) + readNumMess
+	return curMedia
 }

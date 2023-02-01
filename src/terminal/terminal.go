@@ -8,7 +8,7 @@ import (
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/media"
@@ -18,149 +18,151 @@ import (
 )
 
 func ShowNumberedChoices(progBounds consts.ProgBounds) (string, error) {
-	pdescs, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
+	podDirNames, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
 		return "", err
 	}
 	if len(thePodcasts) == 0 {
 		return "", flaws.NoPodcasts.StartError("add some podcasts feeds first")
 	}
-	choices, err := podcasts.PodChoices(progBounds.ProgPath, pdescs)
+	podcastChoices, err := podcasts.PodChoices(progBounds.ProgPath, podDirNames)
 	if err != nil {
 		return "", err
 	}
-	theMenu := choices + " 'Q' or a number + enter: "
+	theMenu := podcastChoices + " 'Q' or a number + enter: "
 	return theMenu, nil
 }
 
 func AfterMenu(progBounds consts.ProgBounds, simKeyStream chan string, getMenuChoice consts.ReadLineFunc) (string, error) {
-	pdescs, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
+	podDirNames, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
 		return "", err
 	}
-	choice, err := podcasts.ChoosePod(progBounds.ProgPath, pdescs, getMenuChoice) // q*bert 1
-	if choice == 0 && err == nil {
+	podcastIndex, err := podcasts.ChoosePod(podDirNames, getMenuChoice)
+	if podcastIndex == 0 && err == nil {
 		return "", nil // 'Q' entered to quit
 	}
 	if err != nil {
 		return "", err
 	}
-	report, err := DownloadAndReport(pdescs, thePodcasts, choice-1, progBounds, simKeyStream)
-	if err != nil {
+	addedFiles, err := DownloadAndReport(podDirNames, thePodcasts, podcastIndex-1, progBounds, simKeyStream)
+	if err != nil && !errors.Is(err, flaws.SStop) {
 		return "", err
 	}
-	return report, nil
+	return addedFiles, err
 }
 
-// go run ./ siberiantimes.com/ecology/rss/
-func AddByUrl(url string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	xml, files, lengths, err := podcasts.ReadUrl(url)
+func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
+	rssXml, rssFiles, rssSizes, err := podcasts.ReadUrl(podcastUrl)
 	if err != nil {
 		return "", err
 	}
-	mediaTitle, err := rss.RssTitle(xml)
+	mediaTitle, err := rss.RssTitle(rssXml)
 	if err != nil {
 		return "", err
 	}
-	mediaPath, err := media.InitFolder(progBounds.ProgPath, mediaTitle, url)
+	mediaPath, dirNotExist, err := media.InitFolder(progBounds.ProgPath, mediaTitle, podcastUrl)
 	if err != nil {
 		return "", err
+	}
+	if dirNotExist {
+		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
 	}
 	podcastData := consts.PodcastData{
-		MediaTitle: mediaTitle,
-		MediaPath:  mediaPath,
-		Medias:     files,
-		Lengths:    lengths,
+		PodTitle: mediaTitle,
+		PodPath:  mediaPath,
+		PodUrls:  rssFiles,
+		PodSizes: rssSizes,
 	}
-	report, err := downloadReport(url, podcastData, progBounds, simKeyStream)
-	return report, err
+	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, simKeyStream)
+	return podcastReport, err
 }
 
-// go run ./ siberiantimes.com/ecology/rss/ Xecology
-func AddByUrlAndName(url string, osArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	_, files, lengths, err := podcasts.ReadUrl(url)
+func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
+	_, rssFiles, rssSizes, err := podcasts.ReadUrl(podcastUrl)
 	if err != nil {
 		return "", err
 	}
 	mediaTitle := feed.PodcastName(osArgs)
-
-	mediaPath, err := media.InitFolder(progBounds.ProgPath, mediaTitle, url)
+	mediaPath, dirNotExist, err := media.InitFolder(progBounds.ProgPath, mediaTitle, podcastUrl)
 	if err != nil {
 		return "", err
 	}
-	podcastData := consts.PodcastData{
-		MediaTitle: mediaTitle,
-		MediaPath:  mediaPath,
-		Medias:     files,
-		Lengths:    lengths,
+	if dirNotExist {
+		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
 	}
-	report, err := downloadReport(url, podcastData, progBounds, simKeyStream)
-	return report, err
+	podcastData := consts.PodcastData{
+		PodTitle: mediaTitle,
+		PodPath:  mediaPath,
+		PodUrls:  rssFiles,
+		PodSizes: rssSizes,
+	}
+	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, simKeyStream)
+	return podcastReport, err
 }
 
-func DownloadAndReport(pdescs, feed []string, choice int, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	mediaTitle := pdescs[choice]
-	url := feed[choice]
-	podcastResults := podcasts.DownloadPodcast(mediaTitle, url, progBounds, simKeyStream)
-	if podcastResults.Err != nil && errors.Is(podcastResults.Err, flaws.LowDisk) {
+func DownloadAndReport(podDirNames, feed []string, choice int, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
+	mediaTitle := podDirNames[choice]
+	podcastUrl := feed[choice]
+	podcastResults := podcasts.DownloadPodcast(mediaTitle, podcastUrl, progBounds, simKeyStream)
+	if podcastResults.Err != nil && errors.Is(podcastResults.Err, flaws.LowDiskSerious) {
 		return "", podcastResults.Err
 	}
-	report := doReport(podcastResults, string(url), mediaTitle)
-	return report, nil
+	podcastReport := doReport(podcastResults, string(podcastUrl), mediaTitle)
+	return podcastReport, podcastResults.Err
 }
 
-func doReport(podcastResults consts.PodcastResults, url string, mediaTitle string) string {
+func doReport(podcastResults consts.PodcastResults, podcastUrl string, mediaTitle string) (podcastReport string) {
 	savedFiles := podcastResults.SavedFiles
-	//possibleFiles := podcastResults.PossibleFiles               keep for tests
 	varietyFiles := podcastResults.VarietyFiles
 	podcastTime := podcastResults.PodcastTime
-
-	var rounded int
-	if !misc.IsTesting(os.Args) {
-		rounded = int(podcastTime.Round(time.Second))
+	secRounded := podcastTime.Round(time.Second)
+	if savedFiles != 0 {
+		addedNew := fmt.Sprintf("\nAdded %d new ", savedFiles)
+		fileTypes := fmt.Sprintf("'%s' file(s) in %s \n", varietyFiles, secRounded)
+		if len(varietyFiles) == 0 {
+			fileTypes = fmt.Sprintf("files in %s \n", secRounded)
+		}
+		fromInto := fmt.Sprintf("From %s \nInto '%s' ", podcastUrl, mediaTitle)
+		podcastReport = addedNew + fileTypes + fromInto
+	} else {
+		podcastReport = "No changes detected"
 	}
-
-	//rounded := podcastTime.Round(time.Second)
-
-	report := fmt.Sprintf("Added %d new '%s' file(s) from %s into '%s' in %ds",
-		savedFiles, varietyFiles, url, mediaTitle, rounded)
-	return report
+	return podcastReport
 }
 
 func downloadReport(url string, podcastData consts.PodcastData, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	fmt.Print("\nADDING ", podcastData.MediaTitle, "\n\n") // q*bert how test?
 	podcastResults := processes.DownloadMedia(url, podcastData, progBounds, simKeyStream)
-	if podcastResults.Err != nil {
+	if podcastResults.Err != nil && !errors.Is(podcastResults.Err, flaws.SStop) {
 		return "", podcastResults.Err
 	}
-	report := doReport(podcastResults, url, podcastData.MediaTitle)
-	return report, nil
+	podcastReport := doReport(podcastResults, url, podcastData.PodTitle)
+	return podcastReport, podcastResults.Err
 }
 
 func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	name := feed.PodcastName(osArgs)
-
-	mediaPath, mediaTitle, err := podcasts.FindPodcastDirName(progBounds.ProgPath, name)
+	podcastTitle := feed.PodcastName(osArgs)
+	mediaPath, mediaTitle, err := podcasts.FindPodcastDirName(progBounds.ProgPath, podcastTitle)
 	if err != nil {
 		return "", err
 	}
-	origin := mediaPath + "/" + consts.URL_OF_RSS
-	url, err := os.ReadFile(origin)
+	originRss := mediaPath + "/" + consts.URL_OF_RSS_FN
+	urlBytes, err := os.ReadFile(originRss)
 	if err != nil {
 		return "", err
 	}
-	strUrl := string(url)
-	_, files, lengths, err := podcasts.ReadUrl(strUrl) // _ == unused xml
+	urlStr := string(urlBytes)
+	_, mediaUrl, mediaSize, err := podcasts.ReadUrl(urlStr) // _ == unused xml
 	if err != nil {
 		return "", err
 	}
 	podcastData := consts.PodcastData{
-		MediaTitle: mediaTitle,
-		MediaPath:  mediaPath,
-		Medias:     files,
-		Lengths:    lengths,
+		PodTitle: mediaTitle,
+		PodPath:  mediaPath,
+		PodUrls:  mediaUrl,
+		PodSizes: mediaSize,
 	}
-	report, err := downloadReport(string(url), podcastData, progBounds, simKeyStream)
+	podcastReport, err := downloadReport(urlStr, podcastData, progBounds, simKeyStream)
 
-	return report, err
+	return podcastReport, err
 }

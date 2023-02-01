@@ -8,20 +8,20 @@ import (
 
 type VarietiesSet map[string]bool
 
-func (varieties VarietiesSet) AddVariety(filename string) {
-	if filename != consts.URL_OF_RSS {
-		pieces := strings.Split(filename, ".")
-		if len(pieces) > 1 {
-			variety := pieces[len(pieces)-1]
-			varieties[variety] = true
+func (varietiesSet VarietiesSet) AddVariety(fileName string) {
+	if fileName != consts.URL_OF_RSS_FN {
+		varietyPieces := strings.Split(fileName, ".")
+		if len(varietyPieces) > 1 {
+			variety := varietyPieces[len(varietyPieces)-1]
+			varietiesSet[variety] = true
 		}
 	}
 }
 
-func (varieties VarietiesSet) VarietiesString(separator string) (vString string) {
-	for k := range varieties {
-		vString = vString + k + " "
+func (varietiesSet VarietiesSet) VarietiesString(sepChar string) (allVar string) {
+	for aVariety := range varietiesSet {
+		allVar = allVar + aVariety + sepChar
 	}
-	vString = strings.TrimSpace(vString)
-	return vString
+	allVar = strings.TrimSpace(allVar)
+	return allVar
 }
