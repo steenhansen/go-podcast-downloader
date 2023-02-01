@@ -3,10 +3,13 @@
   <channel>
     <title>add-by-url-title</title>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/not-missing.jpg" length="0" type="image/jpg" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/information_items_7675.jpg" length="195984" type="image/jpg" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/no-such-file.jpg" length="0" type="image/jpg" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/information_items_7751.jpg" length="144864" type="image/jpg" />
+    </item>
+    <item>
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/information_items_7795.jpg" length="59408" type="image/jpg" />
     </item>
   </channel>
 </rss>
