@@ -35,13 +35,12 @@ add-by-url-2.txt (save #0, 0s)
 add-by-url-3.txt (save #0, 0s)
 `
 
-func TestAddByUrlAndName(t *testing.T) {
+func TestAddByUrl(t *testing.T) {
 	setUp()
-	podcastUrl := consts.TEST_DIR_URL + "AddByUrlAndName/git-server-source/add-by-url-and-name.rss"
-	osArgs := []string{"AddByUrlAndName-test", podcastUrl, "local-download-dest"}
+	podcastUrl := consts.TEST_DIR_URL + "AddByUrl/git-server-source/add-by-url.rss"
 	progBounds := testings.ProgBounds(misc.CurDir())
 	simKeyStream := make(chan string)
-	terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, simKeyStream)
+	terminal.AddByUrl(podcastUrl, progBounds, simKeyStream)
 	actualReport := globals.Console.All()
 	if testings.NotSameOutOfOrder(actualReport, expectedReport) {
 		t.Fatal(testings.ClampActual(actualReport), testings.ClampExpected(expectedReport))
