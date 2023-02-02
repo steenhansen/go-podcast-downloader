@@ -20,12 +20,12 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/Add
 
 func setUp() {
 	progPath := misc.CurDir()
-	testDir := progPath + "/local-download-dest"
+	testDir := progPath + "/add-by-url-title-97"
 	testings.DirRemove(testDir)
 }
 
 const expectedReport = `
-Adding 'local-download-dest'
+Adding 'add-by-url-title'
 Downloading 'local-download-dest' podcast, hit 's' to stop
 add-by-url-1.txt(read #0 21B)
 add-by-url-2.txt(read #0 21B)

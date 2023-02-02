@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>add-by-url-title</title>
+    <title>add-by-url-title-97</title>
     <item>
       <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrl/git-server-source/add-by-url-1.txt" length="21" type="text/plain" />
     </item>
