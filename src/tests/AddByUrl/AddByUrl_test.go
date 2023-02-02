@@ -25,8 +25,8 @@ func setUp() {
 }
 
 const expectedReport = `
-Adding 'add-by-url-title'
-Downloading 'local-download-dest' podcast, hit 's' to stop
+Adding 'add-by-url-title-97'
+Downloading 'add-by-url-title-97' podcast, hit 's' to stop
 add-by-url-1.txt(read #0 21B)
 add-by-url-2.txt(read #0 21B)
 add-by-url-3.txt(read #0 21B)
