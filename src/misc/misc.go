@@ -53,8 +53,9 @@ func DiskPanic(fileSize, minDiskMbs int) error {
 }
 
 func GbOrMb(dirSize int) string {
-	if dirSize == 0 {
-		return ""
+	if int64(dirSize) < consts.KB_BYTES {
+		lenB := int64(dirSize)
+		return fmt.Sprintf("%.0dB", lenB)
 	} else if int64(dirSize) < consts.MB_BYTES {
 		lenKb := int64(dirSize) / consts.KB_BYTES
 		return fmt.Sprintf("%.0dKB", lenKb)

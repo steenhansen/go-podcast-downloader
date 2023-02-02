@@ -6,7 +6,7 @@
       <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/not-missing.txt" length="11" type="text/plain" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/no-such-file.txt" length="11" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/no-such-file.txt" length="12" type="text/plain" />
     </item>
   </channel>
 </rss>

@@ -16,8 +16,23 @@ func DirRemove(dirPath string) error {
 	return err
 }
 
-func ClampStr(testStr string) string {
-	clampStr := "\n~" + testStr + "~"
+func ClampActual(testStr string) string {
+	return ClampStr(testStr, "actual")
+}
+
+func ClampExpected(testStr string) string {
+	return ClampStr(testStr, "expected")
+}
+
+func ClampStr(testStr string, actualStr string) string {
+	clampStr := "\n"
+	if actualStr == "actual" {
+		clampStr += "ACTUAL:"
+	} else {
+		clampStr += "EXPECT:"
+
+	}
+	clampStr += "~" + testStr + "~\n"
 	return clampStr
 }
 
@@ -47,11 +62,32 @@ func nonBlanks(consoleOutput string) map[string]string {
 	return textLines
 }
 
-func SameButOutOfOrder(realLines, expectedLines string) bool {
-	reals := nonBlanks(realLines)
-	expecteds := nonBlanks(expectedLines)
-	for aReal := range reals {
-		delete(expecteds, aReal)
+func NotSameOutOfOrder(actualLines, expectedLines string) bool {
+	trimmedActual := strings.TrimSpace(actualLines)
+	trimmedExpected := strings.TrimSpace(expectedLines)
+	actuals := nonBlanks(trimmedActual)
+	expecteds := nonBlanks(trimmedExpected)
+	for aLine := range actuals {
+		delete(actuals, aLine)
+		delete(expecteds, aLine)
 	}
-	return len(expecteds) == 0
+	//	fmt.Println("actuals", actuals)
+	//fmt.Println("expecteds", expecteds)
+	return len(expecteds) != 0
+}
+
+func NotSameTrimmed(actualStr, expectedStr string) bool {
+	trimmedActual := strings.TrimSpace(actualStr)
+	trimmedExpected := strings.TrimSpace(expectedStr)
+	actualLines := strings.Split(trimmedActual, "\n")
+	expectedLines := strings.Split(trimmedExpected, "\n")
+	for i, actual := range actualLines {
+		actualLines[i] = strings.TrimSpace(actual)
+	}
+	for i, expected := range expectedLines {
+		expectedLines[i] = strings.TrimSpace(expected)
+	}
+	cleanActual := strings.Join(actualLines, "\n")
+	cleanExpected := strings.Join(expectedLines, "\n")
+	return cleanActual != cleanExpected
 }

@@ -12,9 +12,9 @@ import (
 
 /*
 
-go run ./ siberiantimes.com/ecology/rss/ ecology
+go run ./ siberiantimes.com/ecology/rss/
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/add-by-url-and-name.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrl/git-server-source/add-by-url.rss
 
 */
 
@@ -27,12 +27,12 @@ func setUp() {
 const expectedReport = `
 Adding 'local-download-dest'
 Downloading 'local-download-dest' podcast, hit 's' to stop
-add-by-url-and-name-1.txt(read #0 21B)
-add-by-url-and-name-2.txt(read #0 21B)
-add-by-url-and-name-3.txt(read #0 21B)
-add-by-url-and-name-1.txt (save #0, 0s)
-add-by-url-and-name-2.txt (save #0, 0s)
-add-by-url-and-name-3.txt (save #0, 0s)
+add-by-url-1.txt(read #0 21B)
+add-by-url-2.txt(read #0 21B)
+add-by-url-3.txt(read #0 21B)
+add-by-url-1.txt (save #0, 0s)
+add-by-url-2.txt (save #0, 0s)
+add-by-url-3.txt (save #0, 0s)
 `
 
 func TestAddByUrlAndName(t *testing.T) {

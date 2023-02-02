@@ -5,23 +5,6 @@
 
 
 
-/// just use .txt files
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 go run ./
 go run ./ siberiantimes.com/ecology/rss/
 go run ./ ecology  
