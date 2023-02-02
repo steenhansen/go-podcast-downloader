@@ -1,12 +1,5 @@
 package terminal
 
-//      go test ./...
-
-//  const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-go-consol/main/src/tests/"
-
-//                https://github.com/steenhansen/react-native-phone-recipes/blob/main/android/gradlew.bat
-// https://raw.githubusercontent.com/steenhansen/react-native-phone-recipes/main/android/gradlew.bat
-
 import (
 	"fmt"
 	"os"
@@ -21,24 +14,24 @@ import (
 
 func setUp() consts.ProgBounds {
 	progPath := misc.CurDir()
-	delNotMissing := progPath + "/local-dest/not-missing.jpg"
+	delNotMissing := progPath + "/local-download-dest/not-missing.jpg"
 	os.Remove(delNotMissing)
 	progBounds := testings.ProgBounds(progPath)
 	return progBounds
 }
 
-const expectedMenu string = ` 1 |                  |   0 files |    0MB | local-dest
+const expectedMenu string = ` 1 |              txt |   0 files |    1MB | local-download-dest
  'Q' or a number + enter: `
-const expectedConsole string = `Downloading 'local-dest' podcast, hit 's' to stop
-	no-such-file.jpg(read #0)
-	not-missing.jpg(read #0)
-	ERROR no-such-file.jpg
-	not-missing.jpg (save #0, 0s)`
+const expectedConsole string = `Downloading 'local-download-dest' podcast, hit 's' to stop
+	no-such-file.txt(read #0)
+	not-missing.txt(read #0)
+	ERROR no-such-file.txt
+	not-missing.txt (save #0, 0s)`
 const expectedAdds = `
-Added 1 new 'jpg' file(s) in 0s 
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/missing-file.rss 
-Into 'local-dest' `
-const expectedBads = "\t\t*** 404 or 400 html page, https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/server-source/no-such-file.jpg\n"
+Added 1 new 'txt' file(s) in 0s 
+From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/missing-file.rss 
+Into 'local-download-dest' `
+const expectedBads = "\t\t*** 404 or 400 html page, https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/no-such-file.txt\n"
 
 /// just use .txt files
 
@@ -55,17 +48,17 @@ func TestMissingFileFromMenu(t *testing.T) {
 	actualConsol := globals.Console.All()
 	badFiles := globals.Faults.All()
 	if podcastMenu != expectedMenu {
-		t.Fatal(testings.ClampStr(podcastMenu), testings.ClampStr(expectedMenu))
+		t.Fatal(testings.ClampActual(podcastMenu), testings.ClampExpected(expectedMenu))
 	}
 
 	if !testings.SameButOutOfOrder(actualConsol, expectedConsole) {
-		t.Fatal(testings.ClampStr(actualConsol), testings.ClampStr(expectedConsole))
+		t.Fatal(testings.ClampActual(actualConsol), testings.ClampExpected(expectedConsole))
 	}
 
 	if expectedAdds != addedFiles {
-		t.Fatal(testings.ClampStr(addedFiles), testings.ClampStr(expectedAdds))
+		t.Fatal(testings.ClampActual(addedFiles), testings.ClampExpected(expectedAdds))
 	}
 	if expectedBads != badFiles {
-		t.Fatal(testings.ClampStr(badFiles), testings.ClampStr(expectedBads))
+		t.Fatal(testings.ClampActual(badFiles), testings.ClampExpected(expectedBads))
 	}
 }
