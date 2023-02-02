@@ -77,12 +77,15 @@ func ShowError(mediaUrl string) string {
 }
 
 func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string {
-	var savedTemp string = "0"
+	//var savedTemp string = "0"
 	var roundTime time.Duration
+	savedTemp := IncGlobalCounters(savedFiles)
 	if !misc.IsTesting(os.Args) {
-		savedTemp = IncGlobalCounters(savedFiles)
+		//savedTemp = IncGlobalCounters(savedFiles)
 		sinceStart := time.Since(startProcess)
 		roundTime = sinceStart.Round(time.Second) // NB if testing all times are 0s
+	} else {
+		savedTemp = "0"
 	}
 	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
 	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess)
