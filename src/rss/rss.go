@@ -61,21 +61,47 @@ func RssItems(rss []byte) ([]string, []int, error) {
 	return mediaUrls, mediaSizes, nil
 }
 
-func FinalMediaName(ctx context.Context, mediaUrl string) (string, error) {
-	respMedia, err := connectToMedia(ctx, mediaUrl)
-	if err != nil {
-		return "", err
-	}
-	if respMedia.StatusCode != 200 {
-		missingFinalName := NameOfFile(mediaUrl)
-		return missingFinalName, nil
-	}
-	finalQueried := respMedia.Request.URL.String()
-	finalFileName := NameOfFile(finalQueried)
-	return finalFileName, nil
+func NameOfFile(mediaUrl string) string {
+	urlParts := strings.Split(mediaUrl, "/")
+	fileNameQuery := urlParts[len(urlParts)-1]
+	fileNameNoQuery := strings.Split(fileNameQuery, "?")
+	return fileNameNoQuery[0]
 }
 
-func connectToMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
+func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDiskMbs int, httpMedia consts.HttpFunc) (int, error) {
+	respMedia, err := httpMedia(ctx, mediaUrl)
+	if err != nil {
+		return 0, err
+	}
+	defer respMedia.Body.Close()
+	if respMedia.StatusCode != 200 {
+		return 0, flaws.BadContent.StartError(mediaUrl)
+	}
+	mediaContent, err := io.ReadAll(respMedia.Body)
+	if err != nil {
+		return 0, flaws.BadContent.ContinueError(mediaUrl, err)
+	}
+	mediaFile, err := os.Create(filePath)
+	if err != nil {
+		return 0, flaws.CantCreateFileSerious.ContinueError(filePath, err)
+	}
+	defer mediaFile.Close()
+	contentStr := string(mediaContent)
+	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
+		return 0, flaws.BadContent.StartError(mediaUrl)
+	}
+	err = misc.DiskPanic(len(mediaContent), minDiskMbs)
+	if err != nil {
+		return 0, err
+	}
+	writenBytes, err := mediaFile.Write(mediaContent)
+	if err != nil {
+		return 0, flaws.CantWriteFileSerious.ContinueError(filePath, err)
+	}
+	return writenBytes, nil
+}
+
+func HttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 	newReq, err := http.NewRequest(http.MethodGet, mediaUrl, nil)
 	if err != nil {
 		return nil, flaws.BadUrl.ContinueError(mediaUrl, err)
@@ -84,50 +110,24 @@ func connectToMedia(ctx context.Context, mediaUrl string) (*http.Response, error
 	httpClient := &http.Client{}
 	respMedia, err := httpClient.Do(reqCtx)
 	if err != nil {
-		if ctx.Err() == context.Canceled {
-			return nil, context.Canceled
-		}
 		return nil, flaws.BadUrl.ContinueError(mediaUrl, err)
+	}
+	if ctx.Err() == context.Canceled {
+		return nil, context.Canceled
 	}
 	return respMedia, nil
 }
 
-func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDiskMbs int) error {
-	respMedia, err := connectToMedia(ctx, mediaUrl)
+func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia consts.HttpFunc) (string, error) {
+	respMedia, err := httpMedia(ctx, mediaUrl)
 	if err != nil {
-		return err
+		return "", nil
 	}
-	if respMedia.StatusCode != 200 {
-		return flaws.BadContent.StartError(mediaUrl)
+	if respMedia.StatusCode != consts.HTTP_OK_RESP {
+		missingFinalName := NameOfFile(mediaUrl)
+		return missingFinalName, nil
 	}
-	defer respMedia.Body.Close()
-	mediaContent, err := io.ReadAll(respMedia.Body)
-	if err != nil {
-		return flaws.BadContent.ContinueError(mediaUrl, err)
-	}
-	mediaFile, err := os.Create(filePath)
-	if err != nil {
-		return flaws.CantCreateFileSerious.ContinueError(filePath, err)
-	}
-	defer mediaFile.Close()
-	contentStr := string(mediaContent)
-	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
-		return flaws.BadContent.StartError(mediaUrl)
-	}
-	err = misc.DiskPanic(len(mediaContent), minDiskMbs)
-	if err != nil {
-		return err
-	}
-
-	_, err = mediaFile.Write(mediaContent)
-	if err != nil {
-		return flaws.CantWriteFileSerious.ContinueError(filePath, err)
-	}
-	return nil
-}
-func NameOfFile(mediaUrl string) string {
-	urlParts := strings.Split(mediaUrl, "/")
-	fileNameQuery := urlParts[len(urlParts)-1]
-	fileNameNoQuery := strings.Split(fileNameQuery, "?")
-	return fileNameNoQuery[0]
+	finalQueried := respMedia.Request.URL.String()
+	finalFileName := NameOfFile(finalQueried)
+	return finalFileName, nil
 }

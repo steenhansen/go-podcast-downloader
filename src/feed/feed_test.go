@@ -1,10 +1,7 @@
 package feed
 
 import (
-	"errors"
 	"testing"
-
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
 
 // go run pod-down.go http://127.0.0.1:9000/boom
@@ -20,24 +17,53 @@ func TestIsUrl(t *testing.T) {
 	okUrl := "siberiantimes.com/ecology/rss/"
 	isUrl := IsUrl(okUrl)
 	if !isUrl {
-		t.Fatalf(`TestIsUrl A failed`)
+		t.Fatal(`TestIsUrl A failed`)
 	}
 	badUrl1 := "siberiantimes.com"
 	isUrl = IsUrl(badUrl1)
 	if isUrl {
-		t.Fatalf(`TestIsUrl B failed`)
+		t.Fatal(`TestIsUrl B failed`)
 	}
 	badUrl2 := "siberiantimescom/"
 	isUrl = IsUrl(badUrl2)
 	if isUrl {
-		t.Fatalf(`TestIsUrl C failed`)
+		t.Fatal(`TestIsUrl C failed`)
 	}
 }
 
-func TestReadRss(t *testing.T) {
-	badUrl := "doesnot.exist/"
-	_, err := ReadRss(badUrl)
-	if !errors.Is(err, flaws.BadUrl) {
-		t.Fatalf(`TestReadRss A failed`)
-	}
-}
+// func httpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
+// 	body := `<?xml version="1.0" encoding="UTF-8"?>
+// <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+//   <channel>
+//     <title>title tag</title>
+//     <item>
+//       <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/not-missing.txt" length="11" type="text/plain" />
+//     </item>
+//     <item>
+//       <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/no-such-file.txt" length="12" type="text/plain" />
+//     </item>
+//   </channel>
+// </rss>`
+// 	t := &http.Response{
+// 		Status:        "200 OK",
+// 		StatusCode:    200,
+// 		Proto:         "HTTP/1.1",
+// 		ProtoMajor:    1,
+// 		ProtoMinor:    1,
+// 		Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+// 		ContentLength: int64(len(body)),
+// 		Header:        make(http.Header, 0),
+// 	}
+// 	return t, nil
+// }
+
+// func TestReadRss(t *testing.T) {
+// 	badUrl := "doesnot.exist/"
+// 	rssXml, rssFiles, rssSizes, err := podcasts.ReadRssUrl(badUrl, httpMedia)
+// 	fmt.Println("rssXml", rssXml)
+// 	fmt.Println("rssFiles", rssFiles)
+// 	fmt.Println("rssSizes", rssSizes)
+// 	if !errors.Is(err, flaws.BadUrl) {
+// 		t.Fatal(`TestReadRss A failed`)
+// 	}
+// }

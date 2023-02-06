@@ -1,10 +1,11 @@
 package feed
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -32,23 +33,6 @@ func addHttp(rssUrl string) string {
 	return "http://" + rssUrl
 }
 
-func ReadRss(rssUrl string) ([]byte, error) {
-	httpUrl := addHttp(rssUrl)
-	rssResponse, err := http.Get(httpUrl)
-	if err != nil {
-		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
-	}
-	defer rssResponse.Body.Close()
-	rssText, err := io.ReadAll(rssResponse.Body)
-	if err != nil {
-		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
-	}
-	if len(rssText) == 0 {
-		return nil, flaws.EmptyRss.StartError(httpUrl)
-	}
-	return rssText, nil
-}
-
 /* test cancel?
 
 ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*8000))
@@ -72,22 +56,27 @@ func IncGlobalCounters(incCounter *int) string {
 }
 
 func ShowError(mediaUrl string) string {
-	savedOut := fmt.Sprint("ERROR " + rss.NameOfFile(mediaUrl))
+	savedOut := fmt.Sprint("ERROR " + rss.NameOfFile(mediaUrl) + "\n")
+	return savedOut
+}
+
+func ShowSizeError(expectedSize, writtenSize int) string {
+	exSize := strconv.Itoa(expectedSize)
+	wrSize := strconv.Itoa(writtenSize)
+	savedOut := fmt.Sprint("\t\t\tSize disparity, expected " + exSize + " bytes, but was " + wrSize + "\n")
 	return savedOut
 }
 
 func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string {
-	//var savedTemp string = "0"
 	var roundTime time.Duration
 	savedTemp := IncGlobalCounters(savedFiles)
 	if !misc.IsTesting(os.Args) {
-		//savedTemp = IncGlobalCounters(savedFiles)
 		sinceStart := time.Since(startProcess)
 		roundTime = sinceStart.Round(time.Second) // NB if testing all times are 0s
 	} else {
 		savedTemp = "0"
 	}
-	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
+	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")\n"
 	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess)
 	return savedOut
 }
@@ -112,10 +101,33 @@ func ShowProgress(fileEnc consts.MediaEnclosure, readFiles *int) string {
 	mbGbLen := misc.GbOrMb(fileEnc.EnclosureSize)
 	var readNumMess string
 	if mbGbLen == "" {
-		readNumMess = "(read #" + fileCount + ")"
+		readNumMess = "(read #" + fileCount + ")\n"
 	} else {
-		readNumMess = "(read #" + fileCount + " " + mbGbLen + ")"
+		readNumMess = "(read #" + fileCount + " " + mbGbLen + ")\n"
 	}
 	curMedia := "\t" + rss.NameOfFile(fileEnc.EnclosurePath) + readNumMess
 	return curMedia
+}
+
+func ReadRss(rssUrl string, httpMedia consts.HttpFunc) ([]byte, error) {
+	ctxRss, cancelRss := context.WithTimeout(context.Background(), time.Duration(consts.MAX_READ_FILE_TIME))
+	defer cancelRss()
+	httpUrl := addHttp(rssUrl)
+	rssResponse, err := httpMedia(ctxRss, httpUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer rssResponse.Body.Close()
+	if rssResponse.StatusCode != consts.HTTP_OK_RESP {
+		return nil, flaws.BadUrl.StartError(httpUrl)
+	}
+	rssText, err := io.ReadAll(rssResponse.Body)
+	if err != nil {
+
+		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
+	}
+	if len(rssText) == 0 {
+		return nil, flaws.EmptyRss.StartError(httpUrl)
+	}
+	return rssText, nil
 }

@@ -8,23 +8,23 @@ import (
 
 //      go test ./...
 
-func TestRssNoTitle(t *testing.T) {
+func Test_RssNoTitle(t *testing.T) {
 	none := []byte("no title")
 	_, err := RssTitle(none)
 	if err != flaws.MissingTitle {
-		t.Fatalf(`TestRssNoTitle failed`)
+		t.Fatal(`TestRssNoTitle failed`)
 	}
 }
 
-// func TestRssEmptyTitle(t *testing.T) {
+// func Test_RssEmptyTitle(t *testing.T) {
 // 	empty := []byte("<channel><title>   </title></channel>")
 // 	_, err := RssTitle(empty)
 // 	if err != flaws.EmptyTitle {
-// 		t.Fatalf(`TestRssEmptyTitle failed`)
+// 		t.Fatal(`TestRssEmptyTitle failed`)
 // 	}
 // }
 
-// func TestRssEmptyItems(t *testing.T) {
+// func Test_RssEmptyItems(t *testing.T) {
 // 	//	none := []byte("<channel><title>a-title</title><item><enclosure></enclosure></item></channel>")
 // 	none := []byte(
 // 		`<?xml version="1.0" encoding="UTF-8"?>
@@ -38,11 +38,11 @@ func TestRssNoTitle(t *testing.T) {
 // 	_, _, err := RssItems(none)
 // 	//	fmt.Println(" TestRssEmptyItems >>", res, err, EmptyItems)
 // 	if err != flaws.EmptyItems {
-// 		t.Fatalf(`TestRssEmptyItems failed`)
+// 		t.Fatal(`TestRssEmptyItems failed`)
 // 	}
 // }
 
-// func TestRssEmptyItems(t *testing.T) {
+// func Test_RssEmptyItems(t *testing.T) {
 // 	//	none := []byte("<channel><title>a-title</title><item><enclosure></enclosure></item></channel>")
 // 	none := []byte(
 // 		`<?xml version="1.0" encoding="UTF-8"?>
@@ -70,16 +70,16 @@ func TestRssNoTitle(t *testing.T) {
 // 	res, err := rssItems(none)
 // 	fmt.Println(" TestRssEmptyItems >>", res, err, EmptyItems)
 // 	if err != EmptyItems {
-// 		t.Fatalf(`TestRssEmptyItems failed`)
+// 		t.Fatal(`TestRssEmptyItems failed`)
 // 	}
 // }
 
-// func TestInitFolder(t *testing.T) {
+// func Test_InitFolder(t *testing.T) {
 // 	path := "x:/does-not-exist"
 // 	title := "a-title"
 // 	expect := flaws.CantCreateDirSerious.ContinueError(path+"/"+title, nil)
 // 	_, _, err := media.InitFolder(path, title, "http://www.pod.cast")
 // 	if err.Error() != expect.Error() {
-// 		t.Fatalf(`TestInitFolder failed`)
+// 		t.Fatal(`TestInitFolder failed`)
 // 	}
 // }

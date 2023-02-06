@@ -2,7 +2,6 @@ package menu
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
@@ -12,24 +11,24 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
 
-func ByNameOrUrl(cleanArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (podReport string, err error) {
+func ByNameOrUrl(cleanArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (podReport string, err error) {
 	if feed.IsUrl(cleanArgs[1]) {
 		feedUrl := cleanArgs[1]
 		if len(cleanArgs) == 2 {
-			podReport, err = terminal.AddByUrl(feedUrl, progBounds, simKeyStream) // go run ./ https://www.a.com/feed
+			podReport, err = terminal.AddByUrl(feedUrl, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed
 		} else {
-			podReport, err = terminal.AddByUrlAndName(feedUrl, cleanArgs, progBounds, simKeyStream) // go run ./ https://www.a.com/feed  My Fav Feed
+			podReport, err = terminal.AddByUrlAndName(feedUrl, cleanArgs, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed  My Fav Feed
 		}
 	} else {
-		podReport, err = terminal.ReadByExistName(cleanArgs, progBounds, simKeyStream) // go run ./ My Fav Feed
+		podReport, err = terminal.ReadByExistName(cleanArgs, progBounds, keyStream, httpMedia) // go run ./ My Fav Feed
 	}
 	return podReport, err
 }
 
-func DisplayMenu(progBounds consts.ProgBounds, simKeyStream chan string, getMenuChoice consts.ReadLineFunc) (string, error) {
+func DisplayMenu(progBounds consts.ProgBounds, keyStream chan string, getMenuChoice consts.ReadLineFunc, httpMedia consts.HttpFunc) (string, error) {
 	theMenu, _ := terminal.ShowNumberedChoices(progBounds)
-	fmt.Print(theMenu)
-	podReport, err := terminal.AfterMenu(progBounds, simKeyStream, getMenuChoice)
+	globals.Console.Note(theMenu)
+	podReport, err := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, httpMedia)
 	if podReport == "" && err == nil {
 		return "", nil // 'Q' entered to quit
 	}

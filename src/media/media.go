@@ -49,7 +49,7 @@ func InitFolder(progPath, podTitle, rssUrl string) (string, bool, error) {
 	return containDir, dirNotExist, nil
 }
 
-func SaveDownloadedMedia(ctx context.Context, podcastData consts.PodcastData, mediaStream chan<- consts.MediaEnclosure, limitFlag int) (int, string, error) {
+func SaveDownloadedMedia(ctx context.Context, podcastData consts.PodcastData, mediaStream chan<- consts.MediaEnclosure, limitFlag int, httpMedia consts.HttpFunc) (int, string, error) {
 	varietySet := varieties.VarietiesSet{}
 	possibleFiles := 0
 limitCancel:
@@ -59,7 +59,7 @@ limitCancel:
 			break limitCancel
 		default:
 			possibleFiles++
-			finalFileName, err := rss.FinalMediaName(ctx, mediaUrl)
+			finalFileName, err := rss.FinalMediaName(ctx, mediaUrl, httpMedia)
 			if err != nil {
 				return 0, "", err
 			}
@@ -72,6 +72,7 @@ limitCancel:
 						EnclosurePath: filePath,
 						EnclosureSize: podcastData.PodSizes[mediaIndex],
 					}
+
 					mediaStream <- newMedia
 					varietySet.AddVariety(finalFileName)
 					limitFlag--

@@ -6,44 +6,34 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
 	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
 )
 
 /*
 
-go run ./ siberiantimes.com/ecology/rss/ ecology
+go run ./ ecology
 
 https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/ReadByExistName/git-server-source/read-by-exist-name.rss
 
 */
 
-func setUp() {
-	progPath := misc.CurDir()
-	testDir := progPath + "/local-download-dest"
-	testings.DirRemove(testDir)
-}
-
 const expectedReport = `
-Adding 'local-download-dest'
-Downloading 'local-download-dest' podcast, hit 's' to stop
-read-by-exist-name-1.txt(read #0 21B)
-read-by-exist-name-2.txt(read #0 21B)
-read-by-exist-name-3.txt(read #0 21B)
-read-by-exist-name-1.txt (save #0, 0s)
-read-by-exist-name-2.txt (save #0, 0s)
-read-by-exist-name-3.txt (save #0, 0s)
+Downloading 'local-download-dest' podcast, 3 files, hit 's' to stop
 `
 
 func TestReadByExistName(t *testing.T) {
-	setUp()
 	podcastUrl := consts.TEST_DIR_URL + "ReadByExistName/git-server-source/read-by-exist-name.rss"
 	osArgs := []string{"ReadByExistName-test", podcastUrl, "local-download-dest"}
-	progBounds := testings.ProgBounds(misc.CurDir())
-	simKeyStream := make(chan string)
-	terminal.ReadByExistName(osArgs, progBounds, simKeyStream)
+	progBounds := testings.TestBounds(misc.CurDir())
+	keyStream := make(chan string)
+	terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpMedia)
 	actualReport := globals.Console.All()
-	if testings.NotSameOutOfOrder(actualReport, expectedReport) {
-		t.Fatal(testings.ClampActual(actualReport), testings.ClampExpected(expectedReport))
+
+	expectedDiff := testings.NotSameOutOfOrder(actualReport, expectedReport)
+	if len(expectedDiff) != 0 {
+		t.Fatal(testings.ClampActual(actualReport), testings.ClampMapDiff(expectedDiff), testings.ClampExpected(expectedReport))
 	}
+
 }

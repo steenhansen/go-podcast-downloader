@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ricochet2200/go-disk-usage/du"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
@@ -32,9 +33,20 @@ func NumWorkers(loadFlag string) int {
 	if loadFlag == consts.HIGH_LOAD {
 		loadProcs = maxProcessors
 	} else if loadFlag == consts.MEDIUM_LOAD {
-		loadProcs = maxProcessors / 2
+		loadProcs = maxProcessors / consts.CPUS_MED_DIVIDER
 	}
 	return loadProcs
+}
+
+func SleepTime(loadFlag string) {
+	sleepTime := consts.LOW_SLEEP
+	if loadFlag == consts.HIGH_LOAD {
+		sleepTime = consts.HIGH_SLEEP
+	} else if loadFlag == consts.MEDIUM_LOAD {
+		sleepTime = consts.MEDIUM_SLEEP
+	}
+	sleepDuration := time.Duration(sleepTime) * time.Second
+	time.Sleep(sleepDuration)
 }
 
 func DiskPanic(fileSize, minDiskMbs int) error {
@@ -119,8 +131,8 @@ func LoadArg(osArgs []string) (string, []string, error) {
 	return theLoad, loadArgs, nil
 }
 
-// go run ./ https://sffaudio.herokuapp.com/pdf/rss --limit=3 --load=medium
-// go run ./ -race https://sffaudio.herokuapp.com/pdf/rss --limit=3 --load=medium
+// go run ./         https://sffaudio.herokuapp.com/pdf/rss  --fileLimit=3 --networkLoad=medium
+// go run ./  -race  https://sffaudio.herokuapp.com/pdf/rss  --fileLimit=3 --networkLoad=medium
 func DelRace(osArgs []string) ([]string, error) {
 	singleDashAlpha := regexp.MustCompile(consts.SINGLE_DASH_ALPHA)
 	raceArgs := make([]string, 0)
@@ -198,6 +210,5 @@ func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBound
 		LimitOption: limitFlag,
 		MinDisk:     minDiskBytes,
 	}
-
 	return diskSize, progBounds, cleanArgs
 }

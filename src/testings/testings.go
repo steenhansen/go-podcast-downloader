@@ -1,6 +1,10 @@
 package testings
 
 import (
+	"bytes"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -17,22 +21,22 @@ func DirRemove(dirPath string) error {
 }
 
 func ClampActual(testStr string) string {
-	return ClampStr(testStr, "actual")
+	return ClampStr(testStr, "ACTUAL : ")
 }
 
 func ClampExpected(testStr string) string {
-	return ClampStr(testStr, "expected")
+	return ClampStr(testStr, "EXPECTED : ")
+}
+
+func ClampMapDiff(expectedDiff map[string]string) (mapDiff string) {
+	for v := range expectedDiff {
+		mapDiff += "\n" + v
+	}
+	return ClampStr(mapDiff, "DIFFERENCE : ")
 }
 
 func ClampStr(testStr string, actualStr string) string {
-	clampStr := "\n"
-	if actualStr == "actual" {
-		clampStr += "ACTUAL:"
-	} else {
-		clampStr += "EXPECT:"
-
-	}
-	clampStr += "~" + testStr + "~\n"
+	clampStr := "\n" + actualStr + "~~~" + testStr + "~~~\n"
 	return clampStr
 }
 
@@ -40,7 +44,16 @@ func KeyboardMenuChoice_1() string {
 	return "1"
 }
 
-func ProgBounds(progPath string) consts.ProgBounds {
+// testings.KeyboardMenuChoiceNum("q")
+// testings.KeyboardMenuChoiceNum("12") always choose "12" on menu
+func KeyboardMenuChoiceNum(simChoice string) func() string {
+	menuChoice := func() string {
+		return simChoice
+	}
+	return menuChoice
+}
+
+func TestBounds(progPath string) consts.ProgBounds {
 	progBounds := consts.ProgBounds{
 		ProgPath:    progPath,
 		LoadOption:  consts.HIGH_LOAD,
@@ -54,15 +67,15 @@ func nonBlanks(consoleOutput string) map[string]string {
 	textLines := make(map[string]string)
 	consoleLines := strings.Split(consoleOutput, "\n")
 	for _, aLine := range consoleLines {
-		if aLine != "" {
-			trimmedLine := strings.TrimSpace(aLine)
+		trimmedLine := strings.TrimSpace(aLine)
+		if trimmedLine != "" {
 			textLines[trimmedLine] = trimmedLine
 		}
 	}
 	return textLines
 }
 
-func NotSameOutOfOrder(actualLines, expectedLines string) bool {
+func NotSameOutOfOrder(actualLines, expectedLines string) map[string]string {
 	trimmedActual := strings.TrimSpace(actualLines)
 	trimmedExpected := strings.TrimSpace(expectedLines)
 	actuals := nonBlanks(trimmedActual)
@@ -71,9 +84,7 @@ func NotSameOutOfOrder(actualLines, expectedLines string) bool {
 		delete(actuals, aLine)
 		delete(expecteds, aLine)
 	}
-	//	fmt.Println("actuals", actuals)
-	//fmt.Println("expecteds", expecteds)
-	return len(expecteds) != 0
+	return expecteds
 }
 
 func NotSameTrimmed(actualStr, expectedStr string) bool {
@@ -90,4 +101,31 @@ func NotSameTrimmed(actualStr, expectedStr string) bool {
 	cleanActual := strings.Join(actualLines, "\n")
 	cleanExpected := strings.Join(expectedLines, "\n")
 	return cleanActual != cleanExpected
+}
+
+// https://stackoverflow.com/questions/33978216/create-http-response-instance-with-sample-body-string-in-golang
+func Http200Resp(theHost, thePath, bodyXml string) *http.Response {
+
+	theUrl := &url.URL{
+		Scheme: "http",
+		Host:   theHost,
+		Path:   thePath,
+	}
+
+	httpReq := &http.Request{
+		URL: theUrl,
+	}
+
+	httpResp := &http.Response{
+		Status:        "200 OK",
+		StatusCode:    200,
+		Proto:         "HTTP/1.1",
+		ProtoMajor:    1,
+		ProtoMinor:    1,
+		Body:          io.NopCloser(bytes.NewBufferString(bodyXml)),
+		ContentLength: int64(len(bodyXml)),
+		Request:       httpReq,
+		Header:        make(http.Header, 0),
+	}
+	return httpResp
 }

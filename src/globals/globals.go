@@ -41,9 +41,9 @@ type ConsoleCollect struct {
 var Console = ConsoleCollect{progText: ""}
 
 func (consoleCollect *ConsoleCollect) Note(progressStr string) {
-	fmt.Println(progressStr)
+	fmt.Print(progressStr)
 	if progressStr != consts.CLEAR_SCREEN {
-		consoleCollect.progText = consoleCollect.progText + "\n" + progressStr
+		consoleCollect.progText = consoleCollect.progText + progressStr
 	}
 }
 

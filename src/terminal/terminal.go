@@ -9,6 +9,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/media"
@@ -33,7 +34,7 @@ func ShowNumberedChoices(progBounds consts.ProgBounds) (string, error) {
 	return theMenu, nil
 }
 
-func AfterMenu(progBounds consts.ProgBounds, simKeyStream chan string, getMenuChoice consts.ReadLineFunc) (string, error) {
+func AfterMenu(progBounds consts.ProgBounds, keyStream chan string, getMenuChoice consts.ReadLineFunc, httpMedia consts.HttpFunc) (string, error) {
 	podDirNames, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
 		return "", err
@@ -45,15 +46,17 @@ func AfterMenu(progBounds consts.ProgBounds, simKeyStream chan string, getMenuCh
 	if err != nil {
 		return "", err
 	}
-	addedFiles, err := DownloadAndReport(podDirNames, thePodcasts, podcastIndex-1, progBounds, simKeyStream)
+
+	addedFiles, err := DownloadAndReport(podDirNames, thePodcasts, podcastIndex-1, progBounds, keyStream, httpMedia)
 	if err != nil && !errors.Is(err, flaws.SStop) {
 		return "", err
 	}
 	return addedFiles, err
 }
 
-func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	rssXml, rssFiles, rssSizes, err := podcasts.ReadUrl(podcastUrl)
+func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+
+	rssXml, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
 		return "", err
 	}
@@ -74,12 +77,14 @@ func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, simKeyStream chan
 		PodUrls:  rssFiles,
 		PodSizes: rssSizes,
 	}
-	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, simKeyStream)
+
+	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
 	return podcastReport, err
 }
 
-func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	_, rssFiles, rssSizes, err := podcasts.ReadUrl(podcastUrl)
+func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+
+	_, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
 		return "", err
 	}
@@ -97,14 +102,15 @@ func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgB
 		PodUrls:  rssFiles,
 		PodSizes: rssSizes,
 	}
-	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, simKeyStream)
+
+	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
 	return podcastReport, err
 }
 
-func DownloadAndReport(podDirNames, feed []string, choice int, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
+func DownloadAndReport(podDirNames, feed []string, choice int, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
 	mediaTitle := podDirNames[choice]
 	podcastUrl := feed[choice]
-	podcastResults := podcasts.DownloadPodcast(mediaTitle, podcastUrl, progBounds, simKeyStream)
+	podcastResults := podcasts.DownloadPodcast(mediaTitle, podcastUrl, progBounds, keyStream, httpMedia)
 	if podcastResults.Err != nil && errors.Is(podcastResults.Err, flaws.LowDiskSerious) {
 		return "", podcastResults.Err
 	}
@@ -116,7 +122,10 @@ func doReport(podcastResults consts.PodcastResults, podcastUrl string, mediaTitl
 	savedFiles := podcastResults.SavedFiles
 	varietyFiles := podcastResults.VarietyFiles
 	podcastTime := podcastResults.PodcastTime
-	secRounded := podcastTime.Round(time.Second)
+	var secRounded time.Duration
+	if !misc.IsTesting(os.Args) {
+		secRounded = podcastTime.Round(time.Second) // NB if testing all times are 0s
+	}
 	if savedFiles != 0 {
 		addedNew := fmt.Sprintf("\nAdded %d new ", savedFiles)
 		fileTypes := fmt.Sprintf("'%s' file(s) in %s \n", varietyFiles, secRounded)
@@ -131,8 +140,9 @@ func doReport(podcastResults consts.PodcastResults, podcastUrl string, mediaTitl
 	return podcastReport
 }
 
-func downloadReport(url string, podcastData consts.PodcastData, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
-	podcastResults := processes.DownloadMedia(url, podcastData, progBounds, simKeyStream)
+func downloadReport(url string, podcastData consts.PodcastData, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+
+	podcastResults := processes.DownloadMedia(url, podcastData, progBounds, keyStream, httpMedia)
 	if podcastResults.Err != nil && !errors.Is(podcastResults.Err, flaws.SStop) {
 		return "", podcastResults.Err
 	}
@@ -140,7 +150,7 @@ func downloadReport(url string, podcastData consts.PodcastData, progBounds const
 	return podcastReport, podcastResults.Err
 }
 
-func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, simKeyStream chan string) (string, error) {
+func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
 	podcastTitle := feed.PodcastName(osArgs)
 	mediaPath, mediaTitle, err := podcasts.FindPodcastDirName(progBounds.ProgPath, podcastTitle)
 	if err != nil {
@@ -152,7 +162,8 @@ func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, simKeyStream
 		return "", err
 	}
 	urlStr := string(urlBytes)
-	_, mediaUrl, mediaSize, err := podcasts.ReadUrl(urlStr) // _ == unused xml
+
+	_, mediaUrl, mediaSize, err := podcasts.ReadRssUrl(urlStr, httpMedia) // _ == unused xml
 	if err != nil {
 		return "", err
 	}
@@ -162,7 +173,8 @@ func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, simKeyStream
 		PodUrls:  mediaUrl,
 		PodSizes: mediaSize,
 	}
-	podcastReport, err := downloadReport(urlStr, podcastData, progBounds, simKeyStream)
+
+	podcastReport, err := downloadReport(urlStr, podcastData, progBounds, keyStream, httpMedia)
 
 	return podcastReport, err
 }

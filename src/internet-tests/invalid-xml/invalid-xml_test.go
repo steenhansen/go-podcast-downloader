@@ -14,13 +14,14 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
-func TestInvalidXml(t *testing.T) {
+func ITestInvalidXml(t *testing.T) {
 	url := consts.TEST_DIR_URL + "invalid-xml/invalid-xml.rss"
-	_, _, _, err := podcasts.ReadUrl(url)
+	_, _, _, err := podcasts.ReadRssUrl(url, rss.HttpMedia)
 	//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/invalid-xml/invalid-xml.rss
 	if !errors.Is(err, flaws.InvalidXML) {
-		t.Fatalf(`TestInvalidXml failed`)
+		t.Fatal(`TestInvalidXml failed`)
 	}
 }

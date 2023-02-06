@@ -8,6 +8,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
 	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
 )
@@ -20,9 +21,8 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/mis
 
 func setUp() consts.ProgBounds {
 	progPath := misc.CurDir()
-	delNotMissing := progPath + "/local-download-dest/not-missing.txt"
-	os.Remove(delNotMissing)
-	progBounds := testings.ProgBounds(progPath)
+	os.Remove(progPath + "/local-download-dest/not-missing.txt")
+	progBounds := testings.TestBounds(progPath)
 	return progBounds
 }
 
@@ -32,16 +32,11 @@ const expectedMenu string = `
 `
 
 const expectedConsole string = `
-Downloading 'local-download-dest' podcast, hit 's' to stop
-no-such-file.txt(read #0 11B)
+Downloading 'local-download-dest' podcast, 2 files, hit 's' to stop
+no-such-file.txt(read #0 12B)
 not-missing.txt(read #0 11B)
 ERROR no-such-file.txt
 not-missing.txt (save #0, 0s)
-`
-const PERFECTexpectedAdds = `
-Added 1 new 'txt' file(s) in 0s
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/missing-file/git-server-source/missing-file.rss
-Into 'local-download-dest'
 `
 
 const expectedAdds = `
@@ -54,22 +49,23 @@ const expectedBads = "\t\t*** 404 or 400 html page, https://raw.githubuserconten
 
 func TestMissingFileFromMenu(t *testing.T) {
 	progBounds := setUp()
-	simKeyStream := make(chan string)
+	keyStream := make(chan string)
 	globals.Console.Clear()
 	actualMenu, err := terminal.ShowNumberedChoices(progBounds)
 	if err != nil {
 		fmt.Println("wa happen", err)
 	}
 	globals.Console.Clear()
-	actualAdds, _ := terminal.AfterMenu(progBounds, simKeyStream, testings.KeyboardMenuChoice_1)
+	actualAdds, _ := terminal.AfterMenu(progBounds, keyStream, testings.KeyboardMenuChoice_1, rss.HttpMedia)
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
 	if testings.NotSameTrimmed(actualMenu, expectedMenu) {
 		t.Fatal(testings.ClampActual(actualMenu), testings.ClampExpected(expectedMenu))
 	}
 
-	if testings.NotSameOutOfOrder(actualConsole, expectedConsole) {
-		t.Fatal(testings.ClampActual(actualConsole), testings.ClampExpected(expectedConsole))
+	expectedDiff := testings.NotSameOutOfOrder(actualConsole, expectedConsole)
+	if len(expectedDiff) != 0 {
+		t.Fatal(testings.ClampActual(actualConsole), testings.ClampMapDiff(expectedDiff), testings.ClampExpected(expectedConsole))
 	}
 
 	if testings.NotSameTrimmed(actualAdds, expectedAdds) {

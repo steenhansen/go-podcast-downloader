@@ -1,6 +1,8 @@
 package consts
 
 import (
+	"context"
+	"net/http"
 	"time"
 )
 
@@ -23,9 +25,10 @@ type ProgBounds struct {
 }
 
 type CurStat struct {
-	ReadFiles  *int
-	SavedFiles *int
-	MinDiskMbs int
+	ReadFiles   *int
+	SavedFiles  *int
+	MinDiskMbs  int
+	NetworkLoad string
 }
 
 type PodcastData struct {
@@ -45,6 +48,7 @@ type PodcastResults struct {
 }
 
 type ReadLineFunc func() string
+type HttpFunc func(ctx context.Context, mediaUrl string) (*http.Response, error)
 
 const KB_BYTES int64 = 1024
 const MB_BYTES int64 = 1024 * 1024
@@ -54,19 +58,26 @@ const TB_BYTES int64 = 1024 * 1024 * 1024 * 1024
 const MIN_DISK_BYTES int = 1_000_000_000
 const MIN_DISK_FAIL_BYTES int = 999_000_000_000_000
 
-const LIMIT_PLAIN = `$\-\-limit`
-const LIMIT_AND_NUMBER = `$\-\-limit=\d+`
+const LIMIT_PLAIN = `^\-\-fileLimit`
+const LIMIT_AND_NUMBER = `^\-\-fileLimit=\d+`
 const LIMIT_NUMBER = `\d+`
 
-const LOAD_PLAIN = `$\-\-load`
-const LOAD_AND_SPEED = `$\-\-load=(high|medium|low)`
+const LOAD_PLAIN = `^\-\-networkLoad`
+const LOAD_AND_SPEED = `^\-\-networkLoad=(high|medium|low)`
 const LOAD_CHOICE = `high|medium|low`
 
 const HIGH_LOAD = "high"
 const MEDIUM_LOAD = "medium"
 const LOW_LOAD = "low"
 
-const HELP_ARG1 = "--help"
+const HIGH_SLEEP = 0
+const MEDIUM_SLEEP = 5
+const LOW_SLEEP = 10
+const CPUS_MED_DIVIDER = 4
+
+const HELP_PLAIN = "help"
+const HELP_DASH = "-help"
+const HELP_DASH_DASH = "--help"
 
 const CLEAR_SCREEN = "\033[H\033[2J"
 
@@ -86,3 +97,5 @@ const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-con
 
 const KEY_BUFF_SIZE = 1
 const KEY_BUFF_ERROR = "GetKeys() keyboard error"
+
+const HTTP_OK_RESP = 200

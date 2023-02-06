@@ -15,6 +15,25 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
 
+func ReadRssUrl(rssUrl string, httpMedia consts.HttpFunc) ([]byte, []string, []int, error) {
+	podcastXml, err := feed.ReadRss(rssUrl, httpMedia)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	podcastTitle, err := rss.RssTitle(podcastXml)
+	if podcastTitle == "" {
+		xmlStr := string(podcastXml[0:100])
+		return nil, nil, nil, flaws.InvalidXML.StartError(xmlStr)
+	} else if err != nil {
+		return nil, nil, nil, err
+	}
+	mediaUrls, mediaSizes, err := rss.RssItems(podcastXml)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return podcastXml, mediaUrls, mediaSizes, nil
+}
+
 func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
 	progDir, err := os.Open(ProgPath)
 	if err != nil {
@@ -39,28 +58,10 @@ func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
 	return "", "", flaws.NoMatchName.StartError(podcastTitle)
 }
 
-func ReadUrl(rssUrl string) ([]byte, []string, []int, error) {
-	podcastXml, err := feed.ReadRss(rssUrl)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	podcastTitle, err := rss.RssTitle(podcastXml)
-	if podcastTitle == "" {
-		xmlStr := string(podcastXml[0:100])
-		return nil, nil, nil, flaws.InvalidXML.StartError(xmlStr)
-	} else if err != nil {
-		return nil, nil, nil, err
-	}
-	mediaUrls, mediaSizes, err := rss.RssItems(podcastXml)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	return podcastXml, mediaUrls, mediaSizes, nil
-}
-
-func DownloadPodcast(mediaTitle, rssUrl string, progBounds consts.ProgBounds, simKeyStream chan string) consts.PodcastResults {
+func DownloadPodcast(mediaTitle, rssUrl string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) consts.PodcastResults {
 	if feed.IsUrl(rssUrl) {
-		_, mediaUrls, mediaSizes, err := ReadUrl(rssUrl)
+
+		_, mediaUrls, mediaSizes, err := ReadRssUrl(rssUrl, httpMedia)
 		if err != nil {
 			return misc.EmptyPodcastResults(err)
 		}
@@ -71,7 +72,7 @@ func DownloadPodcast(mediaTitle, rssUrl string, progBounds consts.ProgBounds, si
 			PodUrls:  mediaUrls,
 			PodSizes: mediaSizes,
 		}
-		podcastResults := processes.DownloadMedia(rssUrl, podcastData, progBounds, simKeyStream)
+		podcastResults := processes.DownloadMedia(rssUrl, podcastData, progBounds, keyStream, httpMedia)
 		return podcastResults
 	}
 	return misc.EmptyPodcastResults(flaws.InvalidRssURL.StartError(rssUrl))

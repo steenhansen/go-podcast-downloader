@@ -133,7 +133,7 @@ func (e flawError) Error() string {
 	case badContent:
 		return fmt.Sprintf(pre+"404 or 400 html page, %s", e.errMess)
 	case badUrl:
-		return fmt.Sprintf(pre+"bad url %sCBA", e.errMess) //  go run ./ https://www.naasdfasdfsa.gov
+		return fmt.Sprintf(pre+"bad url %s", e.errMess) //  go run ./ https://www.naasdfasdfsa.gov
 	case emptyItems:
 		return pre + "empty items"
 	case emptyRss:
