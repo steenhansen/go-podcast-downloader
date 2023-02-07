@@ -15,7 +15,7 @@ import (
 
 go run ./ siberiantimes.com/ecology/rss/ ecology
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/AddByUrlAndName/git-server-source/add-by-url-and-name.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/AddByUrlAndName/git-server-source/add-by-url-and-name.rss
 
 */
 

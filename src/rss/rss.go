@@ -6,15 +6,18 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 )
 
 // no title is ok, if user gives us a title
+
 func RssTitle(rssXml []byte) (string, error) {
 	type XmlTitle struct {
 		Title string `xml:"channel>title"`
@@ -28,26 +31,41 @@ func RssTitle(rssXml []byte) (string, error) {
 	if len(title) == 0 {
 		return "", flaws.EmptyTitle
 	}
+
 	return theChannel.Title, nil
 }
 
-func RssItems(rss []byte) ([]string, []int, error) {
+func RssItems(orgRss []byte) ([]string, []string, []int, error) {
+	var re1 = regexp.MustCompile(`:title\>`)                               // <itunes:title>itunes title</itunes:title>
+	noItunesTitles := re1.ReplaceAllString(string(orgRss), ":TEMP_TITLE>") // <itunes:TEMP_TITLE>itunes title</itunes:TEMP_TITLE>
+	type XmlTitles struct {
+		Titles []string `xml:"channel>item>title"` // itunes:title are now ignored
+	}
+	theTitles := XmlTitles{}
+	xml.Unmarshal([]byte(noItunesTitles), &theTitles)
+	mediaTitles := make([]string, len(theTitles.Titles))
+	for i, itemTitle := range theTitles.Titles {
+		mediaTitles[i] = string(itemTitle)
+	}
+
 	type XmlAttrib struct {
 		UrlKey string `xml:"url,attr"`
 		LenKey string `xml:"length,attr"`
 	}
+
 	type XmlEnclosures struct {
 		Enclosures []XmlAttrib `xml:"channel>item>enclosure"`
 	}
 	enclosures := XmlEnclosures{}
-	err := xml.Unmarshal([]byte(rss), &enclosures)
+	err := xml.Unmarshal([]byte(noItunesTitles), &enclosures)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	mediaUrls := make([]string, len(enclosures.Enclosures))
 	mediaSizes := make([]int, len(enclosures.Enclosures))
+
 	if len(mediaUrls) == 0 {
-		return nil, nil, flaws.EmptyItems
+		return nil, nil, nil, flaws.EmptyItems
 	}
 	for i, v := range enclosures.Enclosures {
 		mediaUrls[i] = string(v.UrlKey)
@@ -58,7 +76,7 @@ func RssItems(rss []byte) ([]string, []int, error) {
 			mediaSizes[i] = size
 		}
 	}
-	return mediaUrls, mediaSizes, nil
+	return mediaTitles, mediaUrls, mediaSizes, nil
 }
 
 func NameOfFile(mediaUrl string) string {
@@ -77,16 +95,22 @@ func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDis
 	if respMedia.StatusCode != 200 {
 		return 0, flaws.BadContent.StartError(mediaUrl)
 	}
-	mediaContent, err := io.ReadAll(respMedia.Body)
-	if err != nil {
-		return 0, flaws.BadContent.ContinueError(mediaUrl, err)
+	contentStr := ""
+	mediaContent := make([]byte, 0)
+	if !globals.EmptyFiles {
+		mediaContent, err = io.ReadAll(respMedia.Body)
+		if err != nil {
+			return 0, flaws.BadContent.ContinueError(mediaUrl, err)
+		}
+		contentStr = string(mediaContent)
 	}
+
 	mediaFile, err := os.Create(filePath)
 	if err != nil {
 		return 0, flaws.CantCreateFileSerious.ContinueError(filePath, err)
 	}
 	defer mediaFile.Close()
-	contentStr := string(mediaContent)
+
 	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
 		return 0, flaws.BadContent.StartError(mediaUrl)
 	}
@@ -127,6 +151,7 @@ func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia consts.HttpF
 		missingFinalName := NameOfFile(mediaUrl)
 		return missingFinalName, nil
 	}
+	// https://stackoverflow.com/questions/16784419/in-golang-how-to-determine-the-final-url-after-a-series-of-redirects
 	finalQueried := respMedia.Request.URL.String()
 	finalFileName := NameOfFile(finalQueried)
 	return finalFileName, nil

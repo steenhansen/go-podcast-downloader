@@ -7,6 +7,12 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 )
 
+/*
+  For testing only
+*/
+
+var EmptyFiles bool
+
 type FaultsCollect struct {
 	podErrors map[string]error
 }

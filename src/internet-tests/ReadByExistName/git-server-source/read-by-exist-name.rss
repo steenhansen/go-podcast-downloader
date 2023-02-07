@@ -3,13 +3,13 @@
   <channel>
     <title>add-by-url-title</title>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/ReadByExistName/git-server-source/read-by-exist-name-1.txt" length="21" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/ReadByExistName/git-server-source/read-by-exist-name-1.txt" length="21" type="text/plain" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/ReadByExistName/git-server-source/read-by-exist-name-2.txt" length="21" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/ReadByExistName/git-server-source/read-by-exist-name-2.txt" length="21" type="text/plain" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/ReadByExistName/git-server-source/read-by-exist-name-3.txt" length="21" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/ReadByExistName/git-server-source/read-by-exist-name-3.txt" length="21" type="text/plain" />
     </item>
   </channel>
 </rss>

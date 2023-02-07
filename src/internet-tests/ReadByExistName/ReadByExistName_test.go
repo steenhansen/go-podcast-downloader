@@ -15,7 +15,7 @@ import (
 
 go run ./ ecology
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/ReadByExistName/git-server-source/read-by-exist-name.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/ReadByExistName/git-server-source/read-by-exist-name.rss
 
 */
 

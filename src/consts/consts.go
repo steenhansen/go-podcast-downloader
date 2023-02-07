@@ -32,10 +32,11 @@ type CurStat struct {
 }
 
 type PodcastData struct {
-	PodTitle string
-	PodPath  string
-	PodUrls  []string
-	PodSizes []int
+	PodTitle  string
+	PodPath   string
+	PodUrls   []string
+	PodSizes  []int
+	PodTitles []string
 }
 
 type PodcastResults struct {
@@ -57,6 +58,10 @@ const TB_BYTES int64 = 1024 * 1024 * 1024 * 1024
 
 const MIN_DISK_BYTES int = 1_000_000_000
 const MIN_DISK_FAIL_BYTES int = 999_000_000_000_000
+
+const BAD_FILE_CHAR_AND_DOT = `[\\/:"*?<>|.]+`
+
+const EMTPY_FILES = `^\-\-emptyFiles`
 
 const LIMIT_PLAIN = `^\-\-fileLimit`
 const LIMIT_AND_NUMBER = `^\-\-fileLimit=\d+`

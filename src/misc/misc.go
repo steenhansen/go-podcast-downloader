@@ -13,6 +13,7 @@ import (
 	"github.com/ricochet2200/go-disk-usage/du"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 )
 
 func EmptyPodcastResults(err error) consts.PodcastResults {
@@ -194,15 +195,15 @@ func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBound
 	if err != nil {
 		panic(err)
 	}
-	limitFlag, tempArgs, err := LimitArg(raceArgs)
+	limitFlag, noLimitArgs, err := LimitArg(raceArgs)
 	if err != nil {
 		panic(err)
 	}
-	loadFlag, cleanArgs, err := LoadArg(tempArgs)
+	loadFlag, noLoadArgs, err := LoadArg(noLimitArgs)
 	if err != nil {
 		panic(err)
 	}
-
+	cleanArgs := SetEmptyFiles(noLoadArgs)
 	progPath := CurDir()
 	progBounds := consts.ProgBounds{
 		ProgPath:    progPath,
@@ -211,4 +212,17 @@ func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBound
 		MinDisk:     minDiskBytes,
 	}
 	return diskSize, progBounds, cleanArgs
+}
+
+func SetEmptyFiles(osArgs []string) []string {
+	emptyFiles := regexp.MustCompile(consts.EMTPY_FILES)
+	emptyArgs := make([]string, 0)
+	for argIndex, anArg := range osArgs {
+		if argIndex > 0 && emptyFiles.MatchString(anArg) {
+			globals.EmptyFiles = true
+		} else {
+			emptyArgs = append(emptyArgs, anArg)
+		}
+	}
+	return emptyArgs
 }

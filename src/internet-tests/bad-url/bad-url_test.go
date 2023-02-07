@@ -10,7 +10,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
 )
 
-//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/bad-url/does-not-exist.rss
+//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/bad-url/does-not-exist.rss
 
 const URL2 = consts.TEST_DIR_URL + "bad-url/does-not-exist.rss"
 
@@ -21,7 +21,7 @@ func httpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 }
 
 func TestInvalidXml(t *testing.T) {
-	_, _, _, err := podcasts.ReadRssUrl(URL2, httpMedia)
+	_, _, _, _, err := podcasts.ReadRssUrl(URL2, httpMedia)
 	if err != expected_err {
 		t.Fatal(`TestInvalidXml failed`)
 	}

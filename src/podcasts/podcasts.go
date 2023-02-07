@@ -15,23 +15,23 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
 
-func ReadRssUrl(rssUrl string, httpMedia consts.HttpFunc) ([]byte, []string, []int, error) {
+func ReadRssUrl(rssUrl string, httpMedia consts.HttpFunc) ([]byte, []string, []string, []int, error) {
 	podcastXml, err := feed.ReadRss(rssUrl, httpMedia)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	podcastTitle, err := rss.RssTitle(podcastXml)
 	if podcastTitle == "" {
 		xmlStr := string(podcastXml[0:100])
-		return nil, nil, nil, flaws.InvalidXML.StartError(xmlStr)
+		return nil, nil, nil, nil, flaws.InvalidXML.StartError(xmlStr)
 	} else if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
-	mediaUrls, mediaSizes, err := rss.RssItems(podcastXml)
+	mediaTitles, mediaUrls, mediaSizes, err := rss.RssItems(podcastXml)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
-	return podcastXml, mediaUrls, mediaSizes, nil
+	return podcastXml, mediaTitles, mediaUrls, mediaSizes, nil
 }
 
 func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
@@ -61,16 +61,17 @@ func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
 func DownloadPodcast(mediaTitle, rssUrl string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) consts.PodcastResults {
 	if feed.IsUrl(rssUrl) {
 
-		_, mediaUrls, mediaSizes, err := ReadRssUrl(rssUrl, httpMedia)
+		_, mediaTitles, mediaUrls, mediaSizes, err := ReadRssUrl(rssUrl, httpMedia)
 		if err != nil {
 			return misc.EmptyPodcastResults(err)
 		}
 		mediaPath := progBounds.ProgPath + "/" + mediaTitle
 		podcastData := consts.PodcastData{
-			PodTitle: mediaTitle,
-			PodPath:  mediaPath,
-			PodUrls:  mediaUrls,
-			PodSizes: mediaSizes,
+			PodTitle:  mediaTitle,
+			PodPath:   mediaPath,
+			PodUrls:   mediaUrls,
+			PodSizes:  mediaSizes,
+			PodTitles: mediaTitles,
 		}
 		podcastResults := processes.DownloadMedia(rssUrl, podcastData, progBounds, keyStream, httpMedia)
 		return podcastResults
