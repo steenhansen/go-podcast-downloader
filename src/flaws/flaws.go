@@ -7,10 +7,15 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 )
 
-type ErrorKind int
+type errorKind int
+type flawError struct {
+	kindError     errorKind
+	errMess       string
+	previousError error
+}
 
 const (
-	sStop ErrorKind = iota + 1
+	sStop errorKind = iota + 1
 
 	badFlagSerious
 	badLimitSerious
@@ -35,12 +40,6 @@ const (
 	noPodcasts
 	timeoutQuit
 )
-
-type flawError struct {
-	kindError     ErrorKind
-	errMess       string
-	previousError error
-}
 
 func IsSerious(err error) bool {
 	if err != nil {

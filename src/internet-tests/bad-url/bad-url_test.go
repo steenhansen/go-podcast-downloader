@@ -23,6 +23,6 @@ func httpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 func TestInvalidXml(t *testing.T) {
 	_, _, _, _, err := podcasts.ReadRssUrl(URL2, httpMedia)
 	if err != expected_err {
-		t.Fatal(`TestInvalidXml failed`)
+		t.Fatal(err)
 	}
 }

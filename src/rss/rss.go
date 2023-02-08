@@ -3,6 +3,7 @@ package rss
 import (
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -14,15 +15,31 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
 // no title is ok, if user gives us a title
 
+type xmlRssTitle struct {
+	Title string `xml:"channel>title"`
+}
+
+type xmlItemTitles struct {
+	Titles []string `xml:"channel>item>title"` // itunes:title are now ignored by changing them to itunes:tiXYZ
+}
+
+type xmlUrlLen struct {
+	UrlKey string `xml:"url,attr"`
+	LenKey string `xml:"length,attr"`
+}
+
+type xmlEnclosures struct {
+	Enclosures []xmlUrlLen `xml:"channel>item>enclosure"`
+}
+
 func RssTitle(rssXml []byte) (string, error) {
-	type XmlTitle struct {
-		Title string `xml:"channel>title"`
-	}
-	theChannel := XmlTitle{Title: ""}
+
+	theChannel := xmlRssTitle{Title: ""}
 	err := xml.Unmarshal([]byte(rssXml), &theChannel)
 	if err != nil {
 		return "", flaws.MissingTitle
@@ -31,32 +48,21 @@ func RssTitle(rssXml []byte) (string, error) {
 	if len(title) == 0 {
 		return "", flaws.EmptyTitle
 	}
-
 	return theChannel.Title, nil
 }
 
 func RssItems(orgRss []byte) ([]string, []string, []int, error) {
-	var re1 = regexp.MustCompile(`:title\>`)                               // <itunes:title>itunes title</itunes:title>
-	noItunesTitles := re1.ReplaceAllString(string(orgRss), ":TEMP_TITLE>") // <itunes:TEMP_TITLE>itunes title</itunes:TEMP_TITLE>
-	type XmlTitles struct {
-		Titles []string `xml:"channel>item>title"` // itunes:title are now ignored
-	}
-	theTitles := XmlTitles{}
+	var re1 = regexp.MustCompile(`:title\>`)                          // <itunes:title>itunes title</itunes:title>
+	noItunesTitles := re1.ReplaceAllString(string(orgRss), ":tiXYZ>") // <itunes:TEMP_TITLE>itunes title</itunes:TEMP_TITLE>
+
+	theTitles := xmlItemTitles{}
 	xml.Unmarshal([]byte(noItunesTitles), &theTitles)
 	mediaTitles := make([]string, len(theTitles.Titles))
 	for i, itemTitle := range theTitles.Titles {
 		mediaTitles[i] = string(itemTitle)
 	}
 
-	type XmlAttrib struct {
-		UrlKey string `xml:"url,attr"`
-		LenKey string `xml:"length,attr"`
-	}
-
-	type XmlEnclosures struct {
-		Enclosures []XmlAttrib `xml:"channel>item>enclosure"`
-	}
-	enclosures := XmlEnclosures{}
+	enclosures := xmlEnclosures{}
 	err := xml.Unmarshal([]byte(noItunesTitles), &enclosures)
 	if err != nil {
 		return nil, nil, nil, err
@@ -86,7 +92,7 @@ func NameOfFile(mediaUrl string) string {
 	return fileNameNoQuery[0]
 }
 
-func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDiskMbs int, httpMedia consts.HttpFunc) (int, error) {
+func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDiskMbs int, httpMedia models.HttpFn) (int, error) {
 	respMedia, err := httpMedia(ctx, mediaUrl)
 	if err != nil {
 		return 0, err
@@ -142,12 +148,15 @@ func HttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 	return respMedia, nil
 }
 
-func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia consts.HttpFunc) (string, error) {
+func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia models.HttpFn) (string, error) {
 	respMedia, err := httpMedia(ctx, mediaUrl)
 	if err != nil {
 		return "", nil
 	}
+
 	if respMedia.StatusCode != consts.HTTP_OK_RESP {
+		fmt.Println("      ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ")
+		//fmt.Println("         respMedia.StatusCode =============== ", respMedia.StatusCode)
 		missingFinalName := NameOfFile(mediaUrl)
 		return missingFinalName, nil
 	}

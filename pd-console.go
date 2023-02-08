@@ -1,10 +1,5 @@
 package main
 
-/*
-go run ./ https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
-go run ./pd-console.go https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss
-*/
-
 import (
 	"errors"
 	"fmt"
@@ -21,7 +16,7 @@ import (
 )
 
 func main() {
-	diskSize, progBounds, cleanArgs := misc.InitProg(misc.DiskSpace, consts.MIN_DISK_BYTES)
+	diskSize, progBounds, cleanArgs := misc.InitProg(consts.MIN_DISK_BYTES)
 
 	keyStream := make(chan string)
 

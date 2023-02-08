@@ -10,6 +10,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/media"
@@ -18,7 +19,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
-func ShowNumberedChoices(progBounds consts.ProgBounds) (string, error) {
+func ShowNumberedChoices(progBounds models.ProgBounds) (string, error) {
 	podDirNames, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
 		return "", err
@@ -34,7 +35,7 @@ func ShowNumberedChoices(progBounds consts.ProgBounds) (string, error) {
 	return theMenu, nil
 }
 
-func AfterMenu(progBounds consts.ProgBounds, keyStream chan string, getMenuChoice consts.ReadLineFunc, httpMedia consts.HttpFunc) (string, error) {
+func AfterMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, error) {
 	podDirNames, thePodcasts, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
 		return "", err
@@ -54,7 +55,7 @@ func AfterMenu(progBounds consts.ProgBounds, keyStream chan string, getMenuChoic
 	return addedFiles, err
 }
 
-func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+func AddByUrl(podcastUrl string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
 
 	rssXml, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
@@ -71,7 +72,7 @@ func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, keyStream chan st
 	if dirNotExist {
 		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
 	}
-	podcastData := consts.PodcastData{
+	podcastData := models.PodcastData{
 		PodTitle:  mediaTitle,
 		PodPath:   mediaPath,
 		PodUrls:   rssFiles,
@@ -83,7 +84,7 @@ func AddByUrl(podcastUrl string, progBounds consts.ProgBounds, keyStream chan st
 	return podcastReport, err
 }
 
-func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
 
 	_, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
@@ -97,7 +98,7 @@ func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgB
 	if dirNotExist {
 		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
 	}
-	podcastData := consts.PodcastData{
+	podcastData := models.PodcastData{
 		PodTitle:  mediaTitle,
 		PodPath:   mediaPath,
 		PodUrls:   rssFiles,
@@ -109,18 +110,19 @@ func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds consts.ProgB
 	return podcastReport, err
 }
 
-func DownloadAndReport(podDirNames, feed []string, choice int, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+func DownloadAndReport(podDirNames, feed []string, choice int, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
 	mediaTitle := podDirNames[choice]
 	podcastUrl := feed[choice]
 	podcastResults := podcasts.DownloadPodcast(mediaTitle, podcastUrl, progBounds, keyStream, httpMedia)
 	if podcastResults.Err != nil && errors.Is(podcastResults.Err, flaws.LowDiskSerious) {
 		return "", podcastResults.Err
 	}
+	//fmt.Println("DownloadAndReport", podcastResults)
 	podcastReport := doReport(podcastResults, string(podcastUrl), mediaTitle)
 	return podcastReport, podcastResults.Err
 }
 
-func doReport(podcastResults consts.PodcastResults, podcastUrl string, mediaTitle string) (podcastReport string) {
+func doReport(podcastResults models.PodcastResults, podcastUrl string, mediaTitle string) (podcastReport string) {
 	savedFiles := podcastResults.SavedFiles
 	varietyFiles := podcastResults.VarietyFiles
 	podcastTime := podcastResults.PodcastTime
@@ -142,7 +144,7 @@ func doReport(podcastResults consts.PodcastResults, podcastUrl string, mediaTitl
 	return podcastReport
 }
 
-func downloadReport(url string, podcastData consts.PodcastData, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+func downloadReport(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
 
 	podcastResults := processes.DownloadMedia(url, podcastData, progBounds, keyStream, httpMedia)
 	if podcastResults.Err != nil && !errors.Is(podcastResults.Err, flaws.SStop) {
@@ -152,7 +154,7 @@ func downloadReport(url string, podcastData consts.PodcastData, progBounds const
 	return podcastReport, podcastResults.Err
 }
 
-func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (string, error) {
+func ReadByExistName(osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
 	podcastTitle := feed.PodcastName(osArgs)
 	mediaPath, mediaTitle, err := podcasts.FindPodcastDirName(progBounds.ProgPath, podcastTitle)
 	if err != nil {
@@ -169,7 +171,7 @@ func ReadByExistName(osArgs []string, progBounds consts.ProgBounds, keyStream ch
 	if err != nil {
 		return "", err
 	}
-	podcastData := consts.PodcastData{
+	podcastData := models.PodcastData{
 		PodTitle:  mediaTitle,
 		PodPath:   mediaPath,
 		PodUrls:   mediaUrl,

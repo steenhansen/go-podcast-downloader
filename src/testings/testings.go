@@ -2,6 +2,7 @@ package testings
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
 func DirRemove(dirPath string) error {
@@ -41,6 +43,7 @@ func ClampStr(testStr string, actualStr string) string {
 }
 
 func KeyboardMenuChoice_1() string {
+	fmt.Println()
 	return "1"
 }
 
@@ -53,8 +56,8 @@ func KeyboardMenuChoiceNum(simChoice string) func() string {
 	return menuChoice
 }
 
-func TestBounds(progPath string) consts.ProgBounds {
-	progBounds := consts.ProgBounds{
+func TestBounds(progPath string) models.ProgBounds {
+	progBounds := models.ProgBounds{
 		ProgPath:    progPath,
 		LoadOption:  consts.HIGH_LOAD,
 		LimitOption: 0,
@@ -118,7 +121,33 @@ func Http200Resp(theHost, thePath, bodyXml string) *http.Response {
 
 	httpResp := &http.Response{
 		Status:        "200 OK",
-		StatusCode:    200,
+		StatusCode:    consts.HTTP_OK_RESP,
+		Proto:         "HTTP/1.1",
+		ProtoMajor:    1,
+		ProtoMinor:    1,
+		Body:          io.NopCloser(bytes.NewBufferString(bodyXml)),
+		ContentLength: int64(len(bodyXml)),
+		Request:       httpReq,
+		Header:        make(http.Header, 0),
+	}
+	return httpResp
+}
+
+func Http302Resp(theHost, thePath, bodyXml string) *http.Response {
+
+	theUrl := &url.URL{
+		Scheme: "http",
+		Host:   theHost,
+		Path:   thePath,
+	}
+
+	httpReq := &http.Request{
+		URL: theUrl,
+	}
+
+	httpResp := &http.Response{
+		Status:        "200 OK",
+		StatusCode:    302,
 		Proto:         "HTTP/1.1",
 		ProtoMajor:    1,
 		ProtoMinor:    1,

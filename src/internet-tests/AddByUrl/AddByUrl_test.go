@@ -30,9 +30,9 @@ func setUp() {
 const expectedReport = `
 Adding 'add-by-url-title-97'
 Downloading 'add-by-url-title-97' podcast, 3 files, hit 's' to stop
-add-by-url-1.txt(read #0 21B)
-add-by-url-2.txt(read #0 21B)
-add-by-url-3.txt(read #0 21B)
+add-by-url-1.txt(read #0 12B)
+add-by-url-2.txt(read #0 12B)
+add-by-url-3.txt(read #0 12B)
 add-by-url-1.txt (save #0, 0s)
 add-by-url-2.txt (save #0, 0s)
 add-by-url-3.txt (save #0, 0s)
@@ -44,7 +44,11 @@ func TestAddByUrl(t *testing.T) {
 	podcastUrl := consts.TEST_DIR_URL + "AddByUrl/git-server-source/add-by-url.rss"
 	progBounds := testings.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	terminal.AddByUrl(podcastUrl, progBounds, keyStream, rss.HttpMedia)
+	_, err := terminal.AddByUrl(podcastUrl, progBounds, keyStream, rss.HttpMedia)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//fmt.Println("res", res, err)
 	actualReport := globals.Console.All()
 	expectedDiff := testings.NotSameOutOfOrder(actualReport, expectedReport)
 	if len(expectedDiff) != 0 {

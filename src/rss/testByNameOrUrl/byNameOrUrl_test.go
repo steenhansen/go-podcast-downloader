@@ -7,15 +7,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
 )
 
-func setUp() consts.ProgBounds {
+func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	testings.DirRemove(progPath + "/By Name Or Url/")
 	progBounds := testings.TestBounds(progPath)
@@ -57,10 +57,8 @@ const expectedConsole string = `
         Downloading 'By Name Or Url' podcast, 2 files, hit 's' to stop
         	file-2.ByNameOrUrl(read #0 43B)
         	file-1.ByNameOrUrl(read #0 42B)
-        		 file-1.ByNameOrUrl (save #0, 0s)
-        			Size disparity, expected 42 bytes, but was 19
-        		 file-2.ByNameOrUrl (save #0, 0s)
-        			Size disparity, expected 43 bytes, but was 18
+        		 file-1.ByNameOrUrl (save #0, 0s) - Size disparity, expected 42 bytes, but was 19
+        		 file-2.ByNameOrUrl (save #0, 0s) - Size disparity, expected 43 bytes, but was 18
 `
 const expectedAdds = `
 Added 2 new 'ByNameOrUrl' file(s) in 0s 
@@ -79,7 +77,7 @@ func Test_ByNameOrUrl(t *testing.T) { //AddByUrlAndName
 	globals.Console.Clear()
 	actualAdds, err := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, httpTest)
 	if err != nil {
-		fmt.Println("wa happen", err)
+		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()

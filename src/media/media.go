@@ -8,6 +8,7 @@ import (
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
@@ -61,11 +62,10 @@ func chooseName(finalFileName string, podPath string, podTitle string) (filePath
 	} else {
 		filePath += finalFileName
 	}
-	//fmt.Println("media.chooseName podTitle, finalFileName", podTitle, finalFileName)
 	return filePath
 }
 
-func SaveDownloadedMedia(ctx context.Context, podcastData consts.PodcastData, mediaStream chan<- consts.MediaEnclosure, limitFlag int, httpMedia consts.HttpFunc) (int, string, error) {
+func SaveDownloadedMedia(ctx context.Context, podcastData models.PodcastData, mediaStream chan<- models.MediaEnclosure, limitFlag int, httpMedia models.HttpFn) (int, string, error) {
 	varietySet := varieties.VarietiesSet{}
 	possibleFiles := 0
 limitCancel:
@@ -79,11 +79,16 @@ limitCancel:
 			if err != nil {
 				return 0, "", err
 			}
-			filePath := chooseName(finalFileName, podcastData.PodPath, podcastData.PodTitles[mediaIndex])
+			podTitle := ""
+			if len(podcastData.PodTitles) > mediaIndex {
+				podTitle = podcastData.PodTitles[mediaIndex]
+			}
+
+			filePath := chooseName(finalFileName, podcastData.PodPath, podTitle)
 			varietySet.AddVariety(finalFileName)
 			if _, err = os.Stat(filePath); err != nil {
 				if os.IsNotExist(err) {
-					newMedia := consts.MediaEnclosure{
+					newMedia := models.MediaEnclosure{
 						EnclosureUrl:  mediaUrl,
 						EnclosurePath: filePath,
 						EnclosureSize: podcastData.PodSizes[mediaIndex],

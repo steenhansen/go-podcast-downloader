@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
 	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
@@ -19,7 +19,7 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-
 
 */
 
-func setUp() consts.ProgBounds {
+func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	os.Remove(progPath + "/local-download-dest/not-missing.txt")
 	progBounds := testings.TestBounds(progPath)
@@ -56,7 +56,10 @@ func TestMissingFileFromMenu(t *testing.T) {
 		fmt.Println("wa happen", err)
 	}
 	globals.Console.Clear()
-	actualAdds, _ := terminal.AfterMenu(progBounds, keyStream, testings.KeyboardMenuChoice_1, rss.HttpMedia)
+	actualAdds, err := terminal.AfterMenu(progBounds, keyStream, testings.KeyboardMenuChoice_1, rss.HttpMedia)
+	if err != nil {
+		t.Fatal(err)
+	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
 	if testings.NotSameTrimmed(actualMenu, expectedMenu) {

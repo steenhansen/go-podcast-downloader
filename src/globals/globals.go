@@ -17,6 +17,10 @@ type FaultsCollect struct {
 	podErrors map[string]error
 }
 
+type ConsoleCollect struct {
+	progText string
+}
+
 var Faults = FaultsCollect{podErrors: map[string]error{}}
 
 func (faultsCollect *FaultsCollect) Note(mediaUrl string, err error) {
@@ -38,10 +42,6 @@ func (faultsCollect *FaultsCollect) All() (badFiles string) {
 		badFiles = badFiles + "\t\t" + mediaError.Error() + "\n"
 	}
 	return badFiles
-}
-
-type ConsoleCollect struct {
-	progText string
 }
 
 var Console = ConsoleCollect{progText: ""}

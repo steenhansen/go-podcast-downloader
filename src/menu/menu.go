@@ -3,15 +3,15 @@ package menu
 import (
 	"errors"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
 
-func ByNameOrUrl(cleanArgs []string, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) (podReport string, err error) {
+func ByNameOrUrl(cleanArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (podReport string, err error) {
 	if feed.IsUrl(cleanArgs[1]) {
 		feedUrl := cleanArgs[1]
 		if len(cleanArgs) == 2 {
@@ -25,7 +25,7 @@ func ByNameOrUrl(cleanArgs []string, progBounds consts.ProgBounds, keyStream cha
 	return podReport, err
 }
 
-func DisplayMenu(progBounds consts.ProgBounds, keyStream chan string, getMenuChoice consts.ReadLineFunc, httpMedia consts.HttpFunc) (string, error) {
+func DisplayMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, error) {
 	theMenu, _ := terminal.ShowNumberedChoices(progBounds)
 	globals.Console.Note(theMenu)
 	podReport, err := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, httpMedia)

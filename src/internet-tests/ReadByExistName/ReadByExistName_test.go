@@ -28,7 +28,10 @@ func TestReadByExistName(t *testing.T) {
 	osArgs := []string{"ReadByExistName-test", podcastUrl, "local-download-dest"}
 	progBounds := testings.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpMedia)
+	_, err := terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpMedia)
+	if err != nil {
+		t.Fatal(err)
+	}
 	actualReport := globals.Console.All()
 
 	expectedDiff := testings.NotSameOutOfOrder(actualReport, expectedReport)

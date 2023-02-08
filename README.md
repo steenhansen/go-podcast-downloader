@@ -2,6 +2,20 @@
 
 
 
+
+
+
+
+
+
+
+
+
+"      ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff "
+		
+
+
+
 go clean -testcache 
 
 TESTS
@@ -9,13 +23,13 @@ TESTS
 ```
     go test ./... -count=1 | grep -E "^[^?]"
 ```
-  - Tests using real internet 
+  - Test only real Internet tests
 ```
     go test ./src/internet-tests/... -count=1 | grep -E "^[^?]"
 ```
-  - Test using mocked internet
+  - Test only mocked Internet tests
 ```
-     go test ./... -run "^Test_.*$" -count=1 | grep -E "^[^?]"
+     go test ./... -run "^Test_.*$" -count=1 | grep -E "^[^?].*s$"
 ```
 
 

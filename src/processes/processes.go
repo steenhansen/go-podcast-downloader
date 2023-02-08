@@ -2,6 +2,7 @@ package processes
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/media"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
@@ -33,11 +35,20 @@ osErrCancel:
 }
 
 // keyStream <-chan string is so that a test can simulate stopping
-func GoStopKey(ctx context.Context, cancel context.CancelFunc, podcastData consts.PodcastData, keysEvents <-chan keyboard.KeyEvent, keyStream <-chan string) {
+func GoStopKey(ctx context.Context, cancel context.CancelFunc, podcastData models.PodcastData, keysEvents <-chan keyboard.KeyEvent, keyStream <-chan string) {
 	theTitle := podcastData.PodTitle
 	numFiles := strconv.Itoa(len(podcastData.PodUrls))
 	stopKey := consts.STOP_KEY_LOWER
 	globals.Console.Note("Downloading '" + theTitle + "' podcast, " + numFiles + " files, hit '" + stopKey + "' to stop\n")
+	if globals.EmptyFiles {
+		dirFiles, err := misc.FilesInDir(podcastData.PodPath)
+		if err != nil {
+			cancel()
+		}
+		if len(dirFiles) > 1 {
+			fmt.Println("WARNING '" + podcastData.PodPath + "' should have no media files to test correctly")
+		}
+	}
 keyboardCancel:
 	for {
 		select {
@@ -58,7 +69,7 @@ keyboardCancel:
 	}
 }
 
-func GoDownloadAndSaveFiles(ctx context.Context, curStat consts.CurStat, mediaStream <-chan consts.MediaEnclosure, doneStream chan<- bool, errorStream chan<- error, httpMedia consts.HttpFunc) {
+func GoDownloadAndSaveFiles(ctx context.Context, curStat models.CurStat, mediaStream <-chan models.MediaEnclosure, doneStream chan<- bool, errorStream chan<- error, httpMedia models.HttpFn) {
 downloadCancel:
 	for media := range mediaStream {
 		misc.SleepTime(curStat.NetworkLoad)
@@ -80,6 +91,7 @@ downloadCancel:
 				if media.EnclosureSize != writenBytes {
 					globals.Console.Note(feed.ShowSizeError(media.EnclosureSize, writenBytes))
 				}
+				globals.Console.Note("\n")
 			}
 		}
 	}
@@ -92,10 +104,10 @@ func disposeDownloaders(numWorkers int, doneStream <-chan bool) {
 	}
 }
 
-func DownloadMedia(url string, podcastData consts.PodcastData, progBounds consts.ProgBounds, keyStream chan string, httpMedia consts.HttpFunc) consts.PodcastResults {
+func DownloadMedia(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
 	startTime := time.Now()
 	numWorkers := misc.NumWorkers(progBounds.LoadOption)
-	mediaStream := make(chan consts.MediaEnclosure)
+	mediaStream := make(chan models.MediaEnclosure)
 	doneStream := make(chan bool, numWorkers)
 	errorStream := make(chan error, numWorkers)
 	seriousStream := make(chan error, numWorkers)
@@ -108,7 +120,7 @@ func DownloadMedia(url string, podcastData consts.PodcastData, progBounds consts
 	var readFiles, savedFiles int
 	go GoDownloadError(ctxMedias, cancelMedias, errorStream, seriousStream)
 	go GoStopKey(ctxMedias, cancelMedias, podcastData, keysEvents, keyStream)
-	curStat := consts.CurStat{
+	curStat := models.CurStat{
 		ReadFiles:   &readFiles,
 		SavedFiles:  &savedFiles,
 		MinDiskMbs:  progBounds.MinDisk,
@@ -121,7 +133,7 @@ func DownloadMedia(url string, podcastData consts.PodcastData, progBounds consts
 	close(mediaStream)
 	disposeDownloaders(numWorkers, doneStream)
 	err = firstErr(err, seriousStream)
-	podcastResults := consts.PodcastResults{
+	podcastResults := models.PodcastResults{
 		ReadFiles:     readFiles,
 		SavedFiles:    savedFiles,
 		PossibleFiles: possibleFiles,
@@ -133,7 +145,7 @@ func DownloadMedia(url string, podcastData consts.PodcastData, progBounds consts
 	return resultsWithErr
 }
 
-func dealWithErrors(err, ctxErr error, podcastData consts.PodcastData, podcastResults consts.PodcastResults) consts.PodcastResults {
+func dealWithErrors(err, ctxErr error, podcastData models.PodcastData, podcastResults models.PodcastResults) models.PodcastResults {
 
 	if ctxErr == context.Canceled {
 		podcastResults.Err = flaws.SStop.StartError(podcastData.PodPath)

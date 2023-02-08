@@ -7,15 +7,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 	"github.com/steenhansen/go-podcast-downloader-console/src/testings"
 )
 
-func setUp() consts.ProgBounds {
+func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	os.Remove(progPath + "/Display Menu/file-5.txt")
 	os.Remove(progPath + "/Display Menu/file-6.txt")
@@ -64,10 +64,8 @@ const expectedConsole string = `
  'Q' or a number + enter: Downloading 'Display Menu' podcast, 4 files, hit 's' to stop
 	file-5.txt(read #0 44B)
 	file-6.txt(read #0 45B)
-		 file-5.txt (save #0, 0s)
-			Size disparity, expected 44 bytes, but was 19
-		 file-6.txt (save #0, 0s)
-			Size disparity, expected 45 bytes, but was 18
+		 file-5.txt (save #0, 0s) - Size disparity, expected 44 bytes, but was 19
+		 file-6.txt (save #0, 0s) - Size disparity, expected 45 bytes, but was 18
 `
 const expectedAdds = `
 Added 2 new 'txt' file(s) in 0s 
@@ -83,7 +81,7 @@ func Test_DisplayMenu(t *testing.T) {
 	globals.Console.Clear()
 	actualAdds, err := menu.DisplayMenu(progBounds, keyStream, testings.KeyboardMenuChoiceNum("1"), httpTest)
 	if err != nil {
-		fmt.Println("wa happen", err)
+		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()

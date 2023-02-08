@@ -3,6 +3,7 @@ package misc
 import (
 	"bufio"
 	"fmt"
+	"io/fs"
 	"os"
 	"regexp"
 	"runtime"
@@ -14,10 +15,21 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
-func EmptyPodcastResults(err error) consts.PodcastResults {
-	podcastResults := consts.PodcastResults{
+func FilesInDir(dirPath string) ([]fs.FileInfo, error) {
+	podDir, err := os.Open(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	defer podDir.Close()
+	dirFiles, err := podDir.Readdir(0)
+	return dirFiles, err
+}
+
+func EmptyPodcastResults(err error) models.PodcastResults {
+	podcastResults := models.PodcastResults{
 		ReadFiles:     0,
 		SavedFiles:    0,
 		PossibleFiles: 0,
@@ -172,9 +184,7 @@ func CurDir() string {
 	return progPath
 }
 
-type diskSpaceFn func() (string, string, string)
-
-func DiskSpace() (dFree, dSize, dPercent string) {
+func diskSpace() (dFree, dSize, dPercent string) {
 	dUsage := du.NewDiskUsage(".")
 
 	dAvailable := dUsage.Available() / uint64(consts.GB_BYTES)
@@ -188,7 +198,7 @@ func DiskSpace() (dFree, dSize, dPercent string) {
 	return dFree, dSize, dPercent
 }
 
-func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBounds, []string) {
+func InitProg(minDiskBytes int) (string, models.ProgBounds, []string) {
 	dFree, dSize, dPercent := diskSpace()
 	diskSize := fmt.Sprintf("Current disk has %s free from a total %s which is %s full\n", dFree, dSize, dPercent)
 	raceArgs, err := DelRace(os.Args)
@@ -205,7 +215,7 @@ func InitProg(diskSpace diskSpaceFn, minDiskBytes int) (string, consts.ProgBound
 	}
 	cleanArgs := SetEmptyFiles(noLoadArgs)
 	progPath := CurDir()
-	progBounds := consts.ProgBounds{
+	progBounds := models.ProgBounds{
 		ProgPath:    progPath,
 		LoadOption:  loadFlag,
 		LimitOption: limitFlag,

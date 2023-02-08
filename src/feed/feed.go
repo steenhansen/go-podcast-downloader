@@ -13,6 +13,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
@@ -63,7 +64,7 @@ func ShowError(mediaUrl string) string {
 func ShowSizeError(expectedSize, writtenSize int) string {
 	exSize := strconv.Itoa(expectedSize)
 	wrSize := strconv.Itoa(writtenSize)
-	savedOut := fmt.Sprint("\t\t\tSize disparity, expected " + exSize + " bytes, but was " + wrSize + "\n")
+	savedOut := fmt.Sprint(" - Size disparity, expected " + exSize + " bytes, but was " + wrSize)
 	return savedOut
 }
 
@@ -76,7 +77,7 @@ func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string
 	} else {
 		savedTemp = "0"
 	}
-	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")\n"
+	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
 	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess)
 	return savedOut
 }
@@ -93,7 +94,7 @@ func PodcastName(progArgs []string) string {
 	return podcastTitle
 }
 
-func ShowProgress(fileEnc consts.MediaEnclosure, readFiles *int) string {
+func ShowProgress(fileEnc models.MediaEnclosure, readFiles *int) string {
 	var fileCount string = "0"
 	if !misc.IsTesting(os.Args) {
 		fileCount = IncGlobalCounters(readFiles) // NB if testing all times are (read #0
@@ -109,7 +110,7 @@ func ShowProgress(fileEnc consts.MediaEnclosure, readFiles *int) string {
 	return curMedia
 }
 
-func ReadRss(rssUrl string, httpMedia consts.HttpFunc) ([]byte, error) {
+func ReadRss(rssUrl string, httpMedia models.HttpFn) ([]byte, error) {
 	ctxRss, cancelRss := context.WithTimeout(context.Background(), time.Duration(consts.MAX_READ_FILE_TIME))
 	defer cancelRss()
 	httpUrl := addHttp(rssUrl)

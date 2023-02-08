@@ -6,7 +6,6 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 )
 
-// consts?????????
 type VarietiesSet map[string]bool
 
 func (varietiesSet VarietiesSet) AddVarietyOLd(fileName string) (variety string) {

@@ -13,7 +13,7 @@ import (
 // go run pod-down.go https://raw.githubusercontent.com/steenhansen/projects/main/images/zero-bytes.txt
 // emtpy rss file https://raw.githubusercontent.com/steenhansen/projects/main/images/zero-bytes.txt
 
-func TestIsUrl(t *testing.T) {
+func Test_IsUrl(t *testing.T) {
 	okUrl := "siberiantimes.com/ecology/rss/"
 	isUrl := IsUrl(okUrl)
 	if !isUrl {

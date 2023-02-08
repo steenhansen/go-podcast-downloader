@@ -46,7 +46,10 @@ func httpTest(ctx context.Context, mediaUrl string) (*http.Response, error) {
 }
 
 func Test_ReadRssUrl(t *testing.T) {
-	_, _, actualFiles, actualSizes, _ := ReadRssUrl("http://rss.ReadRssUrl/podcast.xml", httpTest)
+	_, _, actualFiles, actualSizes, err := ReadRssUrl("http://rss.ReadRssUrl/podcast.xml", httpTest)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(actualFiles, expectedFiles) {
 		actualJoin := "\n" + strings.Join(actualFiles, "\n")
 		expectedJoin := "\n" + strings.Join(expectedFiles, "\n")

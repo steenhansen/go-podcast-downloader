@@ -1,8 +1,6 @@
 package consts
 
 import (
-	"context"
-	"net/http"
 	"time"
 )
 
@@ -10,46 +8,6 @@ const URL_OF_RSS_FN = "_origin-rss-url"
 const SOURCE_FOLDER = "src"
 
 const MAX_READ_FILE_TIME = time.Millisecond * 400000000
-
-type MediaEnclosure struct {
-	EnclosureUrl  string
-	EnclosurePath string
-	EnclosureSize int
-}
-
-type ProgBounds struct {
-	ProgPath    string
-	LoadOption  string
-	LimitOption int
-	MinDisk     int
-}
-
-type CurStat struct {
-	ReadFiles   *int
-	SavedFiles  *int
-	MinDiskMbs  int
-	NetworkLoad string
-}
-
-type PodcastData struct {
-	PodTitle  string
-	PodPath   string
-	PodUrls   []string
-	PodSizes  []int
-	PodTitles []string
-}
-
-type PodcastResults struct {
-	ReadFiles     int
-	SavedFiles    int
-	PossibleFiles int
-	VarietyFiles  string
-	PodcastTime   time.Duration
-	Err           error
-}
-
-type ReadLineFunc func() string
-type HttpFunc func(ctx context.Context, mediaUrl string) (*http.Response, error)
 
 const KB_BYTES int64 = 1024
 const MB_BYTES int64 = 1024 * 1024
@@ -98,9 +56,11 @@ const HTML_404_BEGIN = "<!DOCTYPE"
 
 const TEST_FLAG_PREFIX = "-test."
 
-const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests/"
+const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/"
 
 const KEY_BUFF_SIZE = 1
 const KEY_BUFF_ERROR = "GetKeys() keyboard error"
 
 const HTTP_OK_RESP = 200
+
+const FIRST_BYTES_OF_ERROR_PAGE = 100

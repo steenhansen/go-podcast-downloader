@@ -46,7 +46,10 @@ func TestAddByUrlAndName(t *testing.T) {
 	osArgs := []string{"AddByUrlAndName-test", podcastUrl, "local-download-dest"}
 	progBounds := testings.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, keyStream, rss.HttpMedia)
+	_, err := terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, keyStream, rss.HttpMedia)
+	if err != nil {
+		t.Fatal(err)
+	}
 	actualReport := globals.Console.All()
 
 	expectedDiff := testings.NotSameOutOfOrder(actualReport, expectedReport)
