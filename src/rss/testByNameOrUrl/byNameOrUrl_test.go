@@ -57,8 +57,10 @@ const expectedConsole string = `
         Downloading 'By Name Or Url' podcast, 2 files, hit 's' to stop
         	file-2.ByNameOrUrl(read #0 43B)
         	file-1.ByNameOrUrl(read #0 42B)
-        		 file-1.ByNameOrUrl (save #0, 0s) - Size disparity, expected 42 bytes, but was 19
-        		 file-2.ByNameOrUrl (save #0, 0s) - Size disparity, expected 43 bytes, but was 18
+        		 file-1.ByNameOrUrl (save #0, 0s)
+						 		Size disparity, expected 42 bytes, but was 19
+        		 file-2.ByNameOrUrl (save #0, 0s)
+						 		Size disparity, expected 43 bytes, but was 18
 `
 const expectedAdds = `
 Added 2 new 'ByNameOrUrl' file(s) in 0s 

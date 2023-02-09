@@ -63,11 +63,14 @@ const expectedConsole string = `
  Adding 'By Name Or Url'
         Downloading 'By Name Or Url' podcast, 3 files, hit 's' to stop
         	file-2.txt(read #0 97B)
-        	My Title2.txt(read #0 42B)
+        	not-this-name.txt(read #0 42B)
 					file-Re-Direct.txt(read #0 63B)
-        		 file-2.txt (save #0, 0s) - Size disparity, expected 97 bytes, but was 33
-        		 My Title2.txt (save #0, 0s) - Size disparity, expected 42 bytes, but was 22
-						 file-Re-Direct.txt (save #0, 0s) - Size disparity, expected 63 bytes, but was 43
+        		 file-2.txt (save #0, 0s)
+						 		Size disparity, expected 97 bytes, but was 33
+        		 not-this-name.txt (save #0, 0s)
+						 		Size disparity, expected 42 bytes, but was 22
+						 file-Re-Direct.txt (save #0, 0s) 
+						 		Size disparity, expected 63 bytes, but was 43
 `
 const expectedAdds = `
 Added 3 new 'txt' file(s) in 0s 
@@ -76,7 +79,7 @@ Into 'By Name Or Url'
 `
 const expectedBads = ""
 
-func Test_FinalMediaName(t *testing.T) {
+func Test_ByNameOrUrl_AddByUrlAndName(t *testing.T) {
 	progBounds := setUp()
 	cleanArgs := []string{"file-name.go", "http://rss.FinalMediaName/podcast.xml", "By", "Name", "Or", "Url"}
 	keyStream := make(chan string)
@@ -117,7 +120,7 @@ func Test_FinalMediaName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file3 := progBounds.ProgPath + "/By Name Or Url/My Title2.txt"
+	file3 := progBounds.ProgPath + "/By Name Or Url/not-this-name.txt"
 	if _, err = os.Stat(file3); err != nil {
 		t.Fatal(err)
 	}

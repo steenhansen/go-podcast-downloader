@@ -12,6 +12,7 @@ import (
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
@@ -62,9 +63,12 @@ func ShowError(mediaUrl string) string {
 }
 
 func ShowSizeError(expectedSize, writtenSize int) string {
-	exSize := strconv.Itoa(expectedSize)
-	wrSize := strconv.Itoa(writtenSize)
-	savedOut := fmt.Sprint(" - Size disparity, expected " + exSize + " bytes, but was " + wrSize)
+	savedOut := ""
+	if !globals.EmptyFiles {
+		exSize := strconv.Itoa(expectedSize)
+		wrSize := strconv.Itoa(writtenSize)
+		savedOut = fmt.Sprint("\t\t\tSize disparity, expected " + exSize + " bytes, but was " + wrSize + "\n")
+	}
 	return savedOut
 }
 
@@ -78,7 +82,7 @@ func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string
 		savedTemp = "0"
 	}
 	saveNumMess := "(save #" + savedTemp + ", " + fmt.Sprint(roundTime) + ")"
-	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess)
+	savedOut := fmt.Sprintf("\t\t %s %s", rss.NameOfFile(mediaPath), saveNumMess) + "\n"
 	return savedOut
 }
 

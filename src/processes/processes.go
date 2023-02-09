@@ -91,7 +91,6 @@ downloadCancel:
 				if media.EnclosureSize != writenBytes {
 					globals.Console.Note(feed.ShowSizeError(media.EnclosureSize, writenBytes))
 				}
-				globals.Console.Note("\n")
 			}
 		}
 	}

@@ -115,8 +115,24 @@ func Http200Resp(theHost, thePath, bodyXml string) *http.Response {
 		Path:   thePath,
 	}
 
+	theHeader := http.Header{
+		"Accept":              []string{"*/*"},
+		"Accept-Encoding":     []string{"gzip, deflate, br"},
+		"Accept-Language":     []string{"en-US,en;q=0.5"},
+		"Cache-Control":       []string{"no-cache"},
+		"Connection":          []string{"keep-alive"},
+		"Content-Disposition": []string{"real-BBC-mp3-filename"},
+		"DNT":                 []string{"1"},
+		"Host":                []string{"www.iana.org"},
+		"Pragma":              []string{"no-cache"},
+		"Referer":             []string{"https://www.iana.org/domains/reserved"},
+		"Sec-Fetch-Dest":      []string{"script"},
+		"Sec-Fetch-Mode":      []string{"no-cors"},
+		"Sec-Fetch-Site":      []string{"same-origin"},
+	}
 	httpReq := &http.Request{
-		URL: theUrl,
+		URL:    theUrl,
+		Header: theHeader,
 	}
 
 	httpResp := &http.Response{
@@ -130,6 +146,7 @@ func Http200Resp(theHost, thePath, bodyXml string) *http.Response {
 		Request:       httpReq,
 		Header:        make(http.Header, 0),
 	}
+
 	return httpResp
 }
 

@@ -30,6 +30,16 @@ Update single podcast
 Delete a podcast :
   > rmdir 'My Favorite Image Podcast'
 
+Options :
+  networkLoad (high | medium | low):
+  > go run ./ --networkLoad=high
+
+  fileLimit (integer):
+  > go run ./ --fileLimit=3
+
+  create empty files for filename checking
+  > go run ./ --emptyFiles
+
 	`
 	return help
 }

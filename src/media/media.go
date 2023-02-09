@@ -51,16 +51,27 @@ func InitFolder(progPath, podTitle, rssUrl string) (string, bool, error) {
 	return containDir, dirNotExist, nil
 }
 
-func chooseName(finalFileName string, podPath string, podTitle string) (filePath string) {
+func chooseName(finalFileName string, podPath string, podTitle string, podcastData models.PodcastData) (filePath string) {
 	filePath = podPath + "/"
-	if podTitle != "" {
-		fileExt := varieties.FindVariety(finalFileName)
-		var re = regexp.MustCompile(consts.BAD_FILE_CHAR_AND_DOT)
-		goodChars := re.ReplaceAllString(podTitle, "")
-		trimmedName := strings.TrimSpace(goodChars)
-		filePath += trimmedName + "." + fileExt
+	if podTitle == "" {
+		filePath += finalFileName // none found yet
 	} else {
-		filePath += finalFileName
+		mediaUrlsSet := make(map[string]string)
+		for _, podUrl := range podcastData.PodUrls {
+			fileName := rss.NameOfFile(podUrl)
+			mediaUrlsSet[fileName] = fileName
+		}
+		// NHK Japan always has 1 mp3
+		if len(podcastData.PodUrls) > 1 && len(mediaUrlsSet) == 1 { // sysk.com/redirect.mp3
+			fileExt := varieties.FindVariety(finalFileName)
+			var re = regexp.MustCompile(consts.BAD_FILE_CHAR_AND_DOT)
+			goodChars := re.ReplaceAllString(podTitle, "")
+			trimmedName := strings.TrimSpace(goodChars)
+			filePath += trimmedName + "." + fileExt
+		} else {
+			filePath += finalFileName // nearly every podcast
+		}
+
 	}
 	return filePath
 }
@@ -84,7 +95,7 @@ limitCancel:
 				podTitle = podcastData.PodTitles[mediaIndex]
 			}
 
-			filePath := chooseName(finalFileName, podcastData.PodPath, podTitle)
+			filePath := chooseName(finalFileName, podcastData.PodPath, podTitle, podcastData)
 			varietySet.AddVariety(finalFileName)
 			if _, err = os.Stat(filePath); err != nil {
 				if os.IsNotExist(err) {

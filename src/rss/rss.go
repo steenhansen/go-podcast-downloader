@@ -3,7 +3,6 @@ package rss
 import (
 	"context"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -153,15 +152,16 @@ func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia models.HttpF
 	if err != nil {
 		return "", nil
 	}
-
-	if respMedia.StatusCode != consts.HTTP_OK_RESP {
-		fmt.Println("      ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ")
-		//fmt.Println("         respMedia.StatusCode =============== ", respMedia.StatusCode)
-		missingFinalName := NameOfFile(mediaUrl)
-		return missingFinalName, nil
-	}
 	// https://stackoverflow.com/questions/16784419/in-golang-how-to-determine-the-final-url-after-a-series-of-redirects
 	finalQueried := respMedia.Request.URL.String()
+	contentDisposition := respMedia.Header.Get("Content-Disposition")
+	if contentDisposition != "" {
+		contentLines := strings.Split(contentDisposition, "\"")
+		if len(contentLines) > 2 {
+			contentFilename := contentLines[1] // podcasts.files.bbci.co.uk/p02nq0gn.rss
+			return contentFilename, nil        // podcasts.files.bbci.co.uk/p004t1hd.rss
+		}
+	}
 	finalFileName := NameOfFile(finalQueried)
 	return finalFileName, nil
 }
