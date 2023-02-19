@@ -15,7 +15,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/missing-file/git-server-source/missing-file.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/missing-file.rss
 
 */
 
@@ -41,12 +41,12 @@ not-missing.txt (save #0, 0s)
 
 const expectedAdds = `
 Added 1 new files in 0s
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/missing-file/git-server-source/missing-file.rss
+From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/missing-file.rss
 Into 'local-download-dest'
 `
 
 const expectedBads = `	
-E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/missing-file/git-server-source/no-such-file.txt
+E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/no-such-file.txt
 `
 
 func TestMissingFileFromMenu(t *testing.T) {

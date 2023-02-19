@@ -15,7 +15,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/press-stop/git-server-source/press-stop.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/press-stop.rss
 
 */
 
@@ -41,17 +41,25 @@ not-missing.txt (save #0, 0s)
 
 const expectedAdds = `
 Added 1 new files in 0s
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/press-stop/git-server-source/press-stop.rss
+From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/press-stop.rss
 Into 'local-download-dest'
 `
 
 const expectedBads = `	
-E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/press-stop/git-server-source/no-such-file.txt
+E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/no-such-file.txt
 `
 
 func TestMissingFileFromMenu(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
+
+	// go func() {
+	// 	fmt.Println("************* start sleep")
+	// 	time.Sleep(time.Second * 1)
+	// 	fmt.Println("************* stop sleep")
+	// 	keyStream <- "a"
+	// }()
+
 	globals.Console.Clear()
 	actualMenu, err := terminal.ShowNumberedChoices(progBounds)
 	if err != nil {

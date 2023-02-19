@@ -11,7 +11,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
 )
 
-//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/bad-url/does-not-exist.rss
+//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/bad-url/does-not-exist.rss
 
 const URL2 = consts.TEST_DIR_URL + "bad-url/does-not-exist.rss"
 
