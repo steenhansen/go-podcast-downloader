@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
@@ -23,6 +25,7 @@ func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	os.Remove(progPath + "/local-download-dest/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
+	progBounds.LoadOption = consts.LOW_LOAD // slow down so can stop after one file read
 	return progBounds
 }
 
@@ -45,7 +48,7 @@ From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/test
 Into 'local-download-dest'
 `
 
-const expectedBads = `	
+const expectedBads = `
 E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/no-such-file.txt
 `
 
@@ -53,23 +56,25 @@ func TestMissingFileFromMenu(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 
-	// go func() {
-	// 	fmt.Println("************* start sleep")
-	// 	time.Sleep(time.Second * 1)
-	// 	fmt.Println("************* stop sleep")
-	// 	keyStream <- "a"
-	// }()
-
 	globals.Console.Clear()
 	actualMenu, err := terminal.ShowNumberedChoices(progBounds)
 	if err != nil {
 		fmt.Println("wa happen", err)
 	}
+
+	go func() {
+		fmt.Print("\n************* start sleep\n")
+		time.Sleep(time.Second * 5)
+		fmt.Print("\n************* stop sleep\n")
+		keyStream <- "a"
+	}()
+
 	globals.Console.Clear()
 	actualAdds, err := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, rss.HttpReal)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
 	if test_helpers.NotSameTrimmed(actualMenu, expectedMenu) {

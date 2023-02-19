@@ -32,7 +32,7 @@ func (faultsCollect *FaultsCollect) All() (badFiles string) {
 	for _, mediaError := range faultsCollect.podErrors {
 		errorLines := mediaError.Error()
 		singleLine := strings.ReplaceAll(errorLines, "\n", consts.ERROR_SEPARATOR)
-		badFiles = badFiles + CLEAR_LINE + "\t" + singleLine + "\n"
+		badFiles = badFiles + "\t" + singleLine + "\n"
 	}
 	return badFiles
 }

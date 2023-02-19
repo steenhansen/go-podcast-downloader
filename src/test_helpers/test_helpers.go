@@ -92,18 +92,25 @@ func NotSameOutOfOrder(actualLines, expectedLines string) map[string]string {
 }
 
 func NotSameTrimmed(actualStr, expectedStr string) bool {
-	trimmedActual := strings.TrimSpace(actualStr)
-	trimmedExpected := strings.TrimSpace(expectedStr)
-	actualLines := misc.SplitByNewline(trimmedActual)
-	expectedLines := misc.SplitByNewline(trimmedExpected)
-	for i, actual := range actualLines {
-		actualLines[i] = strings.TrimSpace(actual)
+	actualStr = strings.TrimSpace(actualStr)
+	expectedStr = strings.TrimSpace(expectedStr)
+	actualLines := misc.SplitByNewline(actualStr)
+	expectedLines := misc.SplitByNewline(expectedStr)
+	cleanActual := ""
+	for _, actual := range actualLines {
+		actualTrim := strings.TrimSpace(actual)
+		if actualTrim != "" {
+			cleanActual += actualTrim
+		}
 	}
-	for i, expected := range expectedLines {
-		expectedLines[i] = strings.TrimSpace(expected)
+	cleanExpected := ""
+	for _, expected := range expectedLines {
+		expectedTrim := strings.TrimSpace(expected)
+		if expectedTrim != "" {
+			cleanExpected += expectedTrim
+		}
+
 	}
-	cleanActual := strings.Join(actualLines, "\n")
-	cleanExpected := strings.Join(expectedLines, "\n")
 	return cleanActual != cleanExpected
 }
 

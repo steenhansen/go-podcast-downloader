@@ -19,7 +19,8 @@ import (
 
 func TestInvalidXml(t *testing.T) {
 	url := consts.TEST_DIR_URL + "invalid-xml/invalid-xml.rss"
-	_, _, _, _, err := podcasts.ReadRssUrl(url, rss.HttpReal)
+	keyStream := make(chan string)
+	_, _, _, _, err := podcasts.ReadRssUrl(url, rss.HttpReal, keyStream)
 
 	//  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/invalid-xml/invalid-xml.rss
 	if !errors.Is(err, flaws.InvalidXML) {
