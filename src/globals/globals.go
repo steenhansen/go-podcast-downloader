@@ -1,70 +1,16 @@
 package globals
 
-import (
-	"fmt"
-	"sync"
+// Episode filenames will be forced to match <title> instead of actual downloaded file
+// go run ./  feeds.megaphone.fm/BRPL9803447123?_Breaking_Points_ --forceTitle
+var ForceTitle = false
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-)
+// User pressed 's' to stop downloading, a variable instead of an error
+var StopingOnSKey = false
 
-/*
-  For testing only
-*/
+// For testing, every http episode will first get a DnsError
+// go run ./ feeds.megaphone.fm/blackboxdown --dnsErrors
+var DnsErrorsTest = false
 
-var EmptyFiles bool
-
-type FaultsCollect struct {
-	podErrors map[string]error
-}
-
-type ConsoleCollect struct {
-	progText string
-}
-
-var Faults = FaultsCollect{podErrors: map[string]error{}}
-
-func (faultsCollect *FaultsCollect) Note(mediaUrl string, err error) {
-	var mu sync.Mutex
-	mu.Lock()
-	faultsCollect.podErrors[mediaUrl] = err
-	mu.Unlock()
-
-}
-
-func (faultsCollect *FaultsCollect) Clear() {
-	for k := range faultsCollect.podErrors {
-		delete(faultsCollect.podErrors, k)
-	}
-}
-
-func (faultsCollect *FaultsCollect) All() (badFiles string) {
-	for _, mediaError := range faultsCollect.podErrors {
-		badFiles = badFiles + "\t\t" + mediaError.Error() + "\n"
-	}
-	return badFiles
-}
-
-var Console = ConsoleCollect{progText: ""}
-
-func (consoleCollect *ConsoleCollect) Note(progressStr string) {
-	fmt.Print(progressStr)
-	if progressStr != consts.CLEAR_SCREEN {
-		consoleCollect.progText = consoleCollect.progText + progressStr
-	}
-}
-
-func (consoleCollect *ConsoleCollect) Clear() {
-	consoleCollect.progText = ""
-}
-
-func (consoleCollect *ConsoleCollect) All() string {
-	return consoleCollect.progText
-}
-
-// func TestMissingFileFromMenu(t *testing.T) {
-// 	fmt.Println("aaa", Console, "aaa")
-// 	Console.Note("hi")
-// 	fmt.Println("bbb", Console.progText, "bbb")
-// 	Console.Clear()
-// 	fmt.Println("ccc", Console, "ccc")
-// }
+// For testing, forgo actually downloading episodes, just create a 0 byte file
+// go run ./ rss.acast.com/the-rest-is-history-podcast --emptyFiles
+var EmptyFilesTest = false

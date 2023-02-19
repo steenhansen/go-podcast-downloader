@@ -7,153 +7,132 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 )
 
-type errorKind int
-type flawError struct {
-	kindError     errorKind
-	errMess       string
-	previousError error
-}
-
 const (
-	sStop errorKind = iota + 1
+	sKeyStop errorKind = iota + 1
+	timeoutStop
+	httpFault
+	exceedRetry
 
+	badChoice
 	badFlagSerious
 	badLimitSerious
 	badLoadSerious
-	cantCreateDirSerious
-	cantCreateFileSerious
-	cantWriteFileSerious
-	keyboardSerious
 	lowDiskSerious
 
-	badChoice
-	badContent
-	badUrl
 	emptyItems
-	emptyRss
 	emptyTitle
-	firstArgNotUrl
+	emptyPodcasts
+	emptyFileWrite
+
 	invalidRssURL
 	invalidXML
-	missingTitle
-	noMatchName
-	noPodcasts
-	timeoutQuit
+	invalidXmlTitle
+	invalidPodcastName
+	invalidFileWrite
 )
+
+type errorKind int
+
+type FlawError struct {
+	errMess   string
+	kindError errorKind
+	errs      []error
+}
+
+func (flaw FlawError) Unwrap() []error {
+	return flaw.errs
+}
 
 func IsSerious(err error) bool {
 	if err != nil {
-		is_serious := errors.Is(err, LowDiskSerious) ||
-			errors.Is(err, CantCreateDirSerious) ||
-			errors.Is(err, CantCreateFileSerious) ||
-			errors.Is(err, CantWriteFileSerious)
+		is_serious := errors.Is(err, LowDiskSerious)
 		return is_serious
 	}
 	return false
 }
 
 var (
-	SStop = flawError{kindError: sStop}
+	SKeyStop    = FlawError{kindError: sKeyStop}
+	TimeoutStop = FlawError{kindError: timeoutStop}
+	HttpFault   = FlawError{kindError: httpFault}
+	ExceedRetry = FlawError{kindError: exceedRetry}
 
-	BadFlagSerious        = flawError{kindError: badFlagSerious}
-	BadLimitSerious       = flawError{kindError: badLimitSerious}
-	BadLoadSerious        = flawError{kindError: badLoadSerious}
-	CantCreateDirSerious  = flawError{kindError: cantCreateDirSerious}
-	CantCreateFileSerious = flawError{kindError: cantCreateFileSerious}
-	CantWriteFileSerious  = flawError{kindError: cantWriteFileSerious}
-	KeyboardSerious       = flawError{kindError: keyboardSerious}
-	LowDiskSerious        = flawError{kindError: lowDiskSerious}
+	BadChoice       = FlawError{kindError: badChoice}
+	BadFlagSerious  = FlawError{kindError: badFlagSerious}
+	BadLimitSerious = FlawError{kindError: badLimitSerious}
+	BadLoadSerious  = FlawError{kindError: badLoadSerious}
+	LowDiskSerious  = FlawError{kindError: lowDiskSerious}
 
-	BadChoice      = flawError{kindError: badChoice}
-	BadContent     = flawError{kindError: badContent}
-	BadUrl         = flawError{kindError: badUrl}
-	EmptyItems     = flawError{kindError: emptyItems}
-	EmptyRss       = flawError{kindError: emptyRss}
-	EmptyTitle     = flawError{kindError: emptyTitle}
-	FirstArgNotUrl = flawError{kindError: invalidXML}
-	InvalidRssURL  = flawError{kindError: invalidRssURL}
-	InvalidXML     = flawError{kindError: invalidXML}
-	MissingTitle   = flawError{kindError: missingTitle}
-	NoMatchName    = flawError{kindError: noMatchName} // in go run ./ my-nasa   is not there!
-	NoPodcasts     = flawError{kindError: noPodcasts}
-	TimeoutQuit    = flawError{kindError: timeoutQuit}
+	EmptyItems     = FlawError{kindError: emptyItems}
+	EmptyTitle     = FlawError{kindError: emptyTitle}
+	EmptyPodcasts  = FlawError{kindError: emptyPodcasts}
+	EmptyFileWrite = FlawError{kindError: emptyFileWrite}
+
+	InvalidRssURL      = FlawError{kindError: invalidRssURL}
+	InvalidXML         = FlawError{kindError: invalidXML}
+	InvalidXmlTitle    = FlawError{kindError: invalidXmlTitle}
+	InvalidPodcastName = FlawError{kindError: invalidPodcastName}
+
+	InvalidFileWrite = FlawError{kindError: invalidFileWrite}
 )
 
-func (be flawError) Is(otherError error) bool {
-	baseKind := be.kindError
-	otherKind := otherError.(flawError).kindError
+func (flaw FlawError) Is(otherError error) bool {
+	baseKind := flaw.kindError
+	otherKind := otherError.(FlawError).kindError
 	return baseKind == otherKind
 }
 
-func (be flawError) StartError(baseMess string) flawError {
-	beNew := be
-	beNew.errMess = baseMess
-	beNew.previousError = nil
-	return beNew
+func (flaw FlawError) MakeFlaw(baseMess string) FlawError {
+	newFlaw := flaw
+	newFlaw.errMess = baseMess
+	return newFlaw
 }
 
-func (ce flawError) ContinueError(chainedMess string, startingError error) flawError {
-	ceNew := ce
-	ceNew.errMess = chainedMess
-	ceNew.previousError = startingError
-	return ceNew
-}
-
-func (ce flawError) Unwrap() error {
-	return ce.previousError
-}
-
-func (e flawError) Error() string {
-	pre := consts.ERROR_PREFIX
-	switch e.kindError {
-	case sStop:
-		stopMess := "podcast '%s' was stopped by '" + consts.STOP_KEY_LOWER + "' being entered"
-		return fmt.Sprintf(pre+stopMess, e.errMess)
-
-	case badFlagSerious:
-		return fmt.Sprintf(pre+"unknown Go flag '%s', try '-race' ", e.errMess)
-	case badLimitSerious:
-		return fmt.Sprintf(pre+"unknown limit option '%s', try '--limit=10' ", e.errMess)
-	case badLoadSerious:
-		return fmt.Sprintf(pre+"unknown load option '%s', try '--load=low' ", e.errMess)
-	case cantCreateDirSerious:
-		return fmt.Sprintf(pre+"cannot create directory %s", e.errMess)
-	case cantCreateFileSerious:
-		return fmt.Sprintf(pre+"cannot create file %s", e.errMess)
-	case cantWriteFileSerious:
-		return fmt.Sprintf(pre+"cannot write to file %s", e.errMess)
-	case keyboardSerious:
-		return fmt.Sprintf(pre+"keyboard error %s", e.errMess)
-	case lowDiskSerious:
-		return fmt.Sprintf(pre+"low disk space, %s", e.errMess)
+func (flaw FlawError) Error() string {
+	switch flaw.kindError {
+	case sKeyStop:
+		stopMess := "podcast '%s' was stopped by the '" + consts.STOP_KEY_LOWER + "' key being pressed"
+		return fmt.Sprintf(stopMess, flaw.errMess)
+	case timeoutStop:
+		return fmt.Sprintf("Internet timed out %s", flaw.errMess)
+	case httpFault:
+		return fmt.Sprint("HTTP error " + flaw.errMess)
+	case exceedRetry:
+		return fmt.Sprintf("exceeded allowed retries : %s", flaw.errMess)
 
 	case badChoice:
-		return fmt.Sprintf(pre+"choice does not exist -  %s", e.errMess)
-	case badContent:
-		return fmt.Sprintf(pre+"404 or 400 html page, %s", e.errMess)
-	case badUrl:
-		return fmt.Sprintf(pre+"bad url %s", e.errMess) //  go run ./ https://www.naasdfasdfsa.gov
+		return fmt.Sprintf("choice does not exist -  %s", flaw.errMess)
+	case badFlagSerious:
+		return fmt.Sprintf("unknown Go flag '%s', try '-race' ", flaw.errMess)
+	case badLimitSerious:
+		return fmt.Sprintf("unknown limit option '%s', try '--limit=10' ", flaw.errMess)
+	case badLoadSerious:
+		return fmt.Sprintf("unknown load option '%s', try '--load=low' ", flaw.errMess)
+	case lowDiskSerious:
+		return fmt.Sprintf("low disk space, %s", flaw.errMess)
+
 	case emptyItems:
-		return pre + "empty items"
-	case emptyRss:
-		return fmt.Sprintf(pre+"empty rss file %s", e.errMess)
+		return "empty items"
 	case emptyTitle:
-		return pre + "empty title"
-	case firstArgNotUrl:
-		return fmt.Sprintf(pre+"First argument must be the RSS Url, but is instead %s", e.errMess)
+		return "empty title"
+	case emptyPodcasts:
+		return "No podcasts have been added yet, try\n" +
+			"$> ./pd-consolflaw.exe https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss"
+	case emptyFileWrite:
+		return fmt.Sprintf("empty written file : %s", flaw.errMess)
+
 	case invalidRssURL:
-		return fmt.Sprintf(pre+"Invalid Rss Url %s in %s", e.errMess, consts.URL_OF_RSS_FN)
+		return fmt.Sprintf("Invalid Rss Url %s in %s", flaw.errMess, consts.URL_OF_RSS_FN)
 	case invalidXML:
-		return fmt.Sprintf(pre+"Invalid XML %s", e.errMess)
-	case missingTitle:
-		return pre + "missing title"
-	case noMatchName:
-		return fmt.Sprintf(pre+"The podcast folder '%s' was not found", e.errMess) // go run ./ my-nasa
-	case noPodcasts:
-		return pre + "No podcasts have been added yet, try\n" +
-			pre + "$> ./pd-console.exe https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss"
-	case timeoutQuit:
-		return fmt.Sprintf(pre+"Internet timed out %s", e.errMess)
+		return fmt.Sprintf("Invalid XML %s", flaw.errMess)
+	case invalidXmlTitle:
+		return "missing title"
+	case invalidPodcastName:
+		return fmt.Sprintf("The podcast folder '%s' was not found", flaw.errMess)
+
+	case invalidFileWrite:
+		return fmt.Sprintf("wrong number of bytes written : %s", flaw.errMess)
+
 	}
-	return pre + "unknown error"
+	return "unknown error"
 }

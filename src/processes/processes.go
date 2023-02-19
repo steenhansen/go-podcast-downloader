@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/eiannone/keyboard"
@@ -25,7 +24,7 @@ osErrCancel:
 		case <-ctx.Done():
 			break osErrCancel
 		case err := <-errorStream:
-			if flaws.IsSerious(err) {
+			if flaws.IsSerious(err) { // don't crash on a missing media file
 				seriousStream <- err
 				cancel()
 				break osErrCancel
@@ -35,36 +34,18 @@ osErrCancel:
 }
 
 // keyStream <-chan string is so that a test can simulate stopping
-func GoStopKey(ctx context.Context, cancel context.CancelFunc, podcastData models.PodcastData, keysEvents <-chan keyboard.KeyEvent, keyStream <-chan string) {
+func startDownloading(cancel context.CancelFunc, podcastData models.PodcastData) {
 	theTitle := podcastData.PodTitle
 	numFiles := strconv.Itoa(len(podcastData.PodUrls))
 	stopKey := consts.STOP_KEY_LOWER
 	globals.Console.Note("Downloading '" + theTitle + "' podcast, " + numFiles + " files, hit '" + stopKey + "' to stop\n")
-	if globals.EmptyFiles {
+	if globals.EmptyFilesTest {
 		dirFiles, err := misc.FilesInDir(podcastData.PodPath)
 		if err != nil {
 			cancel()
 		}
 		if len(dirFiles) > 1 {
 			fmt.Println("WARNING '" + podcastData.PodPath + "' should have no media files to test correctly")
-		}
-	}
-keyboardCancel:
-	for {
-		select {
-		case event := <-keysEvents:
-			keyChar := string(event.Rune)
-			keyLower := strings.ToLower(keyChar)
-			if keyLower == consts.STOP_KEY_LOWER {
-				cancel()
-				break keyboardCancel
-			}
-		case simKey := <-keyStream:
-			globals.Console.Note("TESTING - downloading stopped by simulated key press of '" + simKey + "'")
-			cancel()
-			break keyboardCancel
-		case <-ctx.Done():
-			break keyboardCancel
 		}
 	}
 }
@@ -83,8 +64,8 @@ downloadCancel:
 			if err != nil {
 				if ctx.Err() != context.Canceled {
 					errorStream <- err
-					globals.Faults.Note(media.EnclosureUrl, err)
-					globals.Console.Note(feed.ShowError(media.EnclosureUrl))
+					globals.Faults.Note(media.EnclosurePath, err)
+					globals.Console.Note(feed.ShowError(media.EnclosurePath))
 				}
 			} else {
 				globals.Console.Note(feed.ShowSaved(curStat.SavedFiles, start, media.EnclosurePath))
@@ -105,20 +86,23 @@ func disposeDownloaders(numWorkers int, doneStream <-chan bool) {
 
 func DownloadMedia(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
 	startTime := time.Now()
+	globals.StopingOnSKey = false
 	numWorkers := misc.NumWorkers(progBounds.LoadOption)
 	mediaStream := make(chan models.MediaEnclosure)
 	doneStream := make(chan bool, numWorkers)
 	errorStream := make(chan error, numWorkers)
 	seriousStream := make(chan error, numWorkers)
-	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), time.Duration(consts.MAX_READ_FILE_TIME))
+	timeOut := misc.FileTimeout(consts.MEDIA_MAX_READ_FILE_TIME)
+	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), timeOut)
 	defer cancelMedias()
-	keysEvents, err := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
+	KeyEventsReal, err := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
 	if err != nil {
-		return misc.EmptyPodcastResults(flaws.KeyboardSerious.ContinueError(consts.KEY_BUFF_ERROR, err))
+		return keyboardFailure(err)
 	}
 	var readFiles, savedFiles int
 	go GoDownloadError(ctxMedias, cancelMedias, errorStream, seriousStream)
-	go GoStopKey(ctxMedias, cancelMedias, podcastData, keysEvents, keyStream)
+	startDownloading(cancelMedias, podcastData)
+	go misc.GoStopKey(ctxMedias, cancelMedias, KeyEventsReal, keyStream)
 	curStat := models.CurStat{
 		ReadFiles:   &readFiles,
 		SavedFiles:  &savedFiles,
@@ -128,7 +112,10 @@ func DownloadMedia(url string, podcastData models.PodcastData, progBounds models
 	for i := 0; i < numWorkers; i++ {
 		go GoDownloadAndSaveFiles(ctxMedias, curStat, mediaStream, doneStream, errorStream, httpMedia)
 	}
-	possibleFiles, varietyFiles, err := media.SaveDownloadedMedia(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia) // fix orders like above !!!
+	possibleFiles, err := media.SaveDownloadedMedia(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia) // fix orders like above !!!
+	if err != nil {
+		cancelMedias()
+	}
 	close(mediaStream)
 	disposeDownloaders(numWorkers, doneStream)
 	err = firstErr(err, seriousStream)
@@ -136,38 +123,9 @@ func DownloadMedia(url string, podcastData models.PodcastData, progBounds models
 		ReadFiles:     readFiles,
 		SavedFiles:    savedFiles,
 		PossibleFiles: possibleFiles,
-		VarietyFiles:  varietyFiles,
 		PodcastTime:   time.Since(startTime),
 		Err:           nil,
 	}
 	resultsWithErr := dealWithErrors(err, ctxMedias.Err(), podcastData, podcastResults)
 	return resultsWithErr
-}
-
-func dealWithErrors(err, ctxErr error, podcastData models.PodcastData, podcastResults models.PodcastResults) models.PodcastResults {
-
-	if ctxErr == context.Canceled {
-		podcastResults.Err = flaws.SStop.StartError(podcastData.PodPath)
-		return podcastResults
-	}
-	if err != nil {
-		return misc.EmptyPodcastResults(err)
-	}
-	if ctxErr != nil {
-		return misc.EmptyPodcastResults(ctxErr)
-	}
-	return podcastResults
-}
-
-func firstErr(err error, seriousStream <-chan error) error {
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(seriousStream); i++ {
-		err := <-seriousStream
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

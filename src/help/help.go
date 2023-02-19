@@ -40,6 +40,10 @@ Options :
   create empty files for filename checking
   > go run ./ --emptyFiles
 
+
+
+--forceTitle
+
 	`
 	return help
 }

@@ -2,6 +2,7 @@ package menu
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
@@ -35,11 +36,25 @@ func DisplayMenu(progBounds models.ProgBounds, keyStream chan string, getMenuCho
 	if errors.Is(err, flaws.BadChoice) {
 		return err.Error(), nil
 	}
-	if err != nil && !errors.Is(err, flaws.SStop) {
+	if err != nil && !errors.Is(err, flaws.SKeyStop) {
 		return "", err
 	}
 	badFiles := globals.Faults.All()
 	globals.Faults.Clear()
 	allReport := podReport + "\n" + badFiles
 	return allReport, err
+}
+
+func ShowResults(report string, err error) {
+	if errors.Is(err, flaws.SKeyStop) {
+		fmt.Println(err)
+	} else if err != nil {
+		var flawError flaws.FlawError
+		if errors.As(err, &flawError) {
+			panic(flawError)
+		} else {
+			fmt.Println("UNKNOWN?", err)
+		}
+	}
+	fmt.Println(report, globals.Faults.All())
 }

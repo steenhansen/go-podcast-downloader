@@ -4,13 +4,14 @@ import (
 	"context"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/varieties"
 )
 
 func dirTitle(podTitle, rssUrl string) string {
@@ -34,27 +35,44 @@ func InitFolder(progPath, podTitle, rssUrl string) (string, bool, error) {
 	dirNotExist := false
 	if _, err := os.Stat(containDir); os.IsNotExist(err) {
 		if err := os.Mkdir(containDir, os.ModePerm); err != nil {
-			return "", false, flaws.CantCreateDirSerious.ContinueError(containDir, err)
+			return doesntExist(containDir, flaws.FLAW_E_70, err)
 		}
 		dirNotExist = true
 	}
 	originRss := containDir + "/" + consts.URL_OF_RSS_FN
 	rssAddrFile, err := os.Create(originRss)
 	if err != nil {
-		return "", false, flaws.CantCreateFileSerious.ContinueError(originRss, err)
+		return cannotCreate(originRss, flaws.FLAW_E_71, err)
 	}
 	defer rssAddrFile.Close()
-	_, err = rssAddrFile.Write([]byte(rssUrl))
+	_, err = rssAddrFile.Write([]byte(rssUrl)) // media files change size on ad injection
 	if err != nil {
-		return "", false, flaws.CantWriteFileSerious.ContinueError(originRss, err)
+		return writeError(originRss, flaws.FLAW_E_72, err)
+	}
+	if globals.ForceTitle {
+		rssAddrFile.Write([]byte("\n--forceTitle"))
 	}
 	return containDir, dirNotExist, nil
 }
 
 func chooseName(finalFileName string, podPath string, podTitle string, podcastData models.PodcastData) (filePath string) {
 	filePath = podPath + "/"
+	filePieces := strings.Split(finalFileName, ".")
+	fileExt := filePieces[len(filePieces)-1]
+	noSlashes := strings.ReplaceAll(podTitle, "/", "-") // for dates
+	invFNameChars := regexp.MustCompile(consts.BAD_FILE_CHAR_AND_DOT)
+	noInvFNameChars := invFNameChars.ReplaceAllString(noSlashes, "")
+	multSpaces := regexp.MustCompile(`\s\s+`)
+	goodSpaces := multSpaces.ReplaceAllString(noInvFNameChars, " ")
+	shortName := goodSpaces
+	if len(goodSpaces) > consts.MAX_TITLE_LEN {
+		shortName = goodSpaces[:consts.MAX_TITLE_LEN]
+	}
+	trimmedName := strings.TrimSpace(shortName)
 	if podTitle == "" {
-		filePath += finalFileName // none found yet
+		filePath += finalFileName
+	} else if globals.ForceTitle {
+		filePath += trimmedName + "." + fileExt
 	} else {
 		mediaUrlsSet := make(map[string]string)
 		for _, podUrl := range podcastData.PodUrls {
@@ -63,22 +81,17 @@ func chooseName(finalFileName string, podPath string, podTitle string, podcastDa
 		}
 		// NHK Japan always has 1 mp3
 		if len(podcastData.PodUrls) > 1 && len(mediaUrlsSet) == 1 { // sysk.com/redirect.mp3
-			fileExt := varieties.FindVariety(finalFileName)
-			var re = regexp.MustCompile(consts.BAD_FILE_CHAR_AND_DOT)
-			goodChars := re.ReplaceAllString(podTitle, "")
-			trimmedName := strings.TrimSpace(goodChars)
 			filePath += trimmedName + "." + fileExt
 		} else {
 			filePath += finalFileName // nearly every podcast
 		}
-
 	}
 	return filePath
 }
 
-func SaveDownloadedMedia(ctx context.Context, podcastData models.PodcastData, mediaStream chan<- models.MediaEnclosure, limitFlag int, httpMedia models.HttpFn) (int, string, error) {
-	varietySet := varieties.VarietiesSet{}
+func SaveDownloadedMedia(ctx context.Context, podcastData models.PodcastData, mediaStream chan<- models.MediaEnclosure, limitFlag int, httpMedia models.HttpFn) (int, error) {
 	possibleFiles := 0
+	haveCount := 0
 limitCancel:
 	for mediaIndex, mediaUrl := range podcastData.PodUrls {
 		select {
@@ -88,15 +101,13 @@ limitCancel:
 			possibleFiles++
 			finalFileName, err := rss.FinalMediaName(ctx, mediaUrl, httpMedia)
 			if err != nil {
-				return 0, "", err
+				return 0, err
 			}
 			podTitle := ""
 			if len(podcastData.PodTitles) > mediaIndex {
 				podTitle = podcastData.PodTitles[mediaIndex]
 			}
-
 			filePath := chooseName(finalFileName, podcastData.PodPath, podTitle, podcastData)
-			varietySet.AddVariety(finalFileName)
 			if _, err = os.Stat(filePath); err != nil {
 				if os.IsNotExist(err) {
 					newMedia := models.MediaEnclosure{
@@ -110,11 +121,15 @@ limitCancel:
 						break limitCancel
 					}
 				} else {
-					return 0, "", err
+					return 0, err
 				}
+			} else {
+				nameOfFile := rss.NameOfFile(filePath)
+				haveCount++
+				haveStr := strconv.Itoa(haveCount)
+				globals.Console.Note("\t\t\t\tHave #" + haveStr + " " + nameOfFile + "\n")
 			}
 		}
 	}
-	varietyFiles := varietySet.VarietiesString(" ")
-	return possibleFiles, varietyFiles, nil
+	return possibleFiles, nil
 }

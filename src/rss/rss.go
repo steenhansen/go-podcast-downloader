@@ -3,12 +3,15 @@ package rss
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
@@ -17,31 +20,12 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
-// no title is ok, if user gives us a title
-
-type xmlRssTitle struct {
-	Title string `xml:"channel>title"`
-}
-
-type xmlItemTitles struct {
-	Titles []string `xml:"channel>item>title"` // itunes:title are now ignored by changing them to itunes:tiXYZ
-}
-
-type xmlUrlLen struct {
-	UrlKey string `xml:"url,attr"`
-	LenKey string `xml:"length,attr"`
-}
-
-type xmlEnclosures struct {
-	Enclosures []xmlUrlLen `xml:"channel>item>enclosure"`
-}
-
 func RssTitle(rssXml []byte) (string, error) {
 
 	theChannel := xmlRssTitle{Title: ""}
 	err := xml.Unmarshal([]byte(rssXml), &theChannel)
 	if err != nil {
-		return "", flaws.MissingTitle
+		return "", flaws.InvalidXmlTitle
 	}
 	title := strings.TrimSpace(theChannel.Title)
 	if len(title) == 0 {
@@ -94,52 +78,93 @@ func NameOfFile(mediaUrl string) string {
 func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDiskMbs int, httpMedia models.HttpFn) (int, error) {
 	respMedia, err := httpMedia(ctx, mediaUrl)
 	if err != nil {
-		return 0, err
+		return 0, err // NB dns errors such as "no such host" from from 'Breaking Points' after retries
 	}
-	defer respMedia.Body.Close()
-	if respMedia.StatusCode != 200 {
-		return 0, flaws.BadContent.StartError(mediaUrl)
+	if respMedia.StatusCode != consts.HTTP_OK_RESP {
+		return not200Flaw(respMedia.Status, mediaUrl, flaws.FLAW_E_10)
 	}
-	contentStr := ""
 	mediaContent := make([]byte, 0)
-	if !globals.EmptyFiles {
+	if !globals.EmptyFilesTest {
 		mediaContent, err = io.ReadAll(respMedia.Body)
 		if err != nil {
-			return 0, flaws.BadContent.ContinueError(mediaUrl, err)
+			return readAllFlaw(mediaUrl, flaws.FLAW_E_11, err)
 		}
-		contentStr = string(mediaContent)
 	}
-
+	contentStr := string(mediaContent)
 	mediaFile, err := os.Create(filePath)
 	if err != nil {
-		return 0, flaws.CantCreateFileSerious.ContinueError(filePath, err)
+		return osCreateFlaw(filePath, flaws.FLAW_E_12, err)
 	}
-	defer mediaFile.Close()
-
 	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
-		return 0, flaws.BadContent.StartError(mediaUrl)
+		return was404Flaw(filePath, mediaUrl, flaws.FLAW_E_13, err)
 	}
 	err = misc.DiskPanic(len(mediaContent), minDiskMbs)
 	if err != nil {
-		return 0, err
+		return diskPanicFlaw(filePath, flaws.FLAW_E_15, err)
 	}
-	writenBytes, err := mediaFile.Write(mediaContent)
+	writtenBytes, err := mediaFile.Write(mediaContent)
 	if err != nil {
-		return 0, flaws.CantWriteFileSerious.ContinueError(filePath, err)
+		return badWriteFlaw(filePath, flaws.FLAW_E_14, err)
 	}
-	return writenBytes, nil
+	if writtenBytes < 1 {
+		return length0Flaw(filePath, flaws.FLAW_E_16)
+	}
+	if !globals.EmptyFilesTest && writtenBytes != len(mediaContent) {
+		return lengthWrongFlaw(filePath, flaws.FLAW_E_17, writtenBytes, len(mediaContent))
+	}
+	mediaFile.Close()
+	return writtenBytes, nil
 }
 
-func HttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
+func retryHttp(ctx context.Context, tryHttpMedia func() (*http.Response, error)) (respMedia *http.Response, err error) {
+	sleepTime := consts.RETRY_SLEEP_START
+	var retry int
+	var dnsError *net.DNSError
+	for retry = 0; retry < consts.HTTP_RETRIES; retry++ {
+		if retry > 0 {
+			time.Sleep(time.Duration(sleepTime) * time.Second)
+			sleepTime *= 2
+		}
+		respMedia, err = tryHttpMedia()
+		if retry == 0 && globals.DnsErrorsTest {
+			noSuchHost := &net.DNSError{Err: "no such host TEST"}
+			err = noSuchHost
+		}
+		if ctx.Err() == context.Canceled {
+			return nil, context.Canceled
+		}
+		if err == nil {
+			return respMedia, nil
+		}
+		dnsMess := ""
+
+		if errors.As(err, &dnsError) {
+			dnsMess = dnsError.Err
+		}
+		globals.Console.Note("Retrying " + strconv.Itoa(retry+1) + consts.ERROR_SEPARATOR + dnsMess + "\n")
+	}
+	retryCount := strconv.Itoa(retry)
+	reqUrl := respMedia.Request.URL
+	mediaUrl := reqUrl.Scheme + "://" + reqUrl.Host + reqUrl.Path
+	retryErrMess := retryCount + ", for " + mediaUrl + " " + err.Error()
+	return badRetryHttp(retryErrMess, flaws.FLAW_E_40, err)
+}
+
+func callHttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 	newReq, err := http.NewRequest(http.MethodGet, mediaUrl, nil)
 	if err != nil {
-		return nil, flaws.BadUrl.ContinueError(mediaUrl, err)
+		return badCallHttp(mediaUrl, flaws.FLAW_E_30, err)
 	}
 	reqCtx := newReq.WithContext(ctx)
 	httpClient := &http.Client{}
 	respMedia, err := httpClient.Do(reqCtx)
+	return respMedia, err
+}
+
+func HttpReal(ctx context.Context, mediaUrl string) (*http.Response, error) {
+	respMedia, err := retryHttp(ctx, func() (*http.Response, error) { return callHttpMedia(ctx, mediaUrl) })
 	if err != nil {
-		return nil, flaws.BadUrl.ContinueError(mediaUrl, err)
+		return badHttp(mediaUrl, flaws.FLAW_E_20, err)
 	}
 	if ctx.Err() == context.Canceled {
 		return nil, context.Canceled
@@ -147,12 +172,15 @@ func HttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error) {
 	return respMedia, nil
 }
 
+/*
+BBC News Top stories  go run ./ --emptyFiles podcasts.files.bbci.co.uk/p02nq0gn.rss
+Witness History       go run ./ --emptyFiles podcasts.files.bbci.co.uk/p004t1hd.rss
+*/
 func FinalMediaName(ctx context.Context, mediaUrl string, httpMedia models.HttpFn) (string, error) {
 	respMedia, err := httpMedia(ctx, mediaUrl)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
-	// https://stackoverflow.com/questions/16784419/in-golang-how-to-determine-the-final-url-after-a-series-of-redirects
 	finalQueried := respMedia.Request.URL.String()
 	contentDisposition := respMedia.Header.Get("Content-Disposition")
 	if contentDisposition != "" {

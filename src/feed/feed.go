@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/eiannone/keyboard"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
@@ -35,18 +36,6 @@ func addHttp(rssUrl string) string {
 	return "http://" + rssUrl
 }
 
-/* test cancel?
-
-ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*8000))
-mediaStream := make(chan consts.MediaEnclosure)
-doneXStream := make(chan bool)
-
-cancel()
-downloaded, viewed := GoDownloadAndSaveFiles(ctx, mediaStream, doneXStream)
-//should be 0,0
-
-*/
-
 func IncGlobalCounters(incCounter *int) string {
 	var mu sync.Mutex
 	mu.Lock()
@@ -64,7 +53,7 @@ func ShowError(mediaUrl string) string {
 
 func ShowSizeError(expectedSize, writtenSize int) string {
 	savedOut := ""
-	if !globals.EmptyFiles {
+	if expectedSize > 0 {
 		exSize := strconv.Itoa(expectedSize)
 		wrSize := strconv.Itoa(writtenSize)
 		savedOut = fmt.Sprint("\t\t\tSize disparity, expected " + exSize + " bytes, but was " + wrSize + "\n")
@@ -114,25 +103,30 @@ func ShowProgress(fileEnc models.MediaEnclosure, readFiles *int) string {
 	return curMedia
 }
 
-func ReadRss(rssUrl string, httpMedia models.HttpFn) ([]byte, error) {
-	ctxRss, cancelRss := context.WithTimeout(context.Background(), time.Duration(consts.MAX_READ_FILE_TIME))
+func ReadRss(rssUrl string, httpMedia models.HttpFn, keyStream chan string) ([]byte, error) {
+	timeOut := misc.FileTimeout(consts.RSS_MAX_READ_FILE_TIME)
+	ctxRss, cancelRss := context.WithTimeout(context.Background(), timeOut)
 	defer cancelRss()
 	httpUrl := addHttp(rssUrl)
+	globals.StopingOnSKey = false
+	KeyEventsReal, _ := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
+	go misc.GoStopKey(ctxRss, cancelRss, KeyEventsReal, keyStream)
 	rssResponse, err := httpMedia(ctxRss, httpUrl)
+	if globals.StopingOnSKey {
+		return nil, flaws.SKeyStop.MakeFlaw(rssUrl)
+	}
 	if err != nil {
 		return nil, err
 	}
-	defer rssResponse.Body.Close()
 	if rssResponse.StatusCode != consts.HTTP_OK_RESP {
-		return nil, flaws.BadUrl.StartError(httpUrl)
+		return badStatusCode(httpUrl, rssResponse.Status, flaws.FLAW_E_80, err)
 	}
 	rssText, err := io.ReadAll(rssResponse.Body)
 	if err != nil {
-
-		return nil, flaws.BadUrl.ContinueError(httpUrl, err)
+		return badReadAll(httpUrl, flaws.FLAW_E_81, err)
 	}
 	if len(rssText) == 0 {
-		return nil, flaws.EmptyRss.StartError(httpUrl)
+		return readZero(httpUrl, flaws.FLAW_E_82, err)
 	}
 	return rssText, nil
 }

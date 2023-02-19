@@ -1,0 +1,42 @@
+package terminal
+
+import (
+	"testing"
+
+	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
+	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
+	"github.com/steenhansen/go-podcast-downloader-console/src/test_helpers"
+)
+
+/*
+
+go run ./ ecology
+
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/internet-tests/ReadByExistName/git-server-source/read-by-exist-name.rss
+
+*/
+
+const expectedReport = `
+Downloading 'local-download-dest' podcast, 3 files, hit 's' to stop
+`
+
+func TestReadByExistName(t *testing.T) {
+	podcastUrl := consts.TEST_DIR_URL + "ReadByExistName/git-server-source/read-by-exist-name.rss"
+	osArgs := []string{"ReadByExistName-test", podcastUrl, "local-download-dest"}
+	progBounds := test_helpers.TestBounds(misc.CurDir())
+	keyStream := make(chan string)
+	_, err := terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpReal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actualReport := globals.Console.All()
+
+	expectedDiff := test_helpers.NotSameOutOfOrder(actualReport, expectedReport)
+	if len(expectedDiff) != 0 {
+		t.Fatal(test_helpers.ClampActual(actualReport), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedReport))
+	}
+
+}
