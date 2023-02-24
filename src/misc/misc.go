@@ -2,23 +2,26 @@ package misc
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
-func EmptyPodcastResults(err error) models.PodcastResults {
+func EmptyPodcastResults(wasCanceled bool, err error) models.PodcastResults {
 	podcastResults := models.PodcastResults{
 		ReadFiles:     0,
 		SavedFiles:    0,
 		PossibleFiles: 0,
 		VarietyFiles:  "",
 		PodcastTime:   0,
-		Err:           err,
+		WasCanceled:   wasCanceled,
+		SeriousError:  err,
 	}
 	return podcastResults
 }
@@ -60,9 +63,16 @@ func InitProg(minDiskBytes int) (string, models.ProgBounds, []string) {
 	if err != nil {
 		panic(err)
 	}
+	// logFlag, noLogArgs, err := LoadArg(noLoadArgs)
+	// if err != nil {
+	// 	panic(err)
+	// }
 	noEmptyArgs := setEmptyFiles(noLoadArgs)
 	noDnsArgs := setDnsErrors(noEmptyArgs)
-	cleanArgs := setForceTitle(noDnsArgs)
+	noLogArgs := setDnsErrors(noDnsArgs)
+	noForceTitle := setForceTitle(noLogArgs)
+
+	cleanArgs := setLogChannels(noForceTitle)
 	progPath := CurDir()
 	progBounds := models.ProgBounds{
 		ProgPath:    progPath,
@@ -70,6 +80,7 @@ func InitProg(minDiskBytes int) (string, models.ProgBounds, []string) {
 		LimitOption: limitFlag,
 		MinDisk:     minDiskBytes,
 	}
+	StartLog()
 	return diskSize, progBounds, cleanArgs
 }
 
@@ -78,4 +89,24 @@ func SplitByNewline(multiline string) []string {
 	multiline = strings.ReplaceAll(multiline, "\r", "\n")
 	multilines := strings.Split(multiline, "\n")
 	return multilines
+}
+
+func StartLog() {
+	if globals.LogChannels {
+		progPath := CurDir()
+		logPath := progPath + "/src/channelLog.txt"
+		os.Remove(logPath)
+		logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.SetOutput(logFile)
+		log.Println("--------------------------Start--------------------------")
+	}
+}
+
+func ChannelLog(channelMess string) {
+	if globals.LogChannels {
+		log.Println(channelMess)
+	}
 }

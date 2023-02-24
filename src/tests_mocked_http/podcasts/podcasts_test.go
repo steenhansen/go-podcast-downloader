@@ -48,9 +48,8 @@ func httpTest(ctx context.Context, mediaUrl string) (*http.Response, error) {
 }
 
 func Test_7_ReadRssUrl(t *testing.T) {
-	keyStream := make(chan string)
 
-	_, _, actualFiles, actualSizes, err := podcasts.ReadRssUrl("http://rss.ReadRssUrl/podcast.xml", httpTest, keyStream)
+	_, _, actualFiles, actualSizes, err := podcasts.ReadRssUrl("http://rss.ReadRssUrl/podcast.xml", httpTest)
 	if err != nil {
 		t.Fatal(err)
 	}

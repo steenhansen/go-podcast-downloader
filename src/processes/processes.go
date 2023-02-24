@@ -4,34 +4,19 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/eiannone/keyboard"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/media"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader-console/src/stop"
 )
-
-func GoDownloadError(ctx context.Context, cancel context.CancelFunc, errorStream <-chan error, seriousStream chan<- error) {
-osErrCancel:
-	for {
-		select {
-		case <-ctx.Done():
-			break osErrCancel
-		case err := <-errorStream:
-			if flaws.IsSerious(err) { // don't crash on a missing media file
-				seriousStream <- err
-				cancel()
-				break osErrCancel
-			}
-		}
-	}
-}
 
 // keyStream <-chan string is so that a test can simulate stopping
 func startDownloading(cancel context.CancelFunc, podcastData models.PodcastData) {
@@ -50,82 +35,120 @@ func startDownloading(cancel context.CancelFunc, podcastData models.PodcastData)
 	}
 }
 
-func GoDownloadAndSaveFiles(ctx context.Context, curStat models.CurStat, mediaStream <-chan models.MediaEnclosure, doneStream chan<- bool, errorStream chan<- error, httpMedia models.HttpFn) {
-downloadCancel:
-	for media := range mediaStream {
+func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <-chan models.MediaEnclosure,
+	errorStream chan<- models.MediaError, httpMedia models.HttpFn, waitGroup *sync.WaitGroup) {
+	globals.WaitCountDebug++
+	misc.ChannelLog("\t\t\t\t Go_downloadMedia START " + strconv.Itoa(globals.WaitCountDebug))
+	waitGroup.Add(1)
+	for newMedia := range mediaStream {
 		misc.SleepTime(curStat.NetworkLoad)
-		select {
-		case <-ctx.Done():
-			break downloadCancel
-		default:
-			start := time.Now()
-			globals.Console.Note(feed.ShowProgress(media, curStat.ReadFiles))
-			writenBytes, err := rss.DownloadAndWriteFile(ctx, media.EnclosureUrl, media.EnclosurePath, curStat.MinDiskMbs, httpMedia)
-			if err != nil {
-				if ctx.Err() != context.Canceled {
-					errorStream <- err
-					globals.Faults.Note(media.EnclosurePath, err)
-					globals.Console.Note(feed.ShowError(media.EnclosurePath))
-				}
-			} else {
-				globals.Console.Note(feed.ShowSaved(curStat.SavedFiles, start, media.EnclosurePath))
-				if media.EnclosureSize != writenBytes {
-					globals.Console.Note(feed.ShowSizeError(media.EnclosureSize, writenBytes))
-				}
+		start := time.Now()
+		globals.Console.Note(feed.ShowProgress(newMedia, &readFiles))
+		writenBytes, err := rss.DownloadAndWriteFile(ctx, newMedia.EnclosureUrl, newMedia.EnclosurePath, curStat.MinDiskMbs, httpMedia)
+		misc.ChannelLog("\t\t\t\t Go_downloadMedia SAVED " + newMedia.EnclosurePath)
+		if ctx.Err() != context.Canceled && err != nil {
+			mediaError := models.MediaError{
+				EnclosureUrl:  newMedia.EnclosureUrl,
+				EnclosurePath: newMedia.EnclosurePath,
+				OrgErr:        err,
+			}
+			errorStream <- mediaError
+		} else {
+			globals.Console.Note(feed.ShowSaved(&savedFiles, start, newMedia.EnclosurePath))
+			if newMedia.EnclosureSize != writenBytes {
+				globals.Console.Note(feed.ShowSizeError(newMedia.EnclosureSize, writenBytes))
 			}
 		}
 	}
-	doneStream <- true
+	waitGroup.Done()
+	misc.ChannelLog("\t\t\t\t Go_downloadMedia END " + strconv.Itoa(globals.WaitCountDebug))
+	globals.WaitCountDebug--
 }
 
-func disposeDownloaders(numWorkers int, doneStream <-chan bool) {
-	for i := 0; i < numWorkers; i++ {
-		<-doneStream
-	}
-}
-
-func DownloadMedia(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
-	startTime := time.Now()
-	globals.StopingOnSKey = false
+func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn, ctxMedias context.Context, cancelMedias context.CancelFunc) {
 	numWorkers := misc.NumWorkers(progBounds.LoadOption)
-	mediaStream := make(chan models.MediaEnclosure)
-	doneStream := make(chan bool, numWorkers)
-	errorStream := make(chan error, numWorkers)
-	seriousStream := make(chan error, numWorkers)
-	timeOut := misc.FileTimeout(consts.MEDIA_MAX_READ_FILE_TIME)
-	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), timeOut)
-	defer cancelMedias()
+	mediaStream = make(chan models.MediaEnclosure)
+	errorStream = make(chan models.MediaError, numWorkers)
+	wasStopKeyed = make(chan bool, 1)
+	seriousStream = make(chan error, numWorkers)
+	signalEndDerive = make(chan bool)
+	signalEndSerious = make(chan bool)
+	signalEndStop = make(chan bool)
 	KeyEventsReal, err := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
 	if err != nil {
-		return keyboardFailure(err)
+		mediaError := models.MediaError{
+			EnclosureUrl:  "",
+			EnclosurePath: "",
+			OrgErr:        err,
+		}
+		errorStream <- mediaError
 	}
-	var readFiles, savedFiles int
-	go GoDownloadError(ctxMedias, cancelMedias, errorStream, seriousStream)
+	go stop.Go_ctxDone(ctxMedias, signalEndDerive, wasStopKeyed)
+	go stop.Go_seriousError(ctxMedias, cancelMedias, errorStream, seriousStream, signalEndSerious)
+	go stop.Go_stopKey(cancelMedias, KeyEventsReal, keyStream, signalEndStop, wasStopKeyed)
 	startDownloading(cancelMedias, podcastData)
-	go misc.GoStopKey(ctxMedias, cancelMedias, KeyEventsReal, keyStream)
 	curStat := models.CurStat{
-		ReadFiles:   &readFiles,
-		SavedFiles:  &savedFiles,
 		MinDiskMbs:  progBounds.MinDisk,
 		NetworkLoad: progBounds.LoadOption,
 	}
 	for i := 0; i < numWorkers; i++ {
-		go GoDownloadAndSaveFiles(ctxMedias, curStat, mediaStream, doneStream, errorStream, httpMedia)
+		go Go_downloadMedia(ctxMedias, curStat, mediaStream, errorStream, httpMedia, &waitGroup)
 	}
-	possibleFiles, err := media.SaveDownloadedMedia(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia) // fix orders like above !!!
-	if err != nil {
-		cancelMedias()
-	}
+}
+
+var readFiles, savedFiles int
+
+var waitGroup sync.WaitGroup
+
+var mediaStream chan models.MediaEnclosure
+var errorStream chan models.MediaError
+
+var wasStopKeyed chan bool
+
+var seriousStream chan error
+var signalEndDerive chan bool
+var signalEndSerious chan bool
+var signalEndStop chan bool
+
+func BackupPodcast(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
+	misc.ChannelLog("BackupPodcast START")
+	startTime := time.Now()
+	timeOut := misc.FileTimeout(consts.MEDIA_MAX_READ_FILE_TIME)
+	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), timeOut)
+	defer cancelMedias()
+	createChannels(podcastData, progBounds, keyStream, httpMedia, ctxMedias, cancelMedias)
+	possibleFiles, osFileErr := media.Go_deriveFilenames(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia, signalEndDerive)
+	misc.ChannelLog("BackupPodcast Go_deriveFilenames done")
+
 	close(mediaStream)
-	disposeDownloaders(numWorkers, doneStream)
-	err = firstErr(err, seriousStream)
+	misc.ChannelLog("BackupPodcast Go_downloadMedia close(mediaStream)")
+	waitGroup.Wait()
+
+	misc.ChannelLog("BackupPodcast Go_downloadMedia done")
+	signalEndSerious <- false
+	signalEndStop <- true
+	misc.ChannelLog("BackupPodcast all channels done")
+	wasCanceled := false
+	seriousError := firstErr(osFileErr, seriousStream)
+	misc.ChannelLog("BackupPodcast serious error")
+
+	if ctxMedias.Err() == context.Canceled {
+		wasCanceled = true
+	} else if ctxMedias.Err() != nil {
+		seriousError = ctxMedias.Err()
+	}
+	if osFileErr != nil && osFileErr != context.Canceled {
+		seriousError = osFileErr
+	}
+	misc.ChannelLog("BackupPodcast models.PodcastResults")
 	podcastResults := models.PodcastResults{
 		ReadFiles:     readFiles,
 		SavedFiles:    savedFiles,
 		PossibleFiles: possibleFiles,
 		PodcastTime:   time.Since(startTime),
-		Err:           nil,
+		WasCanceled:   wasCanceled,
+		SeriousError:  seriousError,
 	}
-	resultsWithErr := dealWithErrors(err, ctxMedias.Err(), podcastData, podcastResults)
-	return resultsWithErr
+	misc.ChannelLog("BackupPodcast END")
+	return podcastResults
 }

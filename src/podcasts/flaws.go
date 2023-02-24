@@ -19,7 +19,7 @@ func badRssUrl(rssUrl, locId string) models.PodcastResults {
 	locStat := errors.New(locId)
 	err := flaws.InvalidPodcastName.MakeFlaw(rssUrl)
 	multiErr := errors.Join(locStat, err)
-	emptyPodcastResults := misc.EmptyPodcastResults(multiErr)
+	emptyPodcastResults := misc.EmptyPodcastResults(false, multiErr)
 	return emptyPodcastResults
 }
 

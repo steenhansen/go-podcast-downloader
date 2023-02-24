@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
+	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader-console/src/stop"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/help"
 )
@@ -18,11 +20,14 @@ func main() {
 	if len(cleanArgs) == 1 {
 		fmt.Println(diskSize)
 		for {
-			report, err := menu.DisplayMenu(progBounds, keyStream, misc.KeyboardMenuChoice, rss.HttpReal)
-			if report == "" {
-				break // entered "Q" to quit
+			podReport, didQuit, podcastResults := menu.DisplayMenu(progBounds, keyStream, stop.KeyboardMenuChoice, rss.HttpReal)
+			//fmt.Println("podReport", podReport)
+			//fmt.Println("didQuit", didQuit)
+			//fmt.Println("podcastResults", podcastResults)
+			if didQuit {
+				break
 			}
-			menu.ShowResults(report, err)
+			menu.ShowResults(podReport, podcastResults)
 		}
 	} else {
 		arg1Lower := strings.ToLower(cleanArgs[1])
@@ -30,10 +35,10 @@ func main() {
 			fmt.Println(help.HelpText())
 		} else {
 			fmt.Println(diskSize)
-			report, err := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, rss.HttpReal)
-			menu.ShowResults(report, err)
+			podReport, podcastResults := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, rss.HttpReal)
+			menu.ShowResults(podReport, podcastResults)
 		}
 
 	}
-	fmt.Print("goodbye")
+	globals.Console.Note(consts.GOOD_BYE_MESS)
 }

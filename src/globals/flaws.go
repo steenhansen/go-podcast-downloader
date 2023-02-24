@@ -13,12 +13,12 @@ type FaultsCollect struct {
 
 // Record episode errors so can see what episodes are missing from the server
 var Faults = FaultsCollect{podErrors: map[string]error{}}
-var mapMutex = sync.RWMutex{}
+var flawMutex = sync.RWMutex{}
 
 func (faultsCollect *FaultsCollect) Note(mediaUrl string, err error) {
-	mapMutex.Lock()
+	flawMutex.Lock()
 	faultsCollect.podErrors[mediaUrl] = err
-	mapMutex.Unlock()
+	flawMutex.Unlock()
 
 }
 
@@ -34,5 +34,5 @@ func (faultsCollect *FaultsCollect) All() (badFiles string) {
 		singleLine := strings.ReplaceAll(errorLines, "\n", consts.ERROR_SEPARATOR)
 		badFiles = badFiles + "\t" + singleLine + "\n"
 	}
-	return badFiles
+	return badFiles + "\n"
 }

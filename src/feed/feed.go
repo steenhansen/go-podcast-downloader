@@ -10,10 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eiannone/keyboard"
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
@@ -64,7 +62,7 @@ func ShowSizeError(expectedSize, writtenSize int) string {
 func ShowSaved(savedFiles *int, startProcess time.Time, mediaPath string) string {
 	var roundTime time.Duration
 	savedTemp := IncGlobalCounters(savedFiles)
-	if !misc.IsTesting(os.Args) {
+	if !consts.IsTesting(os.Args) {
 		sinceStart := time.Since(startProcess)
 		roundTime = sinceStart.Round(time.Second) // NB if testing all times are 0s
 	} else {
@@ -89,7 +87,7 @@ func PodcastName(progArgs []string) string {
 
 func ShowProgress(fileEnc models.MediaEnclosure, readFiles *int) string {
 	var fileCount string = "0"
-	if !misc.IsTesting(os.Args) {
+	if !consts.IsTesting(os.Args) {
 		fileCount = IncGlobalCounters(readFiles) // NB if testing all times are (read #0
 	}
 	mbGbLen := misc.GbOrMb(fileEnc.EnclosureSize)
@@ -103,18 +101,12 @@ func ShowProgress(fileEnc models.MediaEnclosure, readFiles *int) string {
 	return curMedia
 }
 
-func ReadRss(rssUrl string, httpMedia models.HttpFn, keyStream chan string) ([]byte, error) {
+func ReadRss(rssUrl string, httpMedia models.HttpFn) ([]byte, error) {
 	timeOut := misc.FileTimeout(consts.RSS_MAX_READ_FILE_TIME)
 	ctxRss, cancelRss := context.WithTimeout(context.Background(), timeOut)
 	defer cancelRss()
 	httpUrl := addHttp(rssUrl)
-	globals.StopingOnSKey = false
-	KeyEventsReal, _ := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
-	go misc.GoStopKey(ctxRss, cancelRss, KeyEventsReal, keyStream)
 	rssResponse, err := httpMedia(ctxRss, httpUrl)
-	if globals.StopingOnSKey {
-		return nil, flaws.SKeyStop.MakeFlaw(rssUrl)
-	}
 	if err != nil {
 		return nil, err
 	}

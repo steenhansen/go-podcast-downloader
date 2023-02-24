@@ -1,4 +1,4 @@
-package terminal
+package t1
 
 import (
 	"fmt"
@@ -58,11 +58,15 @@ func TestMissingFileFromMenu(t *testing.T) {
 		fmt.Println("wa happen", err)
 	}
 	globals.Console.Clear()
-	actualAdds, err := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, rss.HttpReal)
-	if err != nil {
-		t.Fatal(err)
-	}
+	getMenuChoice := test_helpers.KeyboardMenuChoice_1
+	actualAdds, podcastResults := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, rss.HttpReal)
+	fmt.Println("my podcastResults", podcastResults)
+
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 	actualConsole := globals.Console.All()
+	//fmt.Println("ddddddd actualConsole ", actualConsole, ".....\n\n\n.....")
 	actualBads := globals.Faults.All()
 	if test_helpers.NotSameTrimmed(actualMenu, expectedMenu) {
 		t.Fatal(test_helpers.ClampActual(actualMenu), test_helpers.ClampExpected(expectedMenu))

@@ -1,0 +1,56 @@
+2023/02/24 15:25:00 --------------------------Start--------------------------
+2023/02/24 15:25:02 BackupPodcast START
+2023/02/24 15:25:02 	 Go_ctxDone START
+2023/02/24 15:25:02 			 Go_seriousError START
+2023/02/24 15:25:02 		 Go_stopKey START
+2023/02/24 15:25:02 				 Go_downloadMedia START 1
+2023/02/24 15:25:02 				 Go_downloadMedia START 8
+2023/02/24 15:25:02 				 Go_downloadMedia START 3
+2023/02/24 15:25:02 				 Go_downloadMedia START 4
+2023/02/24 15:25:02 				 Go_downloadMedia START 5
+2023/02/24 15:25:02 				 Go_downloadMedia START 6
+2023/02/24 15:25:02 				 Go_downloadMedia START 2
+2023/02/24 15:25:02 				 Go_downloadMedia START 9
+2023/02/24 15:25:02 				 Go_downloadMedia START 10
+2023/02/24 15:25:02 				 Go_downloadMedia START 11
+2023/02/24 15:25:02 				 Go_downloadMedia START 12
+2023/02/24 15:25:02 				 Go_downloadMedia START 7
+2023/02/24 15:25:02 				 Go_downloadMedia START 14
+2023/02/24 15:25:02 				 Go_downloadMedia START 15
+2023/02/24 15:25:02 			 Go_deriveFilenames START
+2023/02/24 15:25:02 						 Go_deriveFilenames 1
+2023/02/24 15:25:02 				 Go_downloadMedia START 16
+2023/02/24 15:25:02 				 Go_downloadMedia START 13
+2023/02/24 15:25:04 	 Go_stopKey wasStopKeyed
+2023/02/24 15:25:04 	 Go_stopKey wasStopKeyed <- true
+2023/02/24 15:25:04 		 Go_stopKey already STOPPED waiting for <-signalEndStop
+2023/02/24 15:25:04 						 Go_deriveFilenames 1 
+2023/02/24 15:25:04 BackupPodcast Go_deriveFilenames done
+2023/02/24 15:25:04 				 Go_deriveFilenames end caused by ctx
+2023/02/24 15:25:04 	 Go_ctxDone wasStopKeyed END
+2023/02/24 15:25:04 BackupPodcast Go_downloadMedia close(mediaStream)
+2023/02/24 15:25:04 BackupPodcast Go_downloadMedia done
+2023/02/24 15:25:04 BackupPodcast all channels done
+2023/02/24 15:25:04 BackupPodcast serious error
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 				 Go_downloadMedia END 16
+2023/02/24 15:25:04 BackupPodcast models.PodcastResults
+2023/02/24 15:25:04 BackupPodcast END
+2023/02/24 15:25:04 		 Go_stopKey STOPPED finished
+2023/02/24 15:25:04 		 Go_stopKey END
+2023/02/24 15:25:04 			 Go_seriousError <-signalEndSerious
+2023/02/24 15:25:04 			 Go_seriousError END

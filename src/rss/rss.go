@@ -91,26 +91,29 @@ func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDis
 		}
 	}
 	contentStr := string(mediaContent)
+
+	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
+		return was404Flaw(filePath, mediaUrl, flaws.FLAW_E_13, err)
+	}
+
 	mediaFile, err := os.Create(filePath)
 	if err != nil {
 		return osCreateFlaw(filePath, flaws.FLAW_E_12, err)
 	}
-	if strings.HasPrefix(contentStr, consts.HTML_404_BEGIN) {
-		return was404Flaw(filePath, mediaUrl, flaws.FLAW_E_13, err)
-	}
+
 	err = misc.DiskPanic(len(mediaContent), minDiskMbs)
 	if err != nil {
-		return diskPanicFlaw(filePath, flaws.FLAW_E_15, err)
+		return diskPanicFlaw(mediaFile, filePath, flaws.FLAW_E_15, err)
 	}
 	writtenBytes, err := mediaFile.Write(mediaContent)
 	if err != nil {
-		return badWriteFlaw(filePath, flaws.FLAW_E_14, err)
+		return badWriteFlaw(mediaFile, filePath, flaws.FLAW_E_14, err)
 	}
 	if writtenBytes < 1 {
-		return length0Flaw(filePath, flaws.FLAW_E_16)
+		return length0Flaw(mediaFile, filePath, flaws.FLAW_E_16)
 	}
 	if !globals.EmptyFilesTest && writtenBytes != len(mediaContent) {
-		return lengthWrongFlaw(filePath, flaws.FLAW_E_17, writtenBytes, len(mediaContent))
+		return lengthWrongFlaw(mediaFile, filePath, flaws.FLAW_E_17, writtenBytes, len(mediaContent))
 	}
 	mediaFile.Close()
 	return writtenBytes, nil
@@ -163,11 +166,11 @@ func callHttpMedia(ctx context.Context, mediaUrl string) (*http.Response, error)
 
 func HttpReal(ctx context.Context, mediaUrl string) (*http.Response, error) {
 	respMedia, err := retryHttp(ctx, func() (*http.Response, error) { return callHttpMedia(ctx, mediaUrl) })
-	if err != nil {
-		return badHttp(mediaUrl, flaws.FLAW_E_20, err)
-	}
 	if ctx.Err() == context.Canceled {
 		return nil, context.Canceled
+	}
+	if err != nil {
+		return badHttp(mediaUrl, flaws.FLAW_E_20, err)
 	}
 	return respMedia, nil
 }

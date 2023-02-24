@@ -82,7 +82,8 @@ func Test_3_DisplayMenu(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()
-	actualAdds, err := menu.DisplayMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoiceNum("1"), httpTest)
+	actualAdds, _, podcastResults := menu.DisplayMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoiceNum("1"), httpTest)
+	err := podcastResults.SeriousError
 	if err != nil {
 		t.Fatal(err)
 	}

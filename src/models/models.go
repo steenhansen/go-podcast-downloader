@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+type MediaError struct {
+	EnclosureUrl  string
+	EnclosurePath string
+	OrgErr        error
+}
+
 type MediaEnclosure struct {
 	EnclosureUrl  string
 	EnclosurePath string
@@ -17,11 +23,10 @@ type ProgBounds struct {
 	LoadOption  string
 	LimitOption int
 	MinDisk     int
+	LogChannels bool
 }
 
 type CurStat struct {
-	ReadFiles   *int
-	SavedFiles  *int
 	MinDiskMbs  int
 	NetworkLoad string
 }
@@ -40,7 +45,8 @@ type PodcastResults struct {
 	PossibleFiles int
 	VarietyFiles  string
 	PodcastTime   time.Duration
-	Err           error
+	WasCanceled   bool
+	SeriousError  error
 }
 
 type ReadLineFn func() string

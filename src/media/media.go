@@ -10,6 +10,7 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
@@ -89,17 +90,23 @@ func chooseName(finalFileName string, podPath string, podTitle string, podcastDa
 	return filePath
 }
 
-func SaveDownloadedMedia(ctx context.Context, podcastData models.PodcastData, mediaStream chan<- models.MediaEnclosure, limitFlag int, httpMedia models.HttpFn) (int, error) {
+func Go_deriveFilenames(ctx context.Context, podcastData models.PodcastData, mediaStream chan<- models.MediaEnclosure,
+	limitFlag int, httpMedia models.HttpFn, signalEndDerive <-chan bool) (int, error) {
+	misc.ChannelLog("\t\t\t Go_deriveFilenames START")
 	possibleFiles := 0
 	haveCount := 0
 limitCancel:
 	for mediaIndex, mediaUrl := range podcastData.PodUrls {
 		select {
-		case <-ctx.Done():
+		case <-signalEndDerive:
+			misc.ChannelLog("\t\t\t\t Go_deriveFilenames <-signalEndDerive")
 			break limitCancel
 		default:
+			//misc.ChannelLog("\t\t\t\t Go_deriveFilenames default ????")
 			possibleFiles++
+			misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames " + strconv.Itoa(possibleFiles))
 			finalFileName, err := rss.FinalMediaName(ctx, mediaUrl, httpMedia)
+			misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames " + strconv.Itoa(possibleFiles) + " " + finalFileName)
 			if err != nil {
 				return 0, err
 			}
@@ -131,5 +138,6 @@ limitCancel:
 			}
 		}
 	}
+	misc.ChannelLog("\t\t\t\t Go_deriveFilenames END")
 	return possibleFiles, nil
 }

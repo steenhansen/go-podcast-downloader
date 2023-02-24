@@ -3,10 +3,7 @@ package processes
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
 	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
 	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
@@ -14,7 +11,7 @@ import (
 func keyboardFailure(err error) models.PodcastResults {
 	locStat := errors.New("DOWNLOADMEDIA()")
 	multiErr := errors.Join(locStat, err)
-	emptyPodcastResults := misc.EmptyPodcastResults(multiErr)
+	emptyPodcastResults := misc.EmptyPodcastResults(false, multiErr)
 	return emptyPodcastResults
 
 }
@@ -26,35 +23,8 @@ func firstErr(err error, seriousStream <-chan error) error {
 			return err
 		}
 	}
-	if err != nil {
-		return err
+	if err == context.Canceled {
+		return nil
 	}
-	return nil
-}
-
-func dealWithErrors(err, ctxErr error, podcastData models.PodcastData, podcastResults models.PodcastResults) models.PodcastResults {
-	if globals.StopingOnSKey {
-		podcastResults.Err = flaws.SKeyStop.MakeFlaw(podcastData.PodTitle)
-		return podcastResults
-	}
-
-	//	fmt.Println("dealWithErrors looking for timeoutStop/lowDisk")
-	//	fmt.Println("err=", err)
-	// fmt.Println("ctxErr=", ctxErr)
-	if err != nil {
-		return misc.EmptyPodcastResults(err)
-	}
-
-	// // so was context canceled for a DNS error, a diskSpace error, or an 'S'
-	//fmt.Println("dealWithErrors looking for timeoutStop/lowDisk ctxErr=", ctxErr)
-	if ctxErr == context.Canceled {
-		fmt.Println("context was canceled")
-		return podcastResults
-	}
-
-	if ctxErr != nil {
-		fmt.Println("context error, not canceled, but instead ctxErr=", ctxErr)
-		return misc.EmptyPodcastResults(ctxErr)
-	}
-	return podcastResults
+	return err // like weird keyboard error, or disk read only?
 }

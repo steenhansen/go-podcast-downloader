@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -21,6 +22,16 @@ func DirRemove(dirPath string) error {
 	}
 	err = os.Remove(dirPath)
 	return err
+}
+
+func DirEmpty(dirPath string) {
+	dir, _ := ioutil.ReadDir(dirPath)
+	for _, aFile := range dir {
+		if aFile.Name() != consts.URL_OF_RSS_FN {
+			remPath := dirPath + "/" + aFile.Name()
+			os.Remove(remPath)
+		}
+	}
 }
 
 func ClampActual(testStr string) string {

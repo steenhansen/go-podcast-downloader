@@ -44,9 +44,9 @@ func TestAddByUrl(t *testing.T) {
 	podcastUrl := consts.TEST_DIR_URL + "AddByUrl/git-server-source/add-by-url.rss"
 	progBounds := test_helpers.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	_, err := terminal.AddByUrl(podcastUrl, progBounds, keyStream, rss.HttpReal)
-	if err != nil {
-		t.Fatal(err)
+	_, podcastResults := terminal.AddByUrl(podcastUrl, progBounds, keyStream, rss.HttpReal)
+	if podcastResults.SeriousError != nil {
+		t.Fatal(podcastResults.SeriousError)
 	}
 	//fmt.Println("res", res, err)
 	actualReport := globals.Console.All()

@@ -52,6 +52,7 @@ func osCreateFlaw(filePath, locId string, err error) (int, error) {
 	return 0, multiErr
 }
 func was404Flaw(filePath, mediaUrl, locId string, err error) (int, error) {
+
 	os.Remove(filePath)
 	locStat := errors.New(locId)
 	htmlStat := errors.New("not a media file, instead html starting with " + consts.HTML_404_BEGIN)
@@ -60,7 +61,8 @@ func was404Flaw(filePath, mediaUrl, locId string, err error) (int, error) {
 	return 0, multiErr
 }
 
-func badWriteFlaw(filePath, locId string, err error) (int, error) {
+func badWriteFlaw(mediaFile *os.File, filePath, locId string, err error) (int, error) {
+	mediaFile.Close()
 	os.Remove(filePath)
 	locStat := errors.New(locId)
 	fileStat := errors.New(filePath)
@@ -68,21 +70,24 @@ func badWriteFlaw(filePath, locId string, err error) (int, error) {
 	return 0, multiErr
 }
 
-func diskPanicFlaw(filePath, locId string, err error) (int, error) {
+func diskPanicFlaw(mediaFile *os.File, filePath, locId string, err error) (int, error) {
+	mediaFile.Close()
 	os.Remove(filePath)
 	locStat := errors.New(locId)
 	multiErr := errors.Join(locStat, err)
 	return 0, multiErr
 }
 
-func length0Flaw(filePath, locId string) (int, error) {
+func length0Flaw(mediaFile *os.File, filePath, locId string) (int, error) {
+	mediaFile.Close()
 	os.Remove(filePath)
 	fileStat := flaws.EmptyFileWrite.MakeFlaw(filePath)
 	locStat := errors.New(locId)
 	multiErr := errors.Join(locStat, fileStat)
 	return 0, multiErr
 }
-func lengthWrongFlaw(filePath, locId string, writtenBytes, lengthContent int) (int, error) {
+func lengthWrongFlaw(mediaFile *os.File, filePath, locId string, writtenBytes, lengthContent int) (int, error) {
+	mediaFile.Close()
 	os.Remove(filePath)
 	writtenStr := strconv.Itoa(writtenBytes)
 	lengthStr := strconv.Itoa(lengthContent)

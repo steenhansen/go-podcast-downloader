@@ -96,8 +96,9 @@ func Test_1_ByNameOrUrl_AddByUrlAndName(t *testing.T) {
 	cleanArgs := []string{"file-name.go", "http://rss.chooseName/podcast.xml", "choose", "Name"}
 	keyStream := make(chan string)
 	globals.Console.Clear()
-	actualAdds, err := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, httpTest)
+	actualAdds, podcastResults := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, httpTest)
 	//fmt.Println("actualAdds", actualAdds)
+	err := podcastResults.SeriousError
 	if err != nil {
 		t.Fatal(err)
 	}

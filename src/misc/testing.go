@@ -2,7 +2,6 @@ package misc
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
@@ -21,6 +20,19 @@ func setDnsErrors(osArgs []string) []string {
 	return emptyArgs
 }
 
+func setLogChannels(osArgs []string) []string {
+	logChannels := regexp.MustCompile(consts.LOG_CHANNELS)
+	emptyArgs := make([]string, 0)
+	for argIndex, anArg := range osArgs {
+		if argIndex > 0 && logChannels.MatchString(anArg) {
+			globals.LogChannels = true
+		} else {
+			emptyArgs = append(emptyArgs, anArg)
+		}
+	}
+	return emptyArgs
+}
+
 func setEmptyFiles(osArgs []string) []string {
 	emptyFiles := regexp.MustCompile(consts.EMTPY_FILES)
 	emptyArgs := make([]string, 0)
@@ -32,15 +44,6 @@ func setEmptyFiles(osArgs []string) []string {
 		}
 	}
 	return emptyArgs
-}
-
-func IsTesting(osArgs []string) bool {
-	for _, anArg := range osArgs {
-		if strings.HasPrefix(anArg, consts.TEST_FLAG_PREFIX) {
-			return true
-		}
-	}
-	return false
 }
 
 // go run ./

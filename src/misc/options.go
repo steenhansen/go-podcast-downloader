@@ -44,8 +44,8 @@ func LoadArg(osArgs []string) (string, []string, error) {
 		}
 	}
 	if theLoad == consts.HIGH_LOAD {
-		highMess := "\n\n \tWARNING, this program will slow down Internet browsing by hogging all bandwith." +
-			"\n \tAs it is running under 'high' network load because of the '--networkLoad=high' option\n\n"
+		highMess := "\n\tWARNING, this program will slow down Internet browsing by hogging all bandwith, as it" +
+			"\n\tis running under 'high' network load because of the default'--networkLoad=high' option\n"
 		fmt.Println(highMess)
 	}
 	return theLoad, loadArgs, nil

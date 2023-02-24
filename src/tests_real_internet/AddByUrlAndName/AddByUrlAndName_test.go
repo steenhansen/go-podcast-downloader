@@ -46,9 +46,9 @@ func TestAddByUrlAndName(t *testing.T) {
 	osArgs := []string{"AddByUrlAndName-test", podcastUrl, "local-download-dest"}
 	progBounds := test_helpers.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	_, err := terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, keyStream, rss.HttpReal)
-	if err != nil {
-		t.Fatal(err)
+	_, podcastResults := terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, keyStream, rss.HttpReal)
+	if podcastResults.SeriousError != nil {
+		t.Fatal(podcastResults.SeriousError)
 	}
 	actualReport := globals.Console.All()
 

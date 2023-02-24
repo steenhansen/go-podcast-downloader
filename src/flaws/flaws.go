@@ -77,9 +77,12 @@ var (
 )
 
 func (flaw FlawError) Is(otherError error) bool {
-	baseKind := flaw.kindError
-	otherKind := otherError.(FlawError).kindError
-	return baseKind == otherKind
+	if otherAsFlaw, ok := otherError.(FlawError); ok {
+		baseKind := flaw.kindError
+		otherKind := otherAsFlaw.kindError
+		return baseKind == otherKind
+	}
+	return false
 }
 
 func (flaw FlawError) MakeFlaw(baseMess string) FlawError {

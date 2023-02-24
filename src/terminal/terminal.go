@@ -1,7 +1,6 @@
 package terminal
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -35,41 +34,38 @@ func ShowNumberedChoices(progBounds models.ProgBounds) (string, error) {
 	return theMenu, nil
 }
 
-func AfterMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, error) {
+func AfterMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, models.PodcastResults) {
 	podDirNames, thePodcasts, forceTitles, err := podcasts.AllPodcasts(progBounds.ProgPath)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	podcastIndex, err := podcasts.ChoosePod(podDirNames, getMenuChoice)
 	if podcastIndex == 0 && err == nil {
-		return "", nil // 'Q' entered to quit
+		return "", misc.EmptyPodcastResults(true, err) //nil // 'Q' entered to quit
 	}
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	globals.ForceTitle = forceTitles[podcastIndex-1] // derived from _origin-rss-url file
 	mediaTitle := podDirNames[podcastIndex-1]
 	podcastUrl := thePodcasts[podcastIndex-1]
 	podcastResults := podcasts.DownloadPodcast(mediaTitle, podcastUrl, progBounds, keyStream, httpMedia)
-	if podcastResults.Err != nil {
-		return "", podcastResults.Err
-	}
 	podcastReport := doReport(podcastResults, string(podcastUrl), mediaTitle)
-	return podcastReport, nil
+	return podcastReport, podcastResults
 }
 
-func AddByUrl(podcastUrl string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
-	rssXml, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia, keyStream)
+func AddByUrl(podcastUrl string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, models.PodcastResults) {
+	rssXml, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	mediaTitle, err := rss.RssTitle(rssXml)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	mediaPath, dirNotExist, err := media.InitFolder(progBounds.ProgPath, mediaTitle, podcastUrl)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	if dirNotExist {
 		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
@@ -82,19 +78,19 @@ func AddByUrl(podcastUrl string, progBounds models.ProgBounds, keyStream chan st
 		PodTitles: mediaTitles,
 	}
 
-	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
-	return podcastReport, err
+	podcastReport, podcastResults := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
+	return podcastReport, podcastResults
 }
 
-func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
-	_, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia, keyStream)
+func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, models.PodcastResults) {
+	_, mediaTitles, rssFiles, rssSizes, err := podcasts.ReadRssUrl(podcastUrl, httpMedia)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	mediaTitle := feed.PodcastName(osArgs)
 	mediaPath, dirNotExist, err := media.InitFolder(progBounds.ProgPath, mediaTitle, podcastUrl)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	if dirNotExist {
 		globals.Console.Note("\nAdding '" + mediaTitle + "'\n\n")
@@ -107,8 +103,8 @@ func AddByUrlAndName(podcastUrl string, osArgs []string, progBounds models.ProgB
 		PodTitles: mediaTitles,
 	}
 
-	podcastReport, err := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
-	return podcastReport, err
+	podcastReport, podcastResults := downloadReport(podcastUrl, podcastData, progBounds, keyStream, httpMedia)
+	return podcastReport, podcastResults
 }
 
 func doReport(podcastResults models.PodcastResults, podcastUrl string, mediaTitle string) (podcastReport string) {
@@ -116,11 +112,11 @@ func doReport(podcastResults models.PodcastResults, podcastUrl string, mediaTitl
 	varietyFiles := podcastResults.VarietyFiles
 	podcastTime := podcastResults.PodcastTime
 	var secRounded time.Duration
-	if !misc.IsTesting(os.Args) {
+	if !consts.IsTesting(os.Args) {
 		secRounded = podcastTime.Round(time.Second) // NB if testing all times are 0s
 	}
 	if savedFiles != 0 {
-		addedNew := fmt.Sprintf("\nAdded %d new ", savedFiles)
+		addedNew := fmt.Sprintf("Added %d new ", savedFiles)
 		fileTypes := fmt.Sprintf("'%s' file(s) in %s \n", varietyFiles, secRounded)
 		if len(varietyFiles) == 0 {
 			fileTypes = fmt.Sprintf("files in %s \n", secRounded)
@@ -133,25 +129,22 @@ func doReport(podcastResults models.PodcastResults, podcastUrl string, mediaTitl
 	return podcastReport
 }
 
-func downloadReport(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
-	podcastResults := processes.DownloadMedia(url, podcastData, progBounds, keyStream, httpMedia)
-	if podcastResults.Err != nil && !errors.Is(podcastResults.Err, flaws.SKeyStop) {
-		return "", podcastResults.Err
-	}
+func downloadReport(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, models.PodcastResults) {
+	podcastResults := processes.BackupPodcast(url, podcastData, progBounds, keyStream, httpMedia)
 	podcastReport := doReport(podcastResults, url, podcastData.PodTitle)
-	return podcastReport, podcastResults.Err
+	return podcastReport, podcastResults
 }
 
-func ReadByExistName(osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, error) {
+func ReadByExistName(osArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (string, models.PodcastResults) {
 	podcastTitle := feed.PodcastName(osArgs)
 	mediaPath, mediaTitle, err := podcasts.FindPodcastDirName(progBounds.ProgPath, podcastTitle)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	originRss := mediaPath + "/" + consts.URL_OF_RSS_FN
 	urlBytes, err := os.ReadFile(originRss)
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	urlLines := string(urlBytes)
 	urlStrings := misc.SplitByNewline(urlLines)
@@ -161,9 +154,9 @@ func ReadByExistName(osArgs []string, progBounds models.ProgBounds, keyStream ch
 			globals.ForceTitle = true
 		}
 	}
-	_, mediaTitles, mediaUrl, mediaSize, err := podcasts.ReadRssUrl(urlStr, httpMedia, keyStream) // _ == unused xml
+	_, mediaTitles, mediaUrl, mediaSize, err := podcasts.ReadRssUrl(urlStr, httpMedia) // _ == unused xml
 	if err != nil {
-		return "", err
+		return "", misc.EmptyPodcastResults(false, err)
 	}
 	podcastData := models.PodcastData{
 		PodTitle:  mediaTitle,
@@ -172,6 +165,6 @@ func ReadByExistName(osArgs []string, progBounds models.ProgBounds, keyStream ch
 		PodSizes:  mediaSize,
 		PodTitles: mediaTitles,
 	}
-	podcastReport, err := downloadReport(urlStr, podcastData, progBounds, keyStream, httpMedia)
-	return podcastReport, err
+	podcastReport, podcastResults := downloadReport(urlStr, podcastData, progBounds, keyStream, httpMedia)
+	return podcastReport, podcastResults
 }

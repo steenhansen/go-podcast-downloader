@@ -1,5 +1,7 @@
 package consts
 
+const LOG_CHANNELS = `^\-\-logChannels`
+
 const FORCE_TITLE = `^\-\-forceTitle`
 const MAX_TITLE_LEN = 80
 

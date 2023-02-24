@@ -28,9 +28,9 @@ func TestReadByExistName(t *testing.T) {
 	osArgs := []string{"ReadByExistName-test", podcastUrl, "local-download-dest"}
 	progBounds := test_helpers.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
-	_, err := terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpReal)
-	if err != nil {
-		t.Fatal(err)
+	_, podcastResults := terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpReal)
+	if podcastResults.SeriousError != nil {
+		t.Fatal(podcastResults.SeriousError)
 	}
 	actualReport := globals.Console.All()
 

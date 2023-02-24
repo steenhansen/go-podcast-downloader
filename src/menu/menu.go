@@ -2,7 +2,6 @@ package menu
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
 	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
@@ -12,49 +11,49 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
 )
 
-func ByNameOrUrl(cleanArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (podReport string, err error) {
+func ByNameOrUrl(cleanArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (podReport string, podcastResults models.PodcastResults) {
 	if feed.IsUrl(cleanArgs[1]) {
 		feedUrl := cleanArgs[1]
 		if len(cleanArgs) == 2 {
-			podReport, err = terminal.AddByUrl(feedUrl, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed
+			podReport, podcastResults = terminal.AddByUrl(feedUrl, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed
 		} else {
-			podReport, err = terminal.AddByUrlAndName(feedUrl, cleanArgs, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed  My Fav Feed
+			podReport, podcastResults = terminal.AddByUrlAndName(feedUrl, cleanArgs, progBounds, keyStream, httpMedia) // go run ./ https://www.a.com/feed  My Fav Feed
 		}
 	} else {
-		podReport, err = terminal.ReadByExistName(cleanArgs, progBounds, keyStream, httpMedia) // go run ./ My Fav Feed
+		podReport, podcastResults = terminal.ReadByExistName(cleanArgs, progBounds, keyStream, httpMedia) // go run ./ My Fav Feed
 	}
-	return podReport, err
+	return podReport, podcastResults
 }
 
-func DisplayMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, error) {
+func DisplayMenu(progBounds models.ProgBounds, keyStream chan string, getMenuChoice models.ReadLineFn, httpMedia models.HttpFn) (string, bool, models.PodcastResults) {
 	theMenu, _ := terminal.ShowNumberedChoices(progBounds)
 	globals.Console.Note(theMenu)
-	podReport, err := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, httpMedia)
-	if podReport == "" && err == nil {
-		return "", nil // 'Q' entered to quit
+	podReport, podcastResults := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, httpMedia)
+	didQuit := false
+	//	fmt.Println("DisplayMenu -- podReport", podReport == "")
+	//fmt.Println("DisplayMenu -- podcastResults.SeriousError == nil", podcastResults.SeriousError == nil)
+	//fmt.Println("DisplayMenu -- !podcastResults.WasCanceled", !podcastResults.WasCanceled)
+	if podcastResults.WasCanceled && podcastResults.SeriousError == nil && podReport == "" {
+		didQuit = true
 	}
-	if errors.Is(err, flaws.BadChoice) {
-		return err.Error(), nil
-	}
-	if err != nil && !errors.Is(err, flaws.SKeyStop) {
-		return "", err
-	}
-	badFiles := globals.Faults.All()
-	globals.Faults.Clear()
-	allReport := podReport + "\n" + badFiles
-	return allReport, err
+	return podReport, didQuit, podcastResults
 }
 
-func ShowResults(report string, err error) {
-	if errors.Is(err, flaws.SKeyStop) {
-		fmt.Println(err)
-	} else if err != nil {
+func ShowResults(podReport string, podcastResults models.PodcastResults) {
+	if podcastResults.SeriousError != nil {
 		var flawError flaws.FlawError
-		if errors.As(err, &flawError) {
-			panic(flawError)
+		if errors.As(podcastResults.SeriousError, &flawError) {
+			globals.Console.Note("\nSerious Error: " + flawError.Error() + "\n")
 		} else {
-			fmt.Println("UNKNOWN?", err)
+			globals.Console.Note("\nSerious Error: UNKNOWN? " + podcastResults.SeriousError.Error() + "\n")
 		}
+	} else {
+
+		if podcastResults.WasCanceled {
+			globals.Console.Note("\nPodcast backup got canceled" + "\n")
+		}
+		globals.Console.Note(podReport + "\n")
+		globals.Console.Note(globals.Faults.All() + "\n")
+
 	}
-	fmt.Println(report, globals.Faults.All())
 }

@@ -15,8 +15,8 @@ import (
 	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
 )
 
-func ReadRssUrl(rssUrl string, httpMedia models.HttpFn, keyStream chan string) ([]byte, []string, []string, []int, error) {
-	podcastXml, err := feed.ReadRss(rssUrl, httpMedia, keyStream)
+func ReadRssUrl(rssUrl string, httpMedia models.HttpFn) ([]byte, []string, []string, []int, error) {
+	podcastXml, err := feed.ReadRss(rssUrl, httpMedia)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -60,9 +60,9 @@ func FindPodcastDirName(ProgPath, podcastTitle string) (string, string, error) {
 
 func DownloadPodcast(mediaTitle, rssUrl string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
 	if feed.IsUrl(rssUrl) {
-		_, mediaTitles, mediaUrls, mediaSizes, err := ReadRssUrl(rssUrl, httpMedia, keyStream)
+		_, mediaTitles, mediaUrls, mediaSizes, err := ReadRssUrl(rssUrl, httpMedia)
 		if err != nil {
-			return misc.EmptyPodcastResults(err)
+			return misc.EmptyPodcastResults(false, err)
 		}
 		mediaPath := progBounds.ProgPath + "/" + mediaTitle
 		podcastData := models.PodcastData{
@@ -72,7 +72,7 @@ func DownloadPodcast(mediaTitle, rssUrl string, progBounds models.ProgBounds, ke
 			PodSizes:  mediaSizes,
 			PodTitles: mediaTitles,
 		}
-		podcastResults := processes.DownloadMedia(rssUrl, podcastData, progBounds, keyStream, httpMedia)
+		podcastResults := processes.BackupPodcast(rssUrl, podcastData, progBounds, keyStream, httpMedia)
 		return podcastResults
 	}
 	return badRssUrl(rssUrl, flaws.FLAW_E_61)
