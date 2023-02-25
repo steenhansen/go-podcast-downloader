@@ -5,17 +5,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/media"
-	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/processes"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/media"
+	"github.com/steenhansen/go-podcast-downloader/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader/src/processes"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
 )
 
 func ShowNumberedChoices(progBounds models.ProgBounds) (string, error) {

@@ -2,6 +2,8 @@ package consts
 
 const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/"
 
+const MEM_MONITOR_SECONDS = 60
+
 // Regexs
 const DNS_ERRORS = `^\-\-dnsErrors`
 

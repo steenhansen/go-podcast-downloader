@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
 )
 
 //      this stuff needs to be in a sub folder

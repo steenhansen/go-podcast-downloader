@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/test_helpers"
+	"github.com/steenhansen/go-podcast-downloader/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/test_helpers"
 )
 
 var expectedFiles = []string{

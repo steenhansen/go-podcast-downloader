@@ -3,7 +3,7 @@ package tests_mocked_http
 import (
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
 )
 
 // go run pod-down.go http://127.0.0.1:9000/boom

@@ -1,4 +1,4 @@
-module github.com/steenhansen/go-podcast-downloader-console
+module github.com/steenhansen/go-podcast-downloader
 
 go 1.19
 

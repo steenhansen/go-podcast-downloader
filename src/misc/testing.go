@@ -3,8 +3,8 @@ package misc
 import (
 	"regexp"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
 )
 
 func setDnsErrors(osArgs []string) []string {

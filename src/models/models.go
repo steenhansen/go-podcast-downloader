@@ -52,3 +52,10 @@ type PodcastResults struct {
 type ReadLineFn func() string
 
 type HttpFn func(ctx context.Context, mediaUrl string) (*http.Response, error)
+
+// https://scene-si.org/2018/08/06/basic-monitoring-of-go-apps-with-the-runtime-package/
+type MonitorMem struct {
+	Current    uint64
+	Cumulative uint64
+	System     uint64
+}

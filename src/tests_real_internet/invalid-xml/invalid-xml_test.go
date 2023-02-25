@@ -11,10 +11,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
 )
 
 func TestInvalidXml(t *testing.T) {

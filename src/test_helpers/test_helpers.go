@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
 )
 
 func DirRemove(dirPath string) error {

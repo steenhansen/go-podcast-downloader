@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/ricochet2200/go-disk-usage/du"
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
 )
 
 func FileTimeout(maxReadFileTime time.Duration) time.Duration {

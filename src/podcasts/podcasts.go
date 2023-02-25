@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
-	"github.com/steenhansen/go-podcast-downloader-console/src/processes"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/processes"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
 )
 
 func ReadRssUrl(rssUrl string, httpMedia models.HttpFn) ([]byte, []string, []string, []int, error) {

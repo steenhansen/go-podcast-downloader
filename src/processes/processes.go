@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/eiannone/keyboard"
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/media"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/stop"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/media"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/stop"
 )
 
 // keyStream <-chan string is so that a test can simulate stopping
@@ -69,9 +69,7 @@ func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds
 	numWorkers := misc.NumWorkers(progBounds.LoadOption)
 	mediaStream = make(chan models.MediaEnclosure)
 	errorStream = make(chan models.MediaError, numWorkers)
-	wasStopKeyed = make(chan bool, 1)
 	seriousStream = make(chan error, numWorkers)
-	signalEndDerive = make(chan bool)
 	signalEndSerious = make(chan bool)
 	signalEndStop = make(chan bool)
 	KeyEventsReal, err := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
@@ -83,9 +81,9 @@ func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds
 		}
 		errorStream <- mediaError
 	}
-	go stop.Go_ctxDone(ctxMedias, signalEndDerive, wasStopKeyed)
+	go stop.Go_ctxDone(ctxMedias)
 	go stop.Go_seriousError(ctxMedias, cancelMedias, errorStream, seriousStream, signalEndSerious)
-	go stop.Go_stopKey(cancelMedias, KeyEventsReal, keyStream, signalEndStop, wasStopKeyed)
+	go stop.Go_stopKey(cancelMedias, KeyEventsReal, keyStream, signalEndStop)
 	startDownloading(cancelMedias, podcastData)
 	curStat := models.CurStat{
 		MinDiskMbs:  progBounds.MinDisk,
@@ -96,19 +94,16 @@ func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds
 	}
 }
 
-var readFiles, savedFiles int
+var readFiles, savedFiles int // Count number of files delt with
 
-var waitGroup sync.WaitGroup
+var waitGroup sync.WaitGroup // Controls Go_downloadMedia()
 
-var mediaStream chan models.MediaEnclosure
-var errorStream chan models.MediaError
+var mediaStream chan models.MediaEnclosure // Queue of media files to be downloaded
+var errorStream chan models.MediaError     // All errors
 
-var wasStopKeyed chan bool
-
-var seriousStream chan error
-var signalEndDerive chan bool
-var signalEndSerious chan bool
-var signalEndStop chan bool
+var seriousStream chan error   // Out of Disk Space error
+var signalEndSerious chan bool // Leave Go_seriousError()
+var signalEndStop chan bool    // Leave Go_stopKey()
 
 func BackupPodcast(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
 	misc.ChannelLog("BackupPodcast START")
@@ -117,7 +112,7 @@ func BackupPodcast(url string, podcastData models.PodcastData, progBounds models
 	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), timeOut)
 	defer cancelMedias()
 	createChannels(podcastData, progBounds, keyStream, httpMedia, ctxMedias, cancelMedias)
-	possibleFiles, osFileErr := media.Go_deriveFilenames(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia, signalEndDerive)
+	possibleFiles, osFileErr := media.Go_deriveFilenames(ctxMedias, podcastData, mediaStream, progBounds.LimitOption, httpMedia)
 	misc.ChannelLog("BackupPodcast Go_deriveFilenames done")
 
 	close(mediaStream)

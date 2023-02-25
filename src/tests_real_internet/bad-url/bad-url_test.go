@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/podcasts"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/podcasts"
 )
 
 //  https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/bad-url/does-not-exist.rss

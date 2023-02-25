@@ -2,12 +2,9 @@ package processes
 
 import (
 	"context"
-	"errors"
-
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
 )
 
+/*
 func keyboardFailure(err error) models.PodcastResults {
 	locStat := errors.New("DOWNLOADMEDIA()")
 	multiErr := errors.Join(locStat, err)
@@ -15,6 +12,7 @@ func keyboardFailure(err error) models.PodcastResults {
 	return emptyPodcastResults
 
 }
+*/
 
 func firstErr(err error, seriousStream <-chan error) error {
 	for i := 0; i < len(seriousStream); i++ {

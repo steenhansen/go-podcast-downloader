@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
 )
 
 func badRetryHttp(retryMess, locId string, err error) (*http.Response, error) {

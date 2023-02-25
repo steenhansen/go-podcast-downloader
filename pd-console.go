@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/stop"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/menu"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/stop"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/help"
+	"github.com/steenhansen/go-podcast-downloader/src/help"
 )
 
 func main() {
@@ -21,9 +21,6 @@ func main() {
 		fmt.Println(diskSize)
 		for {
 			podReport, didQuit, podcastResults := menu.DisplayMenu(progBounds, keyStream, stop.KeyboardMenuChoice, rss.HttpReal)
-			//fmt.Println("podReport", podReport)
-			//fmt.Println("didQuit", didQuit)
-			//fmt.Println("podcastResults", podcastResults)
 			if didQuit {
 				break
 			}

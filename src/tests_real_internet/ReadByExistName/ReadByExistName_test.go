@@ -3,12 +3,12 @@ package terminal
 import (
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
-	"github.com/steenhansen/go-podcast-downloader-console/src/test_helpers"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/terminal"
+	"github.com/steenhansen/go-podcast-downloader/src/test_helpers"
 )
 
 /*

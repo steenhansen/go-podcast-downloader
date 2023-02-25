@@ -7,12 +7,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/menu"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
-	"github.com/steenhansen/go-podcast-downloader-console/src/test_helpers"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/menu"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/test_helpers"
 )
 
 func setUp() models.ProgBounds {

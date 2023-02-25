@@ -3,7 +3,7 @@ package terminal
 import (
 	"errors"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
 )
 
 func noPodcastsAdded(locId string) (string, error) {

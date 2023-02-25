@@ -1,6 +1,7 @@
 package misc
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -8,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
 )
 
 func EmptyPodcastResults(wasCanceled bool, err error) models.PodcastResults {
@@ -93,6 +94,7 @@ func SplitByNewline(multiline string) []string {
 
 func StartLog() {
 	if globals.LogChannels {
+		go MemMonitor(consts.MEM_MONITOR_SECONDS)
 		progPath := CurDir()
 		logPath := progPath + "/src/channelLog.txt"
 		os.Remove(logPath)
@@ -108,5 +110,25 @@ func StartLog() {
 func ChannelLog(channelMess string) {
 	if globals.LogChannels {
 		log.Println(channelMess)
+	}
+}
+
+/*
+
+ */
+// https://scene-si.org/2018/08/06/basic-monitoring-of-go-apps-with-the-runtime-package/
+// go misc.MemMonitor(300)
+func MemMonitor(duration int) {
+	var monitorMem models.MonitorMem
+	var rtm runtime.MemStats
+	var interval = time.Duration(duration) * time.Second
+	for {
+		<-time.After(interval)
+		runtime.ReadMemStats(&rtm)
+		monitorMem.Current = rtm.Alloc
+		monitorMem.Cumulative = rtm.TotalAlloc
+		monitorMem.System = rtm.Sys
+		asBytes, _ := json.Marshal(monitorMem)
+		ChannelLog("MemMonitor " + string(asBytes))
 	}
 }

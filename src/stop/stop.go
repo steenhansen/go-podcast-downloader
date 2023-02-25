@@ -4,18 +4,18 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/eiannone/keyboard"
-	"github.com/steenhansen/go-podcast-downloader-console/src/consts"
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/misc"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
-	"github.com/steenhansen/go-podcast-downloader-console/src/rss"
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/misc"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/rss"
 )
 
 const SPIN_0 = "\r|"
@@ -53,22 +53,15 @@ seriousEnd:
 	misc.ChannelLog("\t\t\t Go_seriousError END")
 }
 
-func Go_ctxDone(ctx context.Context, signalEndDerive chan<- bool, wasStopKeyed <-chan bool) {
+func Go_ctxDone(ctx context.Context) {
 	misc.ChannelLog("\t Go_ctxDone START")
 	<-ctx.Done()
-	select {
-	case <-wasStopKeyed:
-		misc.ChannelLog("\t\t\t\t Go_deriveFilenames end caused by ctx")
-		misc.ChannelLog("\t Go_ctxDone wasStopKeyed END")
-	default:
-		misc.ChannelLog("\t Go_ctxDone signalEndDerive END")
-		signalEndDerive <- true
-	}
+	misc.ChannelLog("\t Go_ctxDone END")
 }
 
 // keyStreamTest <-chan string is so that a test can simulate stopping
 func Go_stopKey(cancel context.CancelFunc, KeyEventsReal <-chan keyboard.KeyEvent,
-	keyStreamTest <-chan string, signalEndStop <-chan bool, wasStopKeyed chan<- bool) {
+	keyStreamTest <-chan string, signalEndStop <-chan bool) {
 	misc.ChannelLog("\t\t Go_stopKey START")
 	stoppedByKey := false
 keyboardEnd:
@@ -83,7 +76,6 @@ keyboardEnd:
 			if keyLower == consts.STOP_KEY_LOWER {
 				stoppedByKey = true
 				misc.ChannelLog("\t Go_stopKey wasStopKeyed")
-				wasStopKeyed <- true
 				misc.ChannelLog("\t Go_stopKey wasStopKeyed <- true")
 				globals.Console.Note("stopping ...    \n")
 				cancel()
@@ -91,7 +83,6 @@ keyboardEnd:
 			}
 		case simKey := <-keyStreamTest:
 			stoppedByKey = true
-			wasStopKeyed <- true
 			globals.Console.Note("TESTING - downloading stopped by simulated key press of '" + simKey + "'")
 			cancel()
 			break keyboardEnd
@@ -109,12 +100,14 @@ keyboardEnd:
 
 func spinBusy() {
 	if !consts.IsTesting(os.Args) {
-		randInt := rand.Intn(SPIN_TYPES)
-		if randInt == 0 {
+		timeNow := time.Now()
+		nanoNow := timeNow.Nanosecond()
+		zeroTo99 := nanoNow / 10_000_000
+		if zeroTo99 < 25 {
 			fmt.Print(SPIN_0)
-		} else if randInt == 1 {
+		} else if zeroTo99 < 50 {
 			fmt.Print(SPIN_1)
-		} else if randInt == 2 {
+		} else if zeroTo99 < 75 {
 			fmt.Print(SPIN_2)
 		} else {
 			fmt.Print(SPIN_3)

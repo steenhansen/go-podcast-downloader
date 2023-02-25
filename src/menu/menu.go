@@ -3,12 +3,12 @@ package menu
 import (
 	"errors"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/feed"
-	"github.com/steenhansen/go-podcast-downloader-console/src/globals"
-	"github.com/steenhansen/go-podcast-downloader-console/src/models"
-	"github.com/steenhansen/go-podcast-downloader-console/src/terminal"
+	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
+	"github.com/steenhansen/go-podcast-downloader/src/models"
+	"github.com/steenhansen/go-podcast-downloader/src/terminal"
 
-	"github.com/steenhansen/go-podcast-downloader-console/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
 )
 
 func ByNameOrUrl(cleanArgs []string, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) (podReport string, podcastResults models.PodcastResults) {
@@ -30,9 +30,6 @@ func DisplayMenu(progBounds models.ProgBounds, keyStream chan string, getMenuCho
 	globals.Console.Note(theMenu)
 	podReport, podcastResults := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, httpMedia)
 	didQuit := false
-	//	fmt.Println("DisplayMenu -- podReport", podReport == "")
-	//fmt.Println("DisplayMenu -- podcastResults.SeriousError == nil", podcastResults.SeriousError == nil)
-	//fmt.Println("DisplayMenu -- !podcastResults.WasCanceled", !podcastResults.WasCanceled)
 	if podcastResults.WasCanceled && podcastResults.SeriousError == nil && podReport == "" {
 		didQuit = true
 	}
