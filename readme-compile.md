@@ -1,7 +1,7 @@
 
 # Compiling and Running From Source
 
-## Go Version 1.20 Required
+## Go Version 1.19 Required
 
   - <a href='https://go.dev/doc/install'>Download and Install Go</a>
 ```
@@ -19,7 +19,7 @@
   - First time very slow as nothing is cached
 
 ```
-    > go run  ./
+    > go run ./
 ```
 ## Compiling Executable
 ```
@@ -49,8 +49,9 @@
 ```
 
 ## Optional Arguments
-  - --forceTitle uses the title of each episode as the locally saved filename.
-  Needed for "Black Box Down", "Breaking Points", and "Nasa Image of the Day"
+  - --forceTitle uses the title of each episode as the locally saved filename
+  instead of the filename of the downloaded file which can be like Stitchers' "default.mp3".
+  This is needed for "Black Box Down", "Breaking Points", and "Nasa Image of the Day".
 ```
     >  go run ./ --forceTitle
 ```
@@ -69,7 +70,7 @@
 ```
 ## Testing Arguments
 
-  - "--emptyFiles" podcasts are not actually read, used to check for file existance and filenames, all files are empty
+  - "--emptyFiles" podcasts are not actually read, used to check for file existance and filenames only, all files are empty
 ```    
     > go run ./ --emptyFiles
 ```
@@ -81,7 +82,7 @@
 
 ## Channels State Diagram
  
-![Roman 38 is square root of 1444](src/images/channels.png)
+![How go routines, waitGroups, and channels interact](src/images/channels.png)
 
 
 

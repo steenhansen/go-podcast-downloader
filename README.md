@@ -3,38 +3,38 @@
 
 ## For Backing-Up Podcasts
 
-  -  Joe Rogan's podcasts are only on Spotify, except for the single #1109 in the RSS feed https://joeroganexp.libsyn.com/rss.
+  -  Joe Rogan's podcasts are now only on Spotify, except for the single #1109 in the RSS feed https://joeroganexp.libsyn.com/rss. They used to be all publically available.
 
   -  The MP3 files of http://feeds.feedburner.com/PhpRoundtable are no longer accessible.
 
-  - The Hardcore History podcast http://feeds.feedburner.com/dancarlin/history, only lists the last 14 episodes out of 69.
+  - The Hardcore History podcast http://feeds.feedburner.com/dancarlin/history, only lists the last 14 episodes out of 69 released.
 
 
-## Can Check Files
+## For Checking Podcast Files
       
-  - Check existance of episode files
+  - Check the existance of episode files
   
   - Verify filenames and/or episode titles and extensions
 
   - Make sure RSS XML file valid
 
-  - See if episode counters work
+  - See if episode hit counters work
 
 
-## Start as Menu
+## Start as Menu Driven 
 
 ```
     > ./podcast-downloader.exe
 ```
 
-![Roman 38 is square root of 1444](src/images/menu.png)
+![What the menu looks like](src/images/menu.png)
 
 ## Run For a Single "named" Podcast
 ```
     > ./podcast-downloader.exe Nasa Image of the Day --forceTitle
 ```
 
-![Roman 38 is square root of 1444](src/images/nasa-images.png)
+![Run only Nasa's podcast feed by directory name](src/images/nasa-images.png)
 
 ## Run for a Single "RRS file" 
 
@@ -42,7 +42,7 @@
     > ./podcast-downloader.exe www.nasa.gov/rss/dyn/lg_image_of_the_day.rss --forceTitle
 ```
 
-![Roman 38 is square root of 1444](src/images/nasa-rss.png)
+![Run only Nasa's podcast feed by URL](src/images/nasa-rss.png)
 
 ## Non-Menu Single Podcast Examples
 
@@ -52,11 +52,6 @@
     > ./podcast-downloader.exe American Scandal
 ```
 
-  - BC Today from CBC Raido British Columbia
-```
-    > ./podcast-downloader.exe www.cbc.ca/podcasting/includes/bcalmanac.xml
-    > ./podcast-downloader.exe BC Today from CBC Raido British Columbia
-```
 
   - BBC News Top stories
 ```
@@ -154,5 +149,5 @@
 
 
 
-## [Compiling and Running From Source](./readme-compile.md)
+## [Compiling and Running Program From Source](./readme-compile.md)
 

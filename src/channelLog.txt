@@ -1,171 +1,63 @@
-2023/02/25 11:21:20 --------------------------Start--------------------------
-2023/02/25 11:21:20 BackupPodcast START
-2023/02/25 11:21:20 	 Go_ctxDone START
-2023/02/25 11:21:20 		 Go_stopKey START
-2023/02/25 11:21:20 			 Go_seriousError START
-2023/02/25 11:21:20 				 Go_downloadMedia START 1
-2023/02/25 11:21:20 				 Go_downloadMedia START 2
-2023/02/25 11:21:20 				 Go_downloadMedia START 3
-2023/02/25 11:21:20 				 Go_downloadMedia START 4
-2023/02/25 11:21:20 				 Go_downloadMedia START 5
-2023/02/25 11:21:20 				 Go_downloadMedia START 6
-2023/02/25 11:21:20 				 Go_downloadMedia START 7
-2023/02/25 11:21:20 				 Go_downloadMedia START 8
-2023/02/25 11:21:20 				 Go_downloadMedia START 9
-2023/02/25 11:21:20 			 Go_deriveFilenames START
-2023/02/25 11:21:20 						 Go_deriveFilenames 1
-2023/02/25 11:21:20 				 Go_downloadMedia START 10
-2023/02/25 11:21:20 				 Go_downloadMedia START 11
-2023/02/25 11:21:20 				 Go_downloadMedia START 12
-2023/02/25 11:21:20 				 Go_downloadMedia START 13
-2023/02/25 11:21:20 				 Go_downloadMedia START 14
-2023/02/25 11:21:20 				 Go_downloadMedia START 15
-2023/02/25 11:21:20 				 Go_downloadMedia START 16
-2023/02/25 11:21:20 						 Go_deriveFilenames 1 52706618165_0fff7e8f3b_k.jpeg
-2023/02/25 11:21:20 						 Go_deriveFilenames 2
-2023/02/25 11:21:20 						 Go_deriveFilenames 2 friendship_7_8_glenn_ingressing_spacecraft_314095main_image_1288_full.jpg
-2023/02/25 11:21:20 						 Go_deriveFilenames 3
-2023/02/25 11:21:20 						 Go_deriveFilenames 3 pia21590_orig.jpg
-2023/02/25 11:21:21 						 Go_deriveFilenames 4
-2023/02/25 11:21:21 						 Go_deriveFilenames 4 jamesa_stokes.jpg
-2023/02/25 11:21:21 						 Go_deriveFilenames 5
-2023/02/25 11:21:21 						 Go_deriveFilenames 5 jsc2022e065078_orig.jpg
-2023/02/25 11:21:21 						 Go_deriveFilenames 6
-2023/02/25 11:21:21 						 Go_deriveFilenames 6 wjs_2270_orig.jpg
-2023/02/25 11:21:21 						 Go_deriveFilenames 7
-2023/02/25 11:21:22 						 Go_deriveFilenames 7 iss068e047345.jpg
-2023/02/25 11:21:22 						 Go_deriveFilenames 8
-2023/02/25 11:21:22 						 Go_deriveFilenames 8 iss067e373246_lrg.jpg
-2023/02/25 11:21:22 						 Go_deriveFilenames 9
-2023/02/25 11:21:22 						 Go_deriveFilenames 9 iss068e045124_orig.jpg
-2023/02/25 11:21:22 						 Go_deriveFilenames 10
-2023/02/25 11:21:23 						 Go_deriveFilenames 10 jarred_wilhite_-_updated.jpg
-2023/02/25 11:21:23 						 Go_deriveFilenames 11
-2023/02/25 11:21:23 						 Go_deriveFilenames 11 e1a-pia25599-1041.jpg
-2023/02/25 11:21:23 						 Go_deriveFilenames 12
-2023/02/25 11:21:24 						 Go_deriveFilenames 12 pia16613_orig.jpg
-2023/02/25 11:21:24 						 Go_deriveFilenames 13
-2023/02/25 11:21:24 						 Go_deriveFilenames 13 hubble_30dor_potw2305a_main.jpg
-2023/02/25 11:21:24 						 Go_deriveFilenames 14
-2023/02/25 11:21:24 						 Go_deriveFilenames 14 iss068e036313_orig.jpg
-2023/02/25 11:21:24 						 Go_deriveFilenames 15
-2023/02/25 11:21:25 						 Go_deriveFilenames 15 ksc-08pd3162_orig.jpg
-2023/02/25 11:21:25 						 Go_deriveFilenames 16
-2023/02/25 11:21:25 						 Go_deriveFilenames 16 nhq202301250001.jpg
-2023/02/25 11:21:25 						 Go_deriveFilenames 17
-2023/02/25 11:21:26 						 Go_deriveFilenames 17 iss068-e-40596_lrg.jpg
-2023/02/25 11:21:26 						 Go_deriveFilenames 18
-2023/02/25 11:21:26 						 Go_deriveFilenames 18 hubble_v372ori_potw2304a.jpg
-2023/02/25 11:21:26 						 Go_deriveFilenames 19
-2023/02/25 11:21:26 						 Go_deriveFilenames 19 52651369605_4555503bb1_k.jpeg
-2023/02/25 11:21:26 						 Go_deriveFilenames 20
-2023/02/25 11:21:27 						 Go_deriveFilenames 20 naid75853211.jpeg
-2023/02/25 11:21:27 						 Go_deriveFilenames 21
-2023/02/25 11:21:27 						 Go_deriveFilenames 21 ksc-20230124-ph-jbs01_0018.jpg
-2023/02/25 11:21:27 						 Go_deriveFilenames 22
-2023/02/25 11:21:28 						 Go_deriveFilenames 22 iss068e041215.jpg
-2023/02/25 11:21:28 						 Go_deriveFilenames 23
-2023/02/25 11:21:28 						 Go_deriveFilenames 23 stsci-01gq5chesabwmhrf5na60a6mpf_0.png
-2023/02/25 11:21:28 						 Go_deriveFilenames 24
-2023/02/25 11:21:28 						 Go_deriveFilenames 24 iss068e040058_orig.jpg
-2023/02/25 11:21:28 						 Go_deriveFilenames 25
-2023/02/25 11:21:29 						 Go_deriveFilenames 25 iss066e149154_lrg.jpg
-2023/02/25 11:21:29 						 Go_deriveFilenames 26
-2023/02/25 11:21:29 						 Go_deriveFilenames 26 ksc-20230105-ph-ilw01_0023_orig.jpg
-2023/02/25 11:21:29 						 Go_deriveFilenames 27
-2023/02/25 11:21:29 						 Go_deriveFilenames 27 730353main_iss034e032466_full.jpg
-2023/02/25 11:21:29 						 Go_deriveFilenames 28
-2023/02/25 11:21:30 						 Go_deriveFilenames 28 hubble_leda48062_potw2302a.jpg
-2023/02/25 11:21:30 						 Go_deriveFilenames 29
-2023/02/25 11:21:30 						 Go_deriveFilenames 29 iss068e006386.jpeg
-2023/02/25 11:21:30 						 Go_deriveFilenames 30
-2023/02/25 11:21:31 						 Go_deriveFilenames 30 ksc-20230106-ph-jbs01_0028_orig.jpg
-2023/02/25 11:21:31 						 Go_deriveFilenames 31
-2023/02/25 11:21:31 						 Go_deriveFilenames 31 iss068e036135_orig.jpg
-2023/02/25 11:21:31 						 Go_deriveFilenames 32
-2023/02/25 11:21:31 						 Go_deriveFilenames 32 52563811575_3e75f081cc_o.jpg
-2023/02/25 11:21:31 						 Go_deriveFilenames 33
-2023/02/25 11:21:32 						 Go_deriveFilenames 33 hubble_ngc6355_potw2301a.jpg
-2023/02/25 11:21:32 						 Go_deriveFilenames 34
-2023/02/25 11:21:32 						 Go_deriveFilenames 34 51991984485_c7806146ae_o.jpg
-2023/02/25 11:21:32 						 Go_deriveFilenames 35
-2023/02/25 11:21:33 						 Go_deriveFilenames 35 52054927331_241db0ff59_o.jpg
-2023/02/25 11:21:33 						 Go_deriveFilenames 36
-2023/02/25 11:21:33 						 Go_deriveFilenames 36 52329096977_2d3bfc71c5_o.jpg
-2023/02/25 11:21:33 						 Go_deriveFilenames 37
-2023/02/25 11:21:33 						 Go_deriveFilenames 37 pia25703_orig.jpg
-2023/02/25 11:21:33 						 Go_deriveFilenames 38
-2023/02/25 11:21:34 						 Go_deriveFilenames 38 52577236876_109214e963_o.jpg
-2023/02/25 11:21:34 						 Go_deriveFilenames 39
-2023/02/25 11:21:34 						 Go_deriveFilenames 39 apollo_8_earthrise_1968_as08-14-2383.jpg
-2023/02/25 11:21:34 						 Go_deriveFilenames 40
-2023/02/25 11:21:35 						 Go_deriveFilenames 40 iss068e031766.jpg
-2023/02/25 11:21:35 						 Go_deriveFilenames 41
-2023/02/25 11:21:35 						 Go_deriveFilenames 41 iss066e137869_orig.jpg
-2023/02/25 11:21:35 						 Go_deriveFilenames 42
-2023/02/25 11:21:35 						 Go_deriveFilenames 42 stsci-01gkmkkhkk7hr64v5hgx4gms9k_0.png
-2023/02/25 11:21:35 						 Go_deriveFilenames 43
-2023/02/25 11:21:36 						 Go_deriveFilenames 43 _mars.nasa_.gov_insight-raw-images_surface_sol_1436_icc_c000m1436_724026383edr_f0000_0200m_1042.png
-2023/02/25 11:21:36 						 Go_deriveFilenames 44
-2023/02/25 11:21:36 						 Go_deriveFilenames 44 grc-2022-c-04145.jpg
-2023/02/25 11:21:36 						 Go_deriveFilenames 45
-2023/02/25 11:21:37 						 Go_deriveFilenames 45 hubble_ngc6530_potw2250a.jpg
-2023/02/25 11:21:37 						 Go_deriveFilenames 46
-2023/02/25 11:21:37 						 Go_deriveFilenames 46 hubble_ngc6956.jpg
-2023/02/25 11:21:37 						 Go_deriveFilenames 47
-2023/02/25 11:21:37 						 Go_deriveFilenames 47 52562212346_054a94d321_o.jpg
-2023/02/25 11:21:37 						 Go_deriveFilenames 48
-2023/02/25 11:21:38 						 Go_deriveFilenames 48 s65-63188_orig.jpg
-2023/02/25 11:21:38 						 Go_deriveFilenames 49
-2023/02/25 11:21:38 						 Go_deriveFilenames 49 ksc-20221211-ph-jmb01-0001_orig.jpg
-2023/02/25 11:21:38 						 Go_deriveFilenames 50
-2023/02/25 11:21:39 						 Go_deriveFilenames 50 52546705066_0e1e95222c_o.jpg
-2023/02/25 11:21:39 						 Go_deriveFilenames 51
-2023/02/25 11:21:39 						 Go_deriveFilenames 51 arc-1973-ac73-4247-6_orig.jpg
-2023/02/25 11:21:39 						 Go_deriveFilenames 52
-2023/02/25 11:21:39 						 Go_deriveFilenames 52 apollo_17_blue_marble_photo_dec_7_1972_as17-148-22727.jpg
-2023/02/25 11:21:39 						 Go_deriveFilenames 53
-2023/02/25 11:21:40 						 Go_deriveFilenames 53 9401028_orig.jpg
-2023/02/25 11:21:40 						 Go_deriveFilenames 54
-2023/02/25 11:21:40 						 Go_deriveFilenames 54 art001e001999_orig.jpg
-2023/02/25 11:21:40 						 Go_deriveFilenames 55
-2023/02/25 11:21:41 						 Go_deriveFilenames 55 hubble_ngc1858.jpg
-2023/02/25 11:21:41 						 Go_deriveFilenames 56
-2023/02/25 11:21:41 						 Go_deriveFilenames 56 art001e000343_orig.jpg
-2023/02/25 11:21:41 						 Go_deriveFilenames 57
-2023/02/25 11:21:42 						 Go_deriveFilenames 57 52534361804_9bed2f19c0_k.jpg
-2023/02/25 11:21:42 						 Go_deriveFilenames 58
-2023/02/25 11:21:42 						 Go_deriveFilenames 58 52530824918_0f808fa548_4k.jpg
-2023/02/25 11:21:42 						 Go_deriveFilenames 59
-2023/02/25 11:21:43 						 Go_deriveFilenames 59 52514776572_284e4294c2_k.jpg
-2023/02/25 11:21:43 						 Go_deriveFilenames 60
-2023/02/25 11:21:43 						 Go_deriveFilenames 60 52521339794_b792579525_o.jpg
-2023/02/25 11:21:43 				 Go_deriveFilenames END
-2023/02/25 11:21:43 BackupPodcast Go_deriveFilenames done
-2023/02/25 11:21:43 BackupPodcast Go_downloadMedia close(mediaStream)
-2023/02/25 11:21:43 				 Go_downloadMedia END 16
-2023/02/25 11:21:43 				 Go_downloadMedia END 15
-2023/02/25 11:21:43 				 Go_downloadMedia END 15
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 15
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 BackupPodcast Go_downloadMedia done
-2023/02/25 11:21:43 			 Go_seriousError <-signalEndSerious
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 BackupPodcast all channels done
-2023/02/25 11:21:43 BackupPodcast serious error
-2023/02/25 11:21:43 BackupPodcast models.PodcastResults
-2023/02/25 11:21:43 BackupPodcast END
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 14
-2023/02/25 11:21:43 				 Go_downloadMedia END 13
-2023/02/25 11:21:43 			 Go_seriousError END
-2023/02/25 11:21:43 	 Go_stopKey NOT STOPPED <-signalEndStop
-2023/02/25 11:21:43 		 Go_stopKey END
-2023/02/25 11:21:43 	 Go_ctxDone END
+2023/02/25 15:54:08 --------------------------Start--------------------------
+2023/02/25 15:54:12 BackupPodcast START
+2023/02/25 15:54:12 	 Go_ctxDone START
+2023/02/25 15:54:12 		 Go_stopKey START
+2023/02/25 15:54:12 			 Go_seriousError START
+2023/02/25 15:54:12 				 Go_downloadMedia START 1
+2023/02/25 15:54:12 			 Go_deriveFilenames START
+2023/02/25 15:54:12 						 Go_deriveFilenames 1
+2023/02/25 15:54:12 				 Go_downloadMedia START 2
+2023/02/25 15:54:12 				 Go_downloadMedia START 4
+2023/02/25 15:54:12 				 Go_downloadMedia START 5
+2023/02/25 15:54:12 				 Go_downloadMedia START 6
+2023/02/25 15:54:12 				 Go_downloadMedia START 7
+2023/02/25 15:54:12 				 Go_downloadMedia START 8
+2023/02/25 15:54:12 				 Go_downloadMedia START 3
+2023/02/25 15:54:12 				 Go_downloadMedia START 9
+2023/02/25 15:54:12 				 Go_downloadMedia START 10
+2023/02/25 15:54:12 				 Go_downloadMedia START 10
+2023/02/25 15:54:12 				 Go_downloadMedia START 11
+2023/02/25 15:54:12 				 Go_downloadMedia START 12
+2023/02/25 15:54:12 				 Go_downloadMedia START 13
+2023/02/25 15:54:12 				 Go_downloadMedia START 14
+2023/02/25 15:54:12 				 Go_downloadMedia START 12
+2023/02/25 15:54:13 						 Go_deriveFilenames 1 BRPL6858878486.mp3
+2023/02/25 15:54:13 						 Go_deriveFilenames 2
+2023/02/25 15:54:14 						 Go_deriveFilenames 2 BRPL5454733311.mp3
+2023/02/25 15:54:14 						 Go_deriveFilenames 3
+2023/02/25 15:54:14 						 Go_deriveFilenames 3 BRPL1401404768.mp3
+2023/02/25 15:54:14 						 Go_deriveFilenames 4
+2023/02/25 15:54:15 						 Go_deriveFilenames 4 BRPL2630557449.mp3
+2023/02/25 15:54:15 						 Go_deriveFilenames 5
+2023/02/25 15:54:16 						 Go_deriveFilenames 5 BRPL7824481680.mp3
+2023/02/25 15:54:16 						 Go_deriveFilenames 6
+2023/02/25 15:54:17 						 Go_deriveFilenames 6 BRPL2382099964.mp3
+2023/02/25 15:54:17 						 Go_deriveFilenames 7
+2023/02/25 15:54:18 						 Go_deriveFilenames 7 BRPL8822476257.mp3
+2023/02/25 15:54:18 						 Go_deriveFilenames 8
+2023/02/25 15:54:23 						 Go_deriveFilenames 8 BRPL9812474222.mp3
+2023/02/25 15:54:23 						 Go_deriveFilenames 9
+2023/02/25 15:54:24 						 Go_deriveFilenames 9 BRPL1854480156.mp3
+2023/02/25 15:54:24 						 Go_deriveFilenames 10
+2023/02/25 15:54:37 						 Go_deriveFilenames 10 BRPL4414811787.mp3
+2023/02/25 15:54:37 						 Go_deriveFilenames 11
+2023/02/25 15:54:38 						 Go_deriveFilenames 11 BRPL6749505419.mp3
+2023/02/25 15:54:38 						 Go_deriveFilenames 12
+2023/02/25 15:54:40 						 Go_deriveFilenames 12 BRPL5684436491.mp3
+2023/02/25 15:54:40 						 Go_deriveFilenames 13
+2023/02/25 15:54:42 						 Go_deriveFilenames 13 BRPL5578735916.mp3
+2023/02/25 15:54:42 						 Go_deriveFilenames 14
+2023/02/25 15:54:44 						 Go_deriveFilenames 14 BRPL2847941151.mp3
+2023/02/25 15:54:44 						 Go_deriveFilenames 15
+2023/02/25 15:54:45 						 Go_deriveFilenames 15 BRPL1826119334.mp3
+2023/02/25 15:54:45 						 Go_deriveFilenames 16
+2023/02/25 15:54:46 						 Go_deriveFilenames 16 BRPL6062005976.mp3
+2023/02/25 15:54:46 						 Go_deriveFilenames 17
+2023/02/25 15:54:48 						 Go_deriveFilenames 17 BRPL1250967647.mp3
+2023/02/25 15:55:08 MemMonitor {"Current":196713968,"Cumulative":991597112,"System":389737552}
+2023/02/25 15:56:08 MemMonitor {"Current":443195104,"Cumulative":2159164208,"System":901557712}
+2023/02/25 15:57:08 MemMonitor {"Current":789652584,"Cumulative":3305257928,"System":1319544176}
+2023/02/25 15:57:25 				 Go_downloadMedia SAVED C:\go-podcast-downloader/Breaking Points with Krystal and Saagar/2-17-23 Weekly Roundup CNN Courts Charles Barkley, Plane Dive Disaster, Elon Twi.mp3
+2023/02/25 15:57:25 						 Go_deriveFilenames 18
+2023/02/25 15:57:38 						 Go_deriveFilenames 18 BRPL6553697795.mp3
+2023/02/25 15:58:08 MemMonitor {"Current":1296043440,"Cumulative":4414388736,"System":1498943376}

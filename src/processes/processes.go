@@ -44,7 +44,7 @@ func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <
 		misc.SleepTime(curStat.NetworkLoad)
 		start := time.Now()
 		globals.Console.Note(feed.ShowProgress(newMedia, &readFiles))
-		writenBytes, err := rss.DownloadAndWriteFile(ctx, newMedia.EnclosureUrl, newMedia.EnclosurePath, curStat.MinDiskMbs, httpMedia)
+		writtenBytes, err := rss.DownloadAndWriteFile(ctx, newMedia.EnclosureUrl, newMedia.EnclosurePath, curStat.MinDiskMbs, httpMedia)
 		misc.ChannelLog("\t\t\t\t Go_downloadMedia SAVED " + newMedia.EnclosurePath)
 		if ctx.Err() != context.Canceled && err != nil {
 			mediaError := models.MediaError{
@@ -54,9 +54,9 @@ func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <
 			}
 			errorStream <- mediaError
 		} else {
-			globals.Console.Note(feed.ShowSaved(&savedFiles, start, newMedia.EnclosurePath))
-			if newMedia.EnclosureSize != writenBytes {
-				globals.Console.Note(feed.ShowSizeError(newMedia.EnclosureSize, writenBytes))
+			if ctx.Err() == nil && writtenBytes > 0 && newMedia.EnclosureSize != writtenBytes {
+				globals.Console.Note(feed.ShowSaved(&savedFiles, start, newMedia.EnclosurePath))
+				globals.Console.Note(feed.ShowSizeError(newMedia.EnclosureSize, writtenBytes))
 			}
 		}
 	}
@@ -69,7 +69,7 @@ func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds
 	numWorkers := misc.NumWorkers(progBounds.LoadOption)
 	mediaStream = make(chan models.MediaEnclosure)
 	errorStream = make(chan models.MediaError, numWorkers)
-	seriousStream = make(chan error, numWorkers)
+	seriousStream = make(chan error, numWorkers) // if run out of disk space, this stream could get 15 serious errors
 	signalEndSerious = make(chan bool)
 	signalEndStop = make(chan bool)
 	KeyEventsReal, err := keyboard.GetKeys(consts.KEY_BUFF_SIZE)
