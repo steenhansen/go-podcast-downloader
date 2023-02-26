@@ -37,15 +37,19 @@ func startDownloading(cancel context.CancelFunc, podcastData models.PodcastData)
 
 func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <-chan models.MediaEnclosure,
 	errorStream chan<- models.MediaError, httpMedia models.HttpFn, waitGroup *sync.WaitGroup) {
-	globals.WaitCountDebug++
-	misc.ChannelLog("\t\t\t\t Go_downloadMedia START " + strconv.Itoa(globals.WaitCountDebug))
+	globals.WaitCount.Adding()
+
+	misc.ChannelLog("\t\t\t\t Go_downloadMedia START " + strconv.Itoa(globals.WaitCount.Current()))
 	waitGroup.Add(1)
+	//jjj:
 	for newMedia := range mediaStream {
+		//	if ctx.Err() != nil {
+		//	break jjj
+		//}
 		misc.SleepTime(curStat.NetworkLoad)
 		start := time.Now()
 		globals.Console.Note(feed.ShowProgress(newMedia, &readFiles))
 		writtenBytes, err := rss.DownloadAndWriteFile(ctx, newMedia.EnclosureUrl, newMedia.EnclosurePath, curStat.MinDiskMbs, httpMedia)
-		misc.ChannelLog("\t\t\t\t Go_downloadMedia SAVED " + newMedia.EnclosurePath)
 		if ctx.Err() != context.Canceled && err != nil {
 			mediaError := models.MediaError{
 				EnclosureUrl:  newMedia.EnclosureUrl,
@@ -53,16 +57,16 @@ func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <
 				OrgErr:        err,
 			}
 			errorStream <- mediaError
-		} else {
-			if ctx.Err() == nil && writtenBytes > 0 && newMedia.EnclosureSize != writtenBytes {
-				globals.Console.Note(feed.ShowSaved(&savedFiles, start, newMedia.EnclosurePath))
-				globals.Console.Note(feed.ShowSizeError(newMedia.EnclosureSize, writtenBytes))
-			}
+		} else if ctx.Err() == nil && writtenBytes > 0 {
+			misc.ChannelLog("\t\t\t\t Go_downloadMedia SAVED " + newMedia.EnclosurePath)
+			globals.Console.Note(feed.ShowSaved(&savedFiles, start, newMedia.EnclosurePath))
+			globals.Console.Note(feed.ShowSizeError(newMedia.EnclosureSize, writtenBytes))
 		}
+
 	}
 	waitGroup.Done()
-	misc.ChannelLog("\t\t\t\t Go_downloadMedia END " + strconv.Itoa(globals.WaitCountDebug))
-	globals.WaitCountDebug--
+	globals.WaitCount.Subtracting()
+	misc.ChannelLog("\t\t\t\t Go_downloadMedia END " + strconv.Itoa(globals.WaitCount.Current()))
 }
 
 func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn, ctxMedias context.Context, cancelMedias context.CancelFunc) {
@@ -108,7 +112,7 @@ var signalEndStop chan bool    // Leave Go_stopKey()
 func BackupPodcast(url string, podcastData models.PodcastData, progBounds models.ProgBounds, keyStream chan string, httpMedia models.HttpFn) models.PodcastResults {
 	misc.ChannelLog("BackupPodcast START")
 	startTime := time.Now()
-	timeOut := misc.FileTimeout(consts.MEDIA_MAX_READ_FILE_TIME)
+	timeOut := misc.FileTimeout(globals.MediaMaxReadFileTime)
 	ctxMedias, cancelMedias := context.WithTimeout(context.Background(), timeOut)
 	defer cancelMedias()
 	createChannels(podcastData, progBounds, keyStream, httpMedia, ctxMedias, cancelMedias)

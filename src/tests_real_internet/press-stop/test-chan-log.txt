@@ -1,0 +1,29 @@
+2023/02/26 14:08:39 --------------------------Start--------------------------
+2023/02/26 14:08:39 BackupPodcast START
+2023/02/26 14:08:39 			 Go_deriveFilenames START
+2023/02/26 14:08:39 	 Go_ctxDone START
+2023/02/26 14:08:39 			 Go_seriousError START
+2023/02/26 14:08:39 		 Go_stopKey START
+2023/02/26 14:08:39 				 Go_downloadMedia START 1
+2023/02/26 14:08:39 						 Go_deriveFilenames 1 press-stop-1.txt
+2023/02/26 14:08:39 						 Go_deriveFilenames 1 press-stop-1.txt
+2023/02/26 14:08:39 						 Go_deriveFilenames SENT
+2023/02/26 14:08:39 						 Go_deriveFilenames 2 press-stop-2.txt
+2023/02/26 14:08:39 						 Go_deriveFilenames 2 press-stop-2.txt
+2023/02/26 14:08:40 		 TESTING - downloading stopped by simulated key press of 'S'
+2023/02/26 14:08:40 		 Go_stopKey already STOPPED waiting for <-signalEndStop
+2023/02/26 14:08:40 	 Go_ctxDone END
+2023/02/26 14:08:49 						 Go_deriveFilenames SENT
+2023/02/26 14:08:49 						 Go_deriveFilenames 3 
+2023/02/26 14:08:49 BackupPodcast Go_deriveFilenames done
+2023/02/26 14:08:49 BackupPodcast Go_downloadMedia close(mediaStream)
+2023/02/26 14:08:59 				 Go_downloadMedia END 0
+2023/02/26 14:08:59 BackupPodcast Go_downloadMedia done
+2023/02/26 14:08:59 BackupPodcast all channels done
+2023/02/26 14:08:59 BackupPodcast serious error
+2023/02/26 14:08:59 BackupPodcast models.PodcastResults
+2023/02/26 14:08:59 BackupPodcast END
+2023/02/26 14:08:59 			 Go_seriousError <-signalEndSerious
+2023/02/26 14:08:59 			 Go_seriousError END
+2023/02/26 14:08:59 		 Go_stopKey STOPPED finished
+2023/02/26 14:08:59 		 Go_stopKey END

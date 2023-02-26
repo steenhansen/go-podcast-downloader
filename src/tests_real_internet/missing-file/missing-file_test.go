@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
@@ -23,6 +24,9 @@ func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	os.Remove(progPath + "/local-download-dest/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
+
+	globals.MediaMaxReadFileTime = time.Second * 5
+
 	return progBounds
 }
 

@@ -101,14 +101,13 @@ func Test_5_FinalMediaName(t *testing.T) {
 	keyStream := make(chan string)
 	globals.Console.Clear()
 	actualAdds, podcastResults := menu.ByNameOrUrl(cleanArgs, progBounds, keyStream, httpTest)
-	//fmt.Println("actualAdds", actualAdds)
+
 	err := podcastResults.SeriousError
 	if err != nil {
 		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
-
 	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
 	if len(expectedDiff) != 0 {
 		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))

@@ -98,7 +98,6 @@ func Go_deriveFilenames(ctx context.Context, podcastData models.PodcastData, med
 limitCancel:
 	for mediaIndex, mediaUrl := range podcastData.PodUrls {
 		possibleFiles++
-		misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames " + strconv.Itoa(possibleFiles))
 		finalFileName, err := rss.FinalMediaName(ctx, mediaUrl, httpMedia)
 		misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames " + strconv.Itoa(possibleFiles) + " " + finalFileName)
 		if err != nil {
@@ -109,6 +108,8 @@ limitCancel:
 			podTitle = podcastData.PodTitles[mediaIndex]
 		}
 		filePath := chooseName(finalFileName, podcastData.PodPath, podTitle, podcastData)
+		nameOfFile := rss.NameOfFile(filePath)
+		misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames " + strconv.Itoa(possibleFiles) + " " + nameOfFile)
 		if _, err = os.Stat(filePath); err != nil {
 			if os.IsNotExist(err) {
 				newMedia := models.MediaEnclosure{
@@ -117,6 +118,7 @@ limitCancel:
 					EnclosureSize: podcastData.PodSizes[mediaIndex],
 				}
 				mediaStream <- newMedia
+				misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames SENT")
 				limitFlag--
 				if limitFlag == 0 {
 					break limitCancel
@@ -125,12 +127,11 @@ limitCancel:
 				return 0, err
 			}
 		} else {
-			nameOfFile := rss.NameOfFile(filePath)
 			haveCount++
 			haveStr := strconv.Itoa(haveCount)
 			globals.Console.Note("\t\t\t\tHave #" + haveStr + " " + nameOfFile + "\n")
 		}
 	}
-	misc.ChannelLog("\t\t\t\t Go_deriveFilenames END")
+	misc.ChannelLog("\t\t\t\t Go_deriveFilenames END") // never got here
 	return possibleFiles, nil
 }

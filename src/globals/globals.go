@@ -1,5 +1,7 @@
 package globals
 
+import "github.com/steenhansen/go-podcast-downloader/src/consts"
+
 // Episode filenames will be forced to match <title> instead of actual downloaded file
 // go run ./  feeds.megaphone.fm/BRPL9803447123?_Breaking_Points_ --forceTitle
 var ForceTitle = false
@@ -16,4 +18,7 @@ var EmptyFilesTest = false
 // go run ./ rss.acast.com/the-rest-is-history-podcast -logChannels
 var LogChannels = false
 
-var WaitCountDebug = 0
+var MediaMaxReadFileTime = consts.MEDIA_MAX_READ_FILE_TIME
+var RssMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
+
+var MinDiskBytes = consts.MIN_DISK_BYTES

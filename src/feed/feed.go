@@ -12,6 +12,7 @@ import (
 
 	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/flaws"
+	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
 	"github.com/steenhansen/go-podcast-downloader/src/models"
 	"github.com/steenhansen/go-podcast-downloader/src/rss"
@@ -102,7 +103,7 @@ func ShowProgress(fileEnc models.MediaEnclosure, readFiles *int) string {
 }
 
 func ReadRss(rssUrl string, httpMedia models.HttpFn) ([]byte, error) {
-	timeOut := misc.FileTimeout(consts.RSS_MAX_READ_FILE_TIME)
+	timeOut := misc.FileTimeout(globals.RssMaxReadFileTime)
 	ctxRss, cancelRss := context.WithTimeout(context.Background(), timeOut)
 	defer cancelRss()
 	httpUrl := addHttp(rssUrl)

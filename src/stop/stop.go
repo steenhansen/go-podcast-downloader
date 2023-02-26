@@ -83,7 +83,8 @@ keyboardEnd:
 			}
 		case simKey := <-keyStreamTest:
 			stoppedByKey = true
-			globals.Console.Note("TESTING - downloading stopped by simulated key press of '" + simKey + "'")
+			misc.ChannelLog("\t\t TESTING - downloading stopped by simulated key press of '" + simKey + "'")
+			globals.Console.Note("TESTING - downloading stopped by simulated key press of '" + simKey + "'\n")
 			cancel()
 			break keyboardEnd
 		default:
