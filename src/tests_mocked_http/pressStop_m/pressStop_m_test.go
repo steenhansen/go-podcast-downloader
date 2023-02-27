@@ -18,7 +18,7 @@ import (
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	test_helpers.DirEmpty(progPath + "/Press-Stop/")
+	test_helpers.DirEmpty(progPath + "/press-stop-m/")
 
 	progBounds := test_helpers.TestBounds(progPath)
 	progBounds.LoadOption = consts.HIGH_LOAD // slow down so can stop after one file read

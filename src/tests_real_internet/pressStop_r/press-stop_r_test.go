@@ -53,7 +53,7 @@ const expectedBads = `
 
 //    go test ./src/tests_real_internet/press-stop/... -count=1 -timeout 22s           OK
 
-func TestPressStopReal(t *testing.T) {
+func TestPressStop_r(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 

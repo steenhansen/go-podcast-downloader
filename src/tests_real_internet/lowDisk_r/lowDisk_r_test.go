@@ -38,7 +38,7 @@ const expectedBads = `
 E_15 : low disk space, 96GB free, need minimum 909TB to proceed
 `
 
-func TestLowDisk_m(t *testing.T) {
+func TestLowDisk_r(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()

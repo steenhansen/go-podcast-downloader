@@ -16,7 +16,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/missing-file.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
 
 */
 
@@ -45,15 +45,15 @@ not-missing.txt (save #0, 0s)
 
 const expectedAdds = `
 Added 1 new files in 0s
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missingFile_r/git-server-source/missing-file.rss
-Into 'local-download-dest'
+From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
+Into 'missing-file-r'
 `
 
 const expectedBads = `	
-E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/missingFile_r/missing-file/git-server-source/no-such-file.txt
+E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missingFile_r/git-server-source/no-such-file.txt
 `
 
-func TestMissingFileFromMenu(t *testing.T) {
+func TestMissingFile_r(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()

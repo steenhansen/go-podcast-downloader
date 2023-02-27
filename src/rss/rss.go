@@ -81,7 +81,7 @@ func DownloadAndWriteFile(ctx context.Context, mediaUrl, filePath string, minDis
 		return 0, err // NB dns errors such as "no such host" from from 'Breaking Points' after retries
 	}
 	if respMedia.StatusCode != consts.HTTP_OK_RESP {
-		return not200Flaw(respMedia.Status, mediaUrl, flaws.FLAW_E_10)
+		return Not200Flaw(respMedia.Status, mediaUrl, flaws.FLAW_E_10)
 	}
 	mediaContent := make([]byte, 0)
 	if !globals.EmptyFilesTest {

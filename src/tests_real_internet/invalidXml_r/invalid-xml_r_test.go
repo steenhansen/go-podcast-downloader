@@ -18,7 +18,7 @@ import (
 )
 
 func TestInvalidXml(t *testing.T) {
-	url := consts.TEST_DIR_URL + "invalid-xml/invalid-xml.rss"
+	url := consts.TEST_DIR_URL + "invalidXml_r/invalid-xml-r.rss"
 
 	_, _, _, _, err := podcasts.ReadRssUrl(url, rss.HttpReal)
 

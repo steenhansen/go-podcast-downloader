@@ -31,7 +31,7 @@ func badHttp(mediaUrl, locId string, err error) (*http.Response, error) {
 	return nil, multiErr
 }
 
-func not200Flaw(respStat, mediaUrl, locId string) (int, error) {
+func Not200Flaw(respStat, mediaUrl, locId string) (int, error) {
 	locStat := errors.New(locId)
 	err := flaws.HttpFault.MakeFlaw(respStat + consts.ERROR_SEPARATOR + mediaUrl)
 	multiErr := errors.Join(locStat, err)
