@@ -1,10 +1,8 @@
 package testLowDisk
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"testing"
 
 	"github.com/steenhansen/go-podcast-downloader/src/flaws"
@@ -16,6 +14,12 @@ import (
 	"github.com/steenhansen/go-podcast-downloader/src/test_helpers"
 )
 
+/*
+
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r.rss
+
+*/
+
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	progBounds := test_helpers.TestBounds(progPath)
@@ -23,43 +27,12 @@ func setUp() models.ProgBounds {
 	return progBounds
 }
 
-func httpMocked(ctx context.Context, mediaUrl string) (*http.Response, error) {
-	if ctx.Err() == context.Canceled {
-		return nil, context.Canceled
-	}
-	rssData := map[string]string{
-		"http://rss.Low-Disk/podcast.xml": `<?xml version="1.0" encoding="UTF-8"?>
-						<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
-							<channel>
-								<title>title tag</title>
-								<item>
-									<enclosure url="http://rss.Low-Disk/file-1.txt" length="16" type="text/plain" />
-								</item>
-								<item>
-									<enclosure url="http://rss.Low-Disk/file-2.txt" length="16" type="text/plain" />
-								</item>
-							</channel>
-						</rss>`,
-		"http://rss.Low-Disk/file-1.txt": `file 1 low-disk`,
-		"http://rss.Low-Disk/file-2.txt": `file 2 low-disk`,
-	}
-
-	if theData, ok := rssData[mediaUrl]; ok {
-		thePath := rss.NameOfFile(mediaUrl)
-		contentDisposition := ""
-		httpResp := test_helpers.Http200Resp("rss.Low-Disk", thePath, theData, contentDisposition)
-		return httpResp, nil
-	}
-	fmt.Println("unknown mediaUrl : " + mediaUrl)
-	return nil, nil
-}
-
 const expectedConsole string = `
  1 |   1 files |    0MB | Low-Disk
- 'Q' or a number + enter: Downloading 'Low-Disk' podcast, 2 files, hit 's' to stop
-				Have #1 file-1.txt
-	file-2.txt(read #0 16B)
-ERROR file-2.txt
+ 'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
+				Have #1 low-disk-r-1.txt
+	low-disk-r-1.txt(read #0 16B)
+ERROR low-disk-r-2.txt
 `
 const expectedAdds = `
 No changes detected
@@ -69,11 +42,11 @@ const expectedBads = `
 E_15 : low disk space, 96GB free, need minimum 909TB to proceed
 `
 
-func TestLowDisk_r(t *testing.T) {
+func TestLowDisk_m(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()
-	actualAdds, _, podcastResults := menu.DisplayMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoiceNum("1"), httpMocked)
+	actualAdds, _, podcastResults := menu.DisplayMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoiceNum("1"), rss.HttpReal)
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
 	if errors.As(err, &flawError) {
