@@ -1,11 +1,11 @@
-package t1
+package t2
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
 	"github.com/steenhansen/go-podcast-downloader/src/models"
@@ -16,61 +16,72 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/missing-file.rss
+https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/press-stop.rss
 
 */
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	os.Remove(progPath + "/local-download-dest/not-missing.txt")
+	test_helpers.DirEmpty(progPath + "/press-stop-r/")
+
 	progBounds := test_helpers.TestBounds(progPath)
-
-	globals.MediaMaxReadFileTime = time.Second * 5
-
+	progBounds.LoadOption = consts.HIGH_LOAD // slow down so can stop after one file read
+	globals.LogChannels = true
+	misc.StartLog("../../../" + consts.CHANNEL_LOG_NAME)
 	return progBounds
 }
 
 const expectedMenu string = `
-1 |   0 files |    0MB | local-download-dest
+1 |   0 files |    0MB | press-stop-r
  'Q' or a number + enter:
 `
 
 const expectedConsole string = `
-Downloading 'local-download-dest' podcast, 2 files, hit 's' to stop
-no-such-file.txt(read #0 12B)
-not-missing.txt(read #0 11B)
-ERROR no-such-file.txt
-not-missing.txt (save #0, 0s)
+Downloading 'press-stop-r' podcast, 10 files, hit 's' to stop
+        TESTING - downloading stopped by simulated key press of 'S'
+
 `
 
 const expectedAdds = `
-Added 1 new files in 0s
-From https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/missing-file.rss
-Into 'local-download-dest'
+No changes detected
 `
 
-const expectedBads = `	
-E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/missing-file/git-server-source/no-such-file.txt
+//E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/press-stop/git-server-source/no-such-file.txt
+
+const expectedBads = `
 `
 
-func TestMissingFileFromMenu(t *testing.T) {
+//    go test ./src/tests_real_internet/press-stop/... -count=1 -timeout 22s           OK
+
+func TestPressStopReal(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
+
 	globals.Console.Clear()
+
 	actualMenu, err := terminal.ShowNumberedChoices(progBounds)
 	if err != nil {
-		fmt.Println("wa happen", err)
+		fmt.Println("wa happen", actualMenu, err)
 	}
-	globals.Console.Clear()
-	getMenuChoice := test_helpers.KeyboardMenuChoice_1
-	actualAdds, podcastResults := terminal.AfterMenu(progBounds, keyStream, getMenuChoice, rss.HttpReal)
-	fmt.Println("my podcastResults", podcastResults)
 
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	DurationOfTime := time.Duration(10) * time.Millisecond
+	//DurationOfTime := time.Duration(1) * time.Second
+	f := func() {
+		keyStream <- "S"
+	}
+	time.AfterFunc(DurationOfTime, f)
+
+	globals.Console.Clear()
+	actualAdds, _ := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, rss.HttpReal)
+
+	//timer1.Stop()
+	//if !errors.Is(err, context.Canceled) {
+	//if err.Error() != "TESTING - downloading stopped by simulated key press of 'S'" {
+	//		fmt.Println("ddddddd  context.Canceled dddddd", err.Error())
+	//	t.Fatal(err)
+	//}
+
 	actualConsole := globals.Console.All()
-	//fmt.Println("ddddddd actualConsole ", actualConsole, ".....\n\n\n.....")
 	actualBads := globals.Faults.All()
 	if test_helpers.NotSameTrimmed(actualMenu, expectedMenu) {
 		t.Fatal(test_helpers.ClampActual(actualMenu), test_helpers.ClampExpected(expectedMenu))

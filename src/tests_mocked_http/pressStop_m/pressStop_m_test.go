@@ -91,18 +91,18 @@ func httpTest(ctx context.Context, mediaUrl string) (*http.Response, error) {
 }
 
 const expectedMenu string = `
-1 |   0 files |    0MB | Press-Stop
+1 |   0 files |    0MB | press-stop-m
  'Q' or a number + enter:
 `
 
 const expectedConsole string = `
-Downloading 'Press-Stop' podcast, 10 files, hit 's' to stop
+Downloading 'press-stop-m' podcast, 10 files, hit 's' to stop
         TESTING - downloading stopped by simulated key press of 'S'
 `
 
-const expectedAdds = `
-No changes detected
-`
+// const expectedAdds = `
+// No changes detected    we can expect 0 files up to 10 files
+// `
 
 const expectedBads = `
 `
@@ -125,16 +125,7 @@ func TestPressStopMock(t *testing.T) {
 	time.AfterFunc(DurationOfTime, f)
 
 	globals.Console.Clear()
-	actualAdds, _ := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, httpTest)
-
-	//timer1.Stop()
-	//	fmt.Println("dddddddddddddddddd")
-	//	fmt.Println("wa happen", actualAdds, podcastResults)
-	//if !errors.Is(err, context.Canceled) {
-	//if err.Error() != "TESTING - downloading stopped by simulated key press of 'S'" {
-	//		fmt.Println("ddddddd  context.Canceled dddddd", err.Error())
-	//	t.Fatal(err)
-	//}
+	terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, httpTest)
 
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
@@ -145,10 +136,6 @@ func TestPressStopMock(t *testing.T) {
 	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
 	if len(expectedDiff) != 0 {
 		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
-	}
-
-	if test_helpers.NotSameTrimmed(actualAdds, expectedAdds) {
-		t.Fatal(test_helpers.ClampActual(actualAdds), test_helpers.ClampExpected(expectedAdds))
 	}
 
 	if test_helpers.NotSameTrimmed(actualBads, expectedBads) {

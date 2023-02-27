@@ -2,7 +2,6 @@ package testLowDisk
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/steenhansen/go-podcast-downloader/src/flaws"
@@ -15,9 +14,7 @@ import (
 )
 
 /*
-
 https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r.rss
-
 */
 
 func setUp() models.ProgBounds {
@@ -28,11 +25,10 @@ func setUp() models.ProgBounds {
 }
 
 const expectedConsole string = `
- 1 |   1 files |    0MB | Low-Disk
- 'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
-				Have #1 low-disk-r-1.txt
-	low-disk-r-1.txt(read #0 16B)
-ERROR low-disk-r-2.txt
+ 1 |   0 files |    0MB | low-disk-r
+         'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
+        	low-disk-r-1.txt(read #0 11B)
+        ERROR low-disk-r-1.txt
 `
 const expectedAdds = `
 No changes detected
@@ -50,7 +46,9 @@ func TestLowDisk_m(t *testing.T) {
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
 	if errors.As(err, &flawError) {
-		if flawError.Error() != "low disk space, 96GB free, need minimum 909TB to proceed" {
+		lowErr := flawError.Error()
+		safeErr := test_helpers.ReplaceXxGbFree(lowErr)
+		if safeErr != "low disk space, xxGB free, need minimum 909TB to proceed" {
 			t.Fatal(err)
 		}
 	} else {
@@ -58,7 +56,6 @@ func TestLowDisk_m(t *testing.T) {
 	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
-	fmt.Println("------------")
 
 	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
 	if len(expectedDiff) != 0 {
@@ -69,8 +66,10 @@ func TestLowDisk_m(t *testing.T) {
 		t.Fatal(test_helpers.ClampActual(actualAdds), test_helpers.ClampExpected(expectedAdds))
 	}
 
-	if test_helpers.NotSameTrimmed(actualBads, expectedBads) {
-		t.Fatal(test_helpers.ClampActual(actualBads), test_helpers.ClampExpected(expectedBads))
+	actualSafe := test_helpers.ReplaceXxGbFree(actualBads)
+	expectedSafe := test_helpers.ReplaceXxGbFree(expectedBads)
+	if test_helpers.NotSameTrimmed(actualSafe, expectedSafe) {
+		t.Fatal(test_helpers.ClampActual(actualSafe), test_helpers.ClampExpected(expectedSafe))
 	}
 
 }

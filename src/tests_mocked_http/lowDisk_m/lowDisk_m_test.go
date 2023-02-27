@@ -55,8 +55,8 @@ func httpMocked(ctx context.Context, mediaUrl string) (*http.Response, error) {
 }
 
 const expectedConsole string = `
- 1 |   1 files |    0MB | Low-Disk
- 'Q' or a number + enter: Downloading 'Low-Disk' podcast, 2 files, hit 's' to stop
+ 1 |   1 files |    0MB | low-disk-m
+ 'Q' or a number + enter: Downloading 'low-disk-m' podcast, 2 files, hit 's' to stop
 				Have #1 file-1.txt
 	file-2.txt(read #0 16B)
 ERROR file-2.txt
@@ -77,7 +77,9 @@ func TestLowDisk_r(t *testing.T) {
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
 	if errors.As(err, &flawError) {
-		if flawError.Error() != "low disk space, 96GB free, need minimum 909TB to proceed" {
+		lowErr := flawError.Error()
+		safeErr := test_helpers.ReplaceXxGbFree(lowErr)
+		if safeErr != "low disk space, xxGB free, need minimum 909TB to proceed" {
 			t.Fatal(err)
 		}
 	} else {
@@ -85,8 +87,6 @@ func TestLowDisk_r(t *testing.T) {
 	}
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
-	fmt.Println("------------")
-
 	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
 	if len(expectedDiff) != 0 {
 		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
@@ -96,8 +96,10 @@ func TestLowDisk_r(t *testing.T) {
 		t.Fatal(test_helpers.ClampActual(actualAdds), test_helpers.ClampExpected(expectedAdds))
 	}
 
-	if test_helpers.NotSameTrimmed(actualBads, expectedBads) {
-		t.Fatal(test_helpers.ClampActual(actualBads), test_helpers.ClampExpected(expectedBads))
+	actualSafe := test_helpers.ReplaceXxGbFree(actualBads)
+	expectedSafe := test_helpers.ReplaceXxGbFree(expectedBads)
+	if test_helpers.NotSameTrimmed(actualSafe, expectedSafe) {
+		t.Fatal(test_helpers.ClampActual(actualSafe), test_helpers.ClampExpected(expectedSafe))
 	}
 
 }

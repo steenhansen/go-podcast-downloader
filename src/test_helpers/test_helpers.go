@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/steenhansen/go-podcast-downloader/src/consts"
@@ -165,4 +166,11 @@ func Http200Resp(theHost, thePath, bodyXml, contentDisposition string) *http.Res
 		Header:        theHeader,
 	}
 	return httpResp
+}
+
+func ReplaceXxGbFree(lowDiskMess string) string {
+	freeXxGB := regexp.MustCompile(`,\s\d*GB free,`) // , 96GB free,
+	safeCompare := freeXxGB.ReplaceAllLiteralString(lowDiskMess, ", xxGB free,")
+	return safeCompare
+
 }
