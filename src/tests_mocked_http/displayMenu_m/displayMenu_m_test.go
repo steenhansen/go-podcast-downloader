@@ -17,8 +17,8 @@ import (
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	os.Remove(progPath + "/Display Menu/file-5.txt")
-	os.Remove(progPath + "/Display Menu/file-6.txt")
+	os.Remove(progPath + "/display-menu-m/file-5.txt")
+	os.Remove(progPath + "/display-menu-m/file-6.txt")
 	progBounds := test_helpers.TestBounds(progPath)
 	return progBounds
 }
@@ -64,8 +64,8 @@ func httpTest(ctx context.Context, mediaUrl string) (*http.Response, error) {
 
 const expectedConsole string = `
 
-1 |   2 files |    0MB | Display Menu
- 'Q' or a number + enter: Downloading 'Display Menu' podcast, 4 files, hit 's' to stop
+1 |   2 files |    0MB | display-menu-m
+ 'Q' or a number + enter: Downloading 'display-menu-m' podcast, 4 files, hit 's' to stop
 	file-5.txt(read #0 44B)
 	file-6.txt(read #0 45B)
 		 file-5.txt (save #0, 0s)
@@ -76,12 +76,12 @@ const expectedConsole string = `
 const expectedAdds = `
 Added 2 new files in 0s 
 From http://rss.DisplayMenu/podcast.xml 
-Into 'Display Menu'
+Into 'display-menu-m'
 `
 
 const expectedBads = ""
 
-func Test_3_DisplayMenu(t *testing.T) {
+func TestDisplayMenu_m(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()
@@ -106,7 +106,7 @@ func Test_3_DisplayMenu(t *testing.T) {
 		t.Fatal(test_helpers.ClampActual(actualBads), test_helpers.ClampExpected(expectedBads))
 	}
 
-	file5 := progBounds.ProgPath + "/Display Menu/file-5.txt"
+	file5 := progBounds.ProgPath + "/display-menu-m/file-5.txt"
 	if _, err = os.Stat(file5); err != nil {
 		t.Fatal(file5 + " does not exist")
 	}

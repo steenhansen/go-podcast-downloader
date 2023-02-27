@@ -10,7 +10,7 @@ import (
 
 //      this stuff needs to be in a sub folder
 
-func Test_8_RssNoTitle(t *testing.T) {
+func TestRssNoTitle(t *testing.T) {
 	none := []byte("no title")
 	_, err := rss.RssTitle(none)
 	if !errors.Is(err, flaws.InvalidXmlTitle) {

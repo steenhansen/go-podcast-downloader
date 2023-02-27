@@ -15,7 +15,7 @@ import (
 // go run pod-down.go https://raw.githubusercontent.com/steenhansen/projects/main/images/zero-bytes.txt
 // emtpy rss file https://raw.githubusercontent.com/steenhansen/projects/main/images/zero-bytes.txt
 
-func Test_6_IsUrl(t *testing.T) {
+func TestFeed_m(t *testing.T) {
 	okUrl := "siberiantimes.com/ecology/rss/"
 	isUrl := feed.IsUrl(okUrl)
 	if !isUrl {

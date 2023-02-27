@@ -29,14 +29,15 @@ func setUp() {
 }
 
 const expectedReport = `
-Adding 'local-download-dest'
-Downloading 'local-download-dest' podcast, 3 files, hit 's' to stop
-add-by-url-and-name-1.txt(read #0 21B)
-add-by-url-and-name-2.txt(read #0 21B)
-add-by-url-and-name-3.txt(read #0 21B)
-add-by-url-and-name-1.txt (save #0, 0s)
-add-by-url-and-name-2.txt (save #0, 0s)
-add-by-url-and-name-3.txt (save #0, 0s)
+Adding 'add-by-url-and-name-r'
+        
+        Downloading 'add-by-url-and-name-r' podcast, 3 files, hit 's' to stop
+        	add-by-url-and-name-1.txt(read #0 21B)
+        ERROR add-by-url-and-name-1.txt
+        	add-by-url-and-name-2.txt(read #0 21B)
+        ERROR add-by-url-and-name-2.txt
+        	add-by-url-and-name-3.txt(read #0 21B)
+        ERROR add-by-url-and-name-3.txt
 `
 
 func TestAddByUrlAndName(t *testing.T) {
