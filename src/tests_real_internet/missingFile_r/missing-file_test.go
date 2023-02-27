@@ -22,7 +22,7 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_rea
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	os.Remove(progPath + "/local-download-dest/not-missing.txt")
+	os.Remove(progPath + "/missing-file-r/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
 
 	globals.MediaMaxReadFileTime = time.Second * 5
