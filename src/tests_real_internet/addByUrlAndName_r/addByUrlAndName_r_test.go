@@ -21,7 +21,7 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_rea
 
 func setUp() {
 	progPath := misc.CurDir()
-	testDir := progPath + "/local-download-dest"
+	testDir := progPath + "/add-by-url-and-name-r"
 	test_helpers.DirRemove(testDir)
 
 	//progBounds := test_helpers.TestBounds(progPath)
@@ -42,8 +42,8 @@ add-by-url-and-name-3.txt (save #0, 0s)
 func TestAddByUrlAndName(t *testing.T) {
 	//progBounds := setUp()
 	setUp()
-	podcastUrl := consts.TEST_DIR_URL + "AddByUrlAndName/git-server-source/add-by-url-and-name.rss"
-	osArgs := []string{"AddByUrlAndName-test", podcastUrl, "local-download-dest"}
+	podcastUrl := consts.TEST_DIR_URL + "addByUrlAndName_r/git-server-source/add-by-url-and-name-r.rss"
+	osArgs := []string{"AddByUrlAndName-test", podcastUrl, "add-by-url-and-name-r"}
 	progBounds := test_helpers.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
 	_, podcastResults := terminal.AddByUrlAndName(podcastUrl, osArgs, progBounds, keyStream, rss.HttpReal)
