@@ -23,9 +23,9 @@ const expectedReport = `
 Downloading 'local-download-dest' podcast, 3 files, hit 's' to stop
 `
 
-func TestReadByExistName(t *testing.T) {
-	podcastUrl := consts.TEST_DIR_URL + "ReadByExistName/git-server-source/read-by-exist-name.rss"
-	osArgs := []string{"ReadByExistName-test", podcastUrl, "local-download-dest"}
+func TestReadByExistName_r(t *testing.T) {
+	podcastUrl := consts.TEST_DIR_URL + "ReadByExistName_r/git-server-source/read-by-exist-name.rss"
+	osArgs := []string{"ReadByExistName-test", podcastUrl, "read-by-exist-name-r"}
 	progBounds := test_helpers.TestBounds(misc.CurDir())
 	keyStream := make(chan string)
 	_, podcastResults := terminal.ReadByExistName(osArgs, progBounds, keyStream, rss.HttpReal)
