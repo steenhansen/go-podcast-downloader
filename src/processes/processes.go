@@ -10,6 +10,7 @@ import (
 	"github.com/eiannone/keyboard"
 	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/feed"
+	"github.com/steenhansen/go-podcast-downloader/src/flaws"
 	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/media"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
@@ -133,6 +134,9 @@ func BackupPodcast(url string, podcastData models.PodcastData, progBounds models
 
 	if ctxMedias.Err() == context.Canceled {
 		wasCanceled = true
+	} else if ctxMedias.Err().Error() == consts.CONTEXT_DEAD_EXCEEDED {
+		exceedTimeout := fmt.Sprintf("duration: %s", globals.MediaMaxReadFileTime)
+		seriousError = flaws.TimeoutStop.MakeFlaw(exceedTimeout)
 	} else if ctxMedias.Err() != nil {
 		seriousError = ctxMedias.Err()
 	}

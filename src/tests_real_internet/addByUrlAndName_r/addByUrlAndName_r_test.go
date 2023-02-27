@@ -21,6 +21,7 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_rea
 
 func setUp() {
 	progPath := misc.CurDir()
+	globals.MediaMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 	testDir := progPath + "/add-by-url-and-name-r"
 	test_helpers.DirRemove(testDir)
 

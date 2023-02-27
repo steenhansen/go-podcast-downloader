@@ -1,8 +1,9 @@
-package testLowDisk
+package testTimeout
 
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/flaws"
@@ -14,33 +15,33 @@ import (
 	"github.com/steenhansen/go-podcast-downloader/src/test_helpers"
 )
 
-/*
-https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r.rss
-*/
-
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	globals.MediaMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 	progBounds := test_helpers.TestBounds(progPath)
-	progBounds.MinDisk = 1_000_000_000_000_000
+	progBounds.LoadOption = consts.LOW_LOAD
+	globals.MediaMaxReadFileTime = time.Microsecond * 1
 	return progBounds
 }
 
 const expectedConsole string = `
- 1 |   0 files |    0MB | low-disk-r
-         'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
-        	low-disk-r-1.txt(read #0 11B)
-        ERROR low-disk-r-1.txt
+1 |  10 files |    0MB | timeout-r
+         'Q' or a number + enter: Downloading 'timeout-r' podcast, 10 files, hit 's' to stop
+        				Have #1 file-1.txt
+        				Have #2 file-2.txt
+        				Have #3 file-3.txt
+        				Have #4 file-4.txt
+        				Have #5 file-5.txt
+        				Have #6 file-6.txt
+        				Have #7 file-7.txt
+        				Have #8 file-8.txt
+        				Have #9 file-9.txt
+        				Have #10 file-10.txt
 `
 const expectedAdds = `
 No changes detected
 `
 
-const expectedBads = `
-E_15 : low disk space, 96GB free, need minimum 909TB to proceed
-`
-
-func TestLowDisk_r(t *testing.T) {
+func TestTimeout_m(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 	globals.Console.Clear()
@@ -48,17 +49,14 @@ func TestLowDisk_r(t *testing.T) {
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
 	if errors.As(err, &flawError) {
-		lowErr := flawError.Error()
-		safeErr := test_helpers.ReplaceXxGbFree(lowErr)
-		if safeErr != "low disk space, xxGB free, need minimum 909TB to proceed" {
+		timeoutErr := flawError.Error()
+		if timeoutErr != "Internet connection timed out by exceeding duration: 1µs" {
 			t.Fatal(err)
 		}
 	} else {
 		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
-	actualBads := globals.Faults.All()
-
 	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
 	if len(expectedDiff) != 0 {
 		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
@@ -66,12 +64,6 @@ func TestLowDisk_r(t *testing.T) {
 
 	if test_helpers.NotSameTrimmed(actualAdds, expectedAdds) {
 		t.Fatal(test_helpers.ClampActual(actualAdds), test_helpers.ClampExpected(expectedAdds))
-	}
-
-	actualSafe := test_helpers.ReplaceXxGbFree(actualBads)
-	expectedSafe := test_helpers.ReplaceXxGbFree(expectedBads)
-	if test_helpers.NotSameTrimmed(actualSafe, expectedSafe) {
-		t.Fatal(test_helpers.ClampActual(actualSafe), test_helpers.ClampExpected(expectedSafe))
 	}
 
 }

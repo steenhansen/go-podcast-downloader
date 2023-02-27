@@ -10,3 +10,5 @@ const HTTP_OK_RESP = 200
 const DEFAULT_LIMIT = 0 // no limit on number of media episode files downloaded per try
 
 const RETRY_SLEEP_START = 1 // 1sec, 2sec, 4sec, 8sec, 16sec
+
+const CONTEXT_DEAD_EXCEEDED = "context deadline exceeded"

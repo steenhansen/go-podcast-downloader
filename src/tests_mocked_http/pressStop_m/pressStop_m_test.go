@@ -19,7 +19,7 @@ import (
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 	test_helpers.DirEmpty(progPath + "/press-stop-m/")
-
+	globals.MediaMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 	progBounds := test_helpers.TestBounds(progPath)
 	progBounds.LoadOption = consts.HIGH_LOAD // slow down so can stop after one file read
 	globals.LogChannels = true

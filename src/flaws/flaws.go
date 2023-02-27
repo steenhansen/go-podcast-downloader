@@ -45,7 +45,7 @@ func (flaw FlawError) Unwrap() []error {
 
 func IsSerious(err error) bool {
 	if err != nil {
-		is_serious := errors.Is(err, LowDiskSerious)
+		is_serious := errors.Is(err, LowDiskSerious) || errors.Is(err, TimeoutStop)
 		return is_serious
 	}
 	return false
@@ -97,7 +97,7 @@ func (flaw FlawError) Error() string {
 		stopMess := "podcast '%s' was stopped by the '" + consts.STOP_KEY_LOWER + "' key being pressed"
 		return fmt.Sprintf(stopMess, flaw.errMess)
 	case timeoutStop:
-		return fmt.Sprintf("Internet timed out %s", flaw.errMess)
+		return fmt.Sprintf("Internet connection timed out by exceeding %s", flaw.errMess)
 	case httpFault:
 		return fmt.Sprint("HTTP error " + flaw.errMess)
 	case exceedRetry:

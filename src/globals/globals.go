@@ -21,4 +21,5 @@ var LogChannels = false
 var MediaMaxReadFileTime = consts.MEDIA_MAX_READ_FILE_TIME
 var RssMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 
+// Default progBounds.MinDisk
 var MinDiskBytes = consts.MIN_DISK_BYTES

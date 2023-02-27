@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
 	"github.com/steenhansen/go-podcast-downloader/src/models"
@@ -22,6 +23,7 @@ https://raw.githubusercontent.com/steenhansen/pod-down-consol/main/src/tests_rea
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
+	globals.MediaMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 	os.Remove(progPath + "/missing-file-r/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
 
