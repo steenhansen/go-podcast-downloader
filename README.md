@@ -17,6 +17,9 @@
   - Verify filenames and/or episode titles and extensions
 
   - Make sure RSS XML file valid
+~~~
+    > go run ./ https://feeds.buzzsprout.com/2040953.rss
+~~~
 
   - See if episode hit counters work
 
@@ -149,5 +152,5 @@
 
 
 
-## [Compiling and Running Program From Source](./readme-compile.md)
+## [Compiling, Testing, and Running Program From Source](./compile-test.md)
 

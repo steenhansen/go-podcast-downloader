@@ -1,5 +1,5 @@
 
-# Compiling and Running From Source
+# Compiling, Testing, and Running Program From Source
 
 ## Go Version 1.19 Required
 
@@ -39,13 +39,16 @@
 ```
   - Test only real Internet tests
 ```
-    > go test ./src/tests_real_internet/... -count=1 -timeout 50s     
-
-    > go test ./src/tests_real_internet/missing-file/... -count=1 -timeout 5s
+    > go test ./src/tests_real_internet/... -count=1 
 ```
   - Test only mocked Internet tests
 ```
-    > go test ./src/tests_mocked_http/... -count=1
+    > go test ./src/tests_mocked_http/... -count=1 
+```
+
+  - Test single test
+```
+    > go test ./src/tests_real_internet/pressStop_r/... -count=1
 ```
 
 ## Optional Arguments

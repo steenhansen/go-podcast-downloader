@@ -15,10 +15,13 @@ import (
 )
 
 func main() {
-	diskSize, progBounds, cleanArgs := misc.InitProg(consts.MIN_DISK_BYTES)
+	diskSize, progBounds, cleanArgs := misc.InitProg(globals.MinDiskBytes)
 	keyStream := make(chan string)
 	if len(cleanArgs) == 1 {
 		fmt.Println(diskSize)
+
+		progBounds.MinDisk = 1_000_000_000_000_000
+
 		for {
 			podReport, didQuit, podcastResults := menu.DisplayMenu(progBounds, keyStream, stop.KeyboardMenuChoice, rss.HttpReal)
 			if didQuit {
