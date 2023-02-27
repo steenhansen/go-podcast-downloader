@@ -14,8 +14,6 @@ const DEFAULT_LOAD = HIGH_LOAD // default network load is --networkLoad=high
 
 const MIN_DISK_BYTES int = 1_000_000_000 // 1 gb
 
-//const MIN_DISK_BYTES int = 1_000_000_000_000_000
-
 const GOOD_BYE_MESS = "good bye"
 
-// HAVE A MESSAGE IF USE A TEST VALUE
+const CHANNEL_LOG_NAME = "channelLog.txt"

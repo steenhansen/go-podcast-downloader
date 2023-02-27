@@ -81,7 +81,7 @@ func InitProg(minDiskBytes int) (string, models.ProgBounds, []string) {
 		LimitOption: limitFlag,
 		MinDisk:     minDiskBytes,
 	}
-	StartLog("/src/channelLog.txt")
+	StartLog("/src/" + consts.CHANNEL_LOG_NAME)
 	return diskSize, progBounds, cleanArgs
 }
 
@@ -96,7 +96,7 @@ func StartLog(logRelative string) {
 	if globals.LogChannels {
 		go MemMonitor(consts.MEM_MONITOR_SECONDS)
 		progPath := CurDir()
-		logPath := progPath + logRelative //"/src/channelLog.txt"
+		logPath := progPath + logRelative
 		os.Remove(logPath)
 		logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {

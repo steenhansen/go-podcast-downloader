@@ -33,7 +33,7 @@ func DiskPanic(fileSize, minDiskMbs int) error {
 	if afterWrite < minDiskMbs {
 		freeGmb := GbOrMb(afterWrite)
 		minimumGmb := GbOrMb(minDiskMbs)
-		freeNeeded := freeGmb + " free need minimum " + minimumGmb + " to proceed"
+		freeNeeded := freeGmb + " free, need minimum " + minimumGmb + " to proceed"
 		err := flaws.LowDiskSerious.MakeFlaw(freeNeeded)
 		return err
 	}

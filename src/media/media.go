@@ -117,8 +117,9 @@ limitCancel:
 					EnclosurePath: filePath,
 					EnclosureSize: podcastData.PodSizes[mediaIndex],
 				}
+				misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames SENDING")
 				mediaStream <- newMedia
-				misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames SENT")
+				misc.ChannelLog("\t\t\t\t\t\t Go_deriveFilenames RECEIVED")
 				limitFlag--
 				if limitFlag == 0 {
 					break limitCancel

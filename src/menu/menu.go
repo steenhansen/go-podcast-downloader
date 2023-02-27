@@ -40,7 +40,7 @@ func ShowResults(podReport string, podcastResults models.PodcastResults) {
 	if podcastResults.SeriousError != nil {
 		var flawError flaws.FlawError
 		if errors.As(podcastResults.SeriousError, &flawError) {
-			globals.Console.Note("\n" + flawError.Error() + "\n")
+			globals.Console.Note("\n" + flawError.Error() + "\n\n")
 		} else {
 			globals.Console.Note("\nUNKNOWN? " + podcastResults.SeriousError.Error() + "\n")
 		}

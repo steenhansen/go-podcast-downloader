@@ -124,6 +124,7 @@ func retryHttp(ctx context.Context, tryHttpMedia func() (*http.Response, error))
 	var retry int
 	var dnsError *net.DNSError
 	for retry = 0; retry < consts.HTTP_RETRIES; retry++ {
+		//fmt.Println("I am retrying !!!", retry)
 		if retry > 0 {
 			time.Sleep(time.Duration(sleepTime) * time.Second)
 			sleepTime *= 2

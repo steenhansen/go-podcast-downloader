@@ -34,6 +34,9 @@ func setUp() models.ProgBounds {
 }
 
 func httpTest(ctx context.Context, mediaUrl string) (*http.Response, error) {
+	if ctx.Err() == context.Canceled {
+		return nil, context.Canceled
+	}
 	rssData := map[string]string{
 		"http://rss.chooseName/podcast.xml": `<?xml version="1.0" encoding="UTF-8"?>
 						<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">

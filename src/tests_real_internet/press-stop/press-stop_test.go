@@ -25,9 +25,9 @@ func setUp() models.ProgBounds {
 	test_helpers.DirEmpty(progPath + "/title tag/")
 
 	progBounds := test_helpers.TestBounds(progPath)
-	progBounds.LoadOption = consts.LOW_LOAD // slow down so can stop after one file read
+	progBounds.LoadOption = consts.HIGH_LOAD // slow down so can stop after one file read
 	globals.LogChannels = true
-	misc.StartLog("/test-chan-log.txt")
+	misc.StartLog("../../../" + consts.CHANNEL_LOG_NAME)
 	return progBounds
 }
 
@@ -39,8 +39,7 @@ const expectedMenu string = `
 const expectedConsole string = `
 Downloading 'title tag' podcast, 10 files, hit 's' to stop
         TESTING - downloading stopped by simulated key press of 'S'
-        	press-stop-1.txt(read #0 12B)
-        	press-stop-2.txt(read #0 12B)
+
 `
 
 const expectedAdds = `
@@ -54,7 +53,7 @@ const expectedBads = `
 
 //    go test ./src/tests_real_internet/press-stop/... -count=1 -timeout 22s           OK
 
-func TestMissingFileFromMenu(t *testing.T) {
+func TestPressStopReal(t *testing.T) {
 	progBounds := setUp()
 	keyStream := make(chan string)
 
@@ -65,21 +64,17 @@ func TestMissingFileFromMenu(t *testing.T) {
 		fmt.Println("wa happen", actualMenu, err)
 	}
 
-	DurationOfTime := time.Duration(1) * time.Second
+	DurationOfTime := time.Duration(10) * time.Millisecond
+	//DurationOfTime := time.Duration(1) * time.Second
 	f := func() {
-		fmt.Println("aaaaaaaaaaaaaaa")
 		keyStream <- "S"
 	}
 	time.AfterFunc(DurationOfTime, f)
 
 	globals.Console.Clear()
-	fmt.Println("bbbbbbbbbbbbbbbb")
-	actualAdds, podcastResults := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, rss.HttpReal)
-	fmt.Println("ccccccccccccccccccccc")
+	actualAdds, _ := terminal.AfterMenu(progBounds, keyStream, test_helpers.KeyboardMenuChoice_1, rss.HttpReal)
 
 	//timer1.Stop()
-	fmt.Println("dddddddddddddddddd")
-	fmt.Println("wa happen", actualAdds, podcastResults)
 	//if !errors.Is(err, context.Canceled) {
 	//if err.Error() != "TESTING - downloading stopped by simulated key press of 'S'" {
 	//		fmt.Println("ddddddd  context.Canceled dddddd", err.Error())
