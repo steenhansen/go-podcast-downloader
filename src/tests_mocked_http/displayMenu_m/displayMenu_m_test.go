@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/steenhansen/go-podcast-downloader/src/consts"
 	"github.com/steenhansen/go-podcast-downloader/src/globals"
 	"github.com/steenhansen/go-podcast-downloader/src/menu"
 	"github.com/steenhansen/go-podcast-downloader/src/misc"
@@ -18,7 +17,6 @@ import (
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
-	globals.MediaMaxReadFileTime = consts.RSS_MAX_READ_FILE_TIME
 	os.Remove(progPath + "/display-menu-m/file-5.txt")
 	os.Remove(progPath + "/display-menu-m/file-6.txt")
 	progBounds := test_helpers.TestBounds(progPath)

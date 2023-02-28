@@ -134,11 +134,12 @@ func BackupPodcast(url string, podcastData models.PodcastData, progBounds models
 
 	if ctxMedias.Err() == context.Canceled {
 		wasCanceled = true
-	} else if ctxMedias.Err().Error() == consts.CONTEXT_DEAD_EXCEEDED {
-		exceedTimeout := fmt.Sprintf("duration: %s", globals.MediaMaxReadFileTime)
-		seriousError = flaws.TimeoutStop.MakeFlaw(exceedTimeout)
 	} else if ctxMedias.Err() != nil {
 		seriousError = ctxMedias.Err()
+		if ctxMedias.Err().Error() == consts.CONTEXT_DEAD_EXCEEDED {
+			exceedTimeout := fmt.Sprintf("duration: %s", globals.MediaMaxReadFileTime)
+			seriousError = flaws.TimeoutStop.MakeFlaw(exceedTimeout)
+		}
 	}
 	if osFileErr != nil && osFileErr != context.Canceled {
 		seriousError = osFileErr
