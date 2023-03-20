@@ -29,15 +29,18 @@ func setUp() {
 }
 
 const expectedReport = `
-Adding 'add-by-url-and-name-r'
-        
+        Adding 'add-by-url-and-name-r'
+
         Downloading 'add-by-url-and-name-r' podcast, 3 files, hit 's' to stop
-        	add-by-url-and-name-1.txt(read #0 21B)
-        ERROR add-by-url-and-name-1.txt
-        	add-by-url-and-name-2.txt(read #0 21B)
-        ERROR add-by-url-and-name-2.txt
-        	add-by-url-and-name-3.txt(read #0 21B)
-        ERROR add-by-url-and-name-3.txt
+                add-by-url-and-name-1.txt(read #0 21B)
+        ERROR: E_10
+        HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/AddByUrlAndName_r/git-server-source/add-by-url-and-name-1.txt FILE: add-by-url-and-name-1.txt
+                add-by-url-and-name-2.txt(read #0 21B)
+        ERROR: E_10
+        HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/AddByUrlAndName_r/git-server-source/add-by-url-and-name-2.txt FILE: add-by-url-and-name-2.txt
+                add-by-url-and-name-3.txt(read #0 21B)
+        ERROR: E_10
+        HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/AddByUrlAndName_r/git-server-source/add-by-url-and-name-3.txt FILE: add-by-url-and-name-3.txt
 `
 
 func TestAddByUrlAndName(t *testing.T) {

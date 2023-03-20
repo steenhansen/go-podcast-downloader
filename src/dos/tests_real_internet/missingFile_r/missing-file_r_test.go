@@ -22,6 +22,9 @@ https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos
 
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
+
+	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII", progPath)
+
 	os.Remove(progPath + "/missing-file-r/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
 
@@ -37,10 +40,12 @@ const expectedMenu string = `
 
 const expectedConsole string = `
 Downloading 'missing-file-r' podcast, 2 files, hit 's' to stop
-no-such-file.txt(read #0 12B)
-not-missing.txt(read #0 11B)
-ERROR no-such-file.txt
-not-missing.txt (save #0, 0s)
+                not-missing.txt(read #0 11B)
+                         not-missing.txt (save #0, 0s)
+                                Size disparity, expected 11 bytes, but was 11
+                no-such-file.txt(read #0 12B)
+        ERROR: E_10
+        HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/missingFile_r/git-server-source/no-such-file.txt FILE: no-such-file.txt
 `
 
 const expectedAdds = `

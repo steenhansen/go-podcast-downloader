@@ -28,18 +28,18 @@ func setUp() {
 }
 
 const expectedReport = `
-Adding 'add-by-url-r'
-        
+       Adding 'add-by-url-r'
+
         Downloading 'add-by-url-r' podcast, 3 files, hit 's' to stop
-        	add-by-url-1.txt(read #0 12B)
-        		 add-by-url-1.txt (save #0, 0s)
-        			Size disparity, expected 12 bytes, but was 12
-        	add-by-url-2.txt(read #0 12B)
-        		 add-by-url-2.txt (save #0, 0s)
-        			Size disparity, expected 12 bytes, but was 12
-        	add-by-url-3.txt(read #0 12B)
-        		 add-by-url-3.txt (save #0, 0s)
-        			Size disparity, expected 12 bytes, but was 12
+                add-by-url-1.txt(read #0 12B)
+                add-by-url-2.txt(read #0 12B)
+                         add-by-url-1.txt (save #0, 0s)
+                                Size disparity, expected 12 bytes, but was 12
+                         add-by-url-2.txt (save #0, 0s)
+                                Size disparity, expected 12 bytes, but was 12
+                add-by-url-3.txt(read #0 12B)
+                         add-by-url-3.txt (save #0, 0s)
+                                Size disparity, expected 12 bytes, but was 12
 `
 
 func TestAddByUrl(t *testing.T) {

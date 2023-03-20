@@ -28,8 +28,10 @@ const expectedConsole string = `
  1 |   0 files |    0MB | low-disk-r
          'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
         	low-disk-r-1.txt(read #0 11B)
-        ERROR low-disk-r-1.txt
+        ERROR: E_15
+        low disk space, 22GB free, need minimum 909TB to proceed FILE: low-disk-r-1.txt
 `
+
 const expectedAdds = `
 No changes detected
 `

@@ -55,18 +55,19 @@ func httpMocked(ctx context.Context, mediaUrl string, numRetries int) (*http.Res
 }
 
 const expectedConsole string = `
- 1 |   1 files |    0MB | low-disk-m
- 'Q' or a number + enter: Downloading 'low-disk-m' podcast, 2 files, hit 's' to stop
-				Have #1 file-1.txt
-	file-2.txt(read #0 16B)
-ERROR file-2.txt
+       1 |   1 files |    0MB | low-disk-m
+         'Q' or a number + enter: Downloading 'low-disk-m' podcast, 2 files, hit 's' to stop
+                                        Have #1 file-1.txt
+                file-2.txt(read #0 16B)
+        ERROR: E_15
+        low disk space, 22GB free, need minimum 909TB to proceed FILE: file-2.txt
 `
 const expectedAdds = `
 No changes detected
 `
 
 const expectedBads = `
-E_15 : low disk space, 96GB free, need minimum 909TB to proceed
+ E_15 : low disk space, xxGB free, need minimum 909TB to proceed
 `
 
 func TestLowDisk_m(t *testing.T) {
@@ -76,6 +77,8 @@ func TestLowDisk_m(t *testing.T) {
 	actualAdds, _, podcastResults := console.DisplayMenu(progBounds, keyStreamTest, test_helpers.KeyboardMenuChoiceNum("1"), httpMocked)
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
+	fmt.Println("errror XXXXXXXXXXXXXXX", err, "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+	fmt.Println("errror ccccccccccccc", err.Error(), "ddddddddddddd")
 	if errors.As(err, &flawError) {
 		lowErr := flawError.Error()
 		safeErr := test_helpers.ReplaceXxGbFree(lowErr)
