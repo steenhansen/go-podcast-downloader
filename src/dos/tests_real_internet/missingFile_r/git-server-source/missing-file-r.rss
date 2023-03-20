@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>title tag</title>
+    <item>
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/missingFile_r/git-server-source/not-missing.txt" length="11" type="text/plain" />
+    </item>
+    <item>
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/missingFile_r/git-server-source/no-such-file.txt" length="12" type="text/plain" />
+    </item>
+  </channel>
+</rss>
