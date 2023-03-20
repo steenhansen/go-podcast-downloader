@@ -16,7 +16,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
+https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
 
 */
 
@@ -45,12 +45,12 @@ not-missing.txt (save #0, 0s)
 
 const expectedAdds = `
 Added 1 new files in 0s
-From https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
+From https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/missingFile_r/git-server-source/missing-file-r.rss
 Into 'missing-file-r'
 `
 
 const expectedBads = `	
-E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/missingFile_r/git-server-source/no-such-file.txt
+E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/missingFile_r/git-server-source/no-such-file.txt
 `
 
 func TestMissingFile_r(t *testing.T) {

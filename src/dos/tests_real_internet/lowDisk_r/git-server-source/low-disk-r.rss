@@ -3,10 +3,10 @@
   <channel>
     <title>low-disk-r</title>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r-1.txt" length="11" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/lowDisk_r/git-server-source/low-disk-r-1.txt" length="11" type="text/plain" />
     </item>
     <item>
-      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r-2.txt" length="12" type="text/plain" />
+      <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/lowDisk_r/git-server-source/low-disk-r-2.txt" length="12" type="text/plain" />
     </item>
   </channel>
 </rss>

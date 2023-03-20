@@ -15,7 +15,7 @@ import (
 
 go run ./ ecology
 
-https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/ReadByExistName/git-server-source/read-by-exist-name.rss
+https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/ReadByExistName/git-server-source/read-by-exist-name.rss
 
 */
 

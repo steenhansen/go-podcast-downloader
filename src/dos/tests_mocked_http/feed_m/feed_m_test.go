@@ -39,10 +39,10 @@ func TestFeed_m(t *testing.T) {
 //   <channel>
 //     <title>title tag</title>
 //     <item>
-//       <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests/missing-file/git-server-source/not-missing.txt" length="11" type="text/plain" />
+//       <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests/missing-file/git-server-source/not-missing.txt" length="11" type="text/plain" />
 //     </item>
 //     <item>
-//       <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests/missing-file/git-server-source/no-such-file.txt" length="12" type="text/plain" />
+//       <enclosure url="https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests/missing-file/git-server-source/no-such-file.txt" length="12" type="text/plain" />
 //     </item>
 //   </channel>
 // </rss>`

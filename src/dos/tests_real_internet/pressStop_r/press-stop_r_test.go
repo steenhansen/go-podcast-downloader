@@ -16,7 +16,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/press-stop/git-server-source/press-stop.rss
+https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/press-stop/git-server-source/press-stop.rss
 
 */
 
@@ -45,7 +45,7 @@ const expectedAdds = `
 No changes detected
 `
 
-//E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/press-stop/git-server-source/no-such-file.txt
+//E_10 : HTTP error 404 Not Found : https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/press-stop/git-server-source/no-such-file.txt
 
 const expectedBads = `
 `

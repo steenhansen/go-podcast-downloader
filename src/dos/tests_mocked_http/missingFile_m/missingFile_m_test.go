@@ -19,7 +19,7 @@ import (
 
 /*
 
-https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_mock_internet/missingFile_m/git-server-source/missing-file-r.rss
+https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_mock_internet/missingFile_m/git-server-source/missing-file-r.rss
 
 */
 

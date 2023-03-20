@@ -14,7 +14,7 @@ import (
 )
 
 /*
-https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/lowDisk_r/git-server-source/low-disk-r.rss
+https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/lowDisk_r/git-server-source/low-disk-r.rss
 */
 
 func setUp() models.ProgBounds {
