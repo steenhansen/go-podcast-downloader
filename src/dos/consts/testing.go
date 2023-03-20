@@ -1,6 +1,6 @@
 package consts
 
-const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/tests_real_internet/"
+const TEST_DIR_URL = "https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos/tests_real_internet/"
 
 const MEM_MONITOR_SECONDS = 60
 
