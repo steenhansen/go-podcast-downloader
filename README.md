@@ -27,9 +27,9 @@
   
   - Verify filenames and/or episode titles and extensions
 
-  - Make sure RSS XML file valid
+  - Make sure RSS XML file valid of "If Books Could Kill"
 ~~~
-    > go run ./ https://feeds.buzzsprout.com/2040953.rss
+    > go run ./console-downloader.go https://feeds.buzzsprout.com/2040953.rss
 ~~~
 
   - See if episode hit counters work
