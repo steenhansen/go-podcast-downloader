@@ -60,7 +60,7 @@ const expectedConsole string = `
                                         Have #1 file-1.txt
                 file-2.txt(read #0 16B)
         ERROR: E_15
-        low disk space, 22GB free, need minimum 909TB to proceed FILE: file-2.txt
+        low disk space, xxGB free, need minimum 909TB to proceed FILE: file-2.txt
 `
 const expectedAdds = `
 No changes detected
@@ -75,10 +75,9 @@ func TestLowDisk_m(t *testing.T) {
 	keyStreamTest := make(chan string)
 	globals.Console.Clear()
 	actualAdds, _, podcastResults := console.DisplayMenu(progBounds, keyStreamTest, test_helpers.KeyboardMenuChoiceNum("1"), httpMocked)
+
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
-	fmt.Println("errror XXXXXXXXXXXXXXX", err, "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println("errror ccccccccccccc", err.Error(), "ddddddddddddd")
 	if errors.As(err, &flawError) {
 		lowErr := flawError.Error()
 		safeErr := test_helpers.ReplaceXxGbFree(lowErr)
@@ -89,10 +88,11 @@ func TestLowDisk_m(t *testing.T) {
 		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
+	actualConsolexxGB := test_helpers.ReplaceXxGbFree(actualConsole)
 	actualBads := globals.Faults.All()
-	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
+	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsolexxGB, expectedConsole)
 	if len(expectedDiff) != 0 {
-		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
+		t.Fatal(test_helpers.ClampActual(actualConsolexxGB), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
 	}
 
 	if test_helpers.NotSameTrimmed(actualAdds, expectedAdds) {

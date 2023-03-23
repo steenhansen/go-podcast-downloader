@@ -19,6 +19,15 @@ const INIT_WINDOW_HEIGHT = 400
 
 const WINDOW_DEFAULT_TITLE = "Backup Podcasts"
 
+func StartApp() fyne.Window {
+	theApp := app.New()
+	theApp.Settings().SetTheme(&myTheme{})
+	fyneWindow := theApp.NewWindow(values.WINDOW_DEFAULT_TITLE)
+	fyneWindow.Resize(fyne.NewSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT))
+	TheMenu(fyneWindow)
+	return fyneWindow
+}
+
 type myTheme struct{}
 
 var _ fyne.Theme = (*myTheme)(nil)
@@ -83,15 +92,6 @@ func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 	}
 
 	return theme.DefaultTheme().Color(name, variant)
-}
-
-func StartApp() fyne.Window {
-	theApp := app.New()
-	theApp.Settings().SetTheme(&myTheme{})
-	fyneWindow := theApp.NewWindow(values.WINDOW_DEFAULT_TITLE)
-	fyneWindow.Resize(fyne.NewSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT))
-	TheMenu(fyneWindow)
-	return fyneWindow
 }
 
 func cancelAdd(podcastUrl string, fyneWindow fyne.Window, err error) {

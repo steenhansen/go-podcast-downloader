@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	fyne.io/fyne v1.4.3 // indirect
 	fyne.io/systray v1.10.1-0.20230207085535-4a244dbb9d03 // indirect
 	github.com/benoitkugler/textlayout v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

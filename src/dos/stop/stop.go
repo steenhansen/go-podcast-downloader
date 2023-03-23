@@ -3,6 +3,7 @@ package stop
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -52,7 +53,10 @@ seriousEnd:
 			globals.Faults.Note(mediaError.EnclosurePath, err)
 			globals.Console.Note("ERROR: " + err.Error())
 			globals.Console.Note(feed.ShowError(fileName))
-			downloadEpisodeErrorEvent(fileName)
+			//	values.An_exe_debug_error_message = "exe_debug Go_seriousError " + fileName + " - " + err.Error()\
+			if !errors.Is(err, flaws.NoGuiKeyboard) {
+				downloadEpisodeErrorEvent(fileName)
+			}
 		}
 	}
 	misc.ChannelLog("\t\t\t Go_seriousError END")

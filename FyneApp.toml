@@ -1,0 +1,8 @@
+Website = "https://github.com/steenhansen/go-podcast-downloader"
+
+[Details]
+  Icon = "/src/gui/images/prog-icon.png"
+  Name = "Go-Podcast-Downloader"
+  ID = "podcast-downloader"
+  Version = "1.0.0"
+  Build = 4

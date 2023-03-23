@@ -29,7 +29,7 @@ const expectedConsole string = `
          'Q' or a number + enter: Downloading 'low-disk-r' podcast, 2 files, hit 's' to stop
         	low-disk-r-1.txt(read #0 11B)
         ERROR: E_15
-        low disk space, 22GB free, need minimum 909TB to proceed FILE: low-disk-r-1.txt
+        low disk space, xxGB free, need minimum 909TB to proceed FILE: low-disk-r-1.txt
 `
 
 const expectedAdds = `
@@ -37,7 +37,7 @@ No changes detected
 `
 
 const expectedBads = `
-E_15 : low disk space, 96GB free, need minimum 909TB to proceed
+E_15 : low disk space, xxGB free, need minimum 909TB to proceed
 `
 
 func TestLowDisk_r(t *testing.T) {
@@ -45,6 +45,7 @@ func TestLowDisk_r(t *testing.T) {
 	keyStreamTest := make(chan string)
 	globals.Console.Clear()
 	actualAdds, _, podcastResults := console.DisplayMenu(progBounds, keyStreamTest, test_helpers.KeyboardMenuChoiceNum("1"), rss.HttpReal)
+
 	var flawError flaws.FlawError
 	err := podcastResults.SeriousError
 	if errors.As(err, &flawError) {
@@ -57,9 +58,11 @@ func TestLowDisk_r(t *testing.T) {
 		t.Fatal(err)
 	}
 	actualConsole := globals.Console.All()
+	actualConsolexxGB := test_helpers.ReplaceXxGbFree(actualConsole)
+
 	actualBads := globals.Faults.All()
 
-	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsole, expectedConsole)
+	expectedDiff := test_helpers.NotSameOutOfOrder(actualConsolexxGB, expectedConsole)
 	if len(expectedDiff) != 0 {
 		t.Fatal(test_helpers.ClampActual(actualConsole), test_helpers.ClampMapDiff(expectedDiff), test_helpers.ClampExpected(expectedConsole))
 	}

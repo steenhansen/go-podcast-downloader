@@ -140,10 +140,7 @@ func CallTerminalDownloading(redrawWindow func(state.StateKind), keyStreamTest c
 		PodTitles: nMediaTitle,
 	}
 
-	//if state.TheMediaWindow.Internetload != "" {
 	progBounds.LoadOption = state.TheMediaWindow.Internetload
-	//	}
-	//state.TheMediaWindow.DownloadResults = misc.EmptyPodcastResults(false, nil)
 	afterDownloadEpisodeEvent := func(spinningSlashes string) {
 		if len(spinningSlashes) == 0 || spinningSlashes[0] == consts.ASCII_CARRIAGE_RETURN {
 			state.TheMediaWindow.FyneWindow.SetTitle(spinningSlashes)

@@ -83,7 +83,7 @@ func InitProg() (string, models.ProgBounds, []string) {
 		LimitOption: limitFlag,
 		MinDisk:     minDiskFlag,
 	}
-	StartLog("/src/" + consts.CHANNEL_LOG_NAME)
+	StartLog("/src/" + consts.LOG_NAME)
 	return diskSize, progBounds, cleanArgs
 }
 
@@ -94,18 +94,20 @@ func SplitByNewline(multiline string) []string {
 	return multilines
 }
 
-func StartLog(logRelative string) {
-	if globals.LogChannels {
-		go MemMonitor(consts.MEM_MONITOR_SECONDS)
+func StartLog(logFname string) {
+	if globals.LogChannels || globals.LogMemory {
 		progPath := CurDir()
-		logPath := progPath + logRelative
+		logPath := progPath + logFname
 		os.Remove(logPath)
 		logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.SetOutput(logFile)
-		log.Println("--------------------------Start--------------------------")
+		log.Println("--------------------------Start Log --------------------------")
+		if globals.LogMemory {
+			go MemMonitor(consts.MEM_MONITOR_SECONDS)
+		}
 	}
 }
 
@@ -120,6 +122,7 @@ func ChannelLog(channelMess string) {
  */
 // https://scene-si.org/2018/08/06/basic-monitoring-of-go-apps-with-the-runtime-package/
 // go misc.MemMonitor(300)
+//  MemMonitor {"Current":216733512,"Cumulative":28862036936,"System":678813376}
 func MemMonitor(duration int) {
 	var monitorMem models.MonitorMem
 	var rtm runtime.MemStats
@@ -127,10 +130,10 @@ func MemMonitor(duration int) {
 	for {
 		<-time.After(interval)
 		runtime.ReadMemStats(&rtm)
-		monitorMem.Current = rtm.Alloc
-		monitorMem.Cumulative = rtm.TotalAlloc
-		monitorMem.System = rtm.Sys
+		monitorMem.Current = rtm.Alloc / uint64(consts.MB_BYTES)
+		monitorMem.Cumulative = rtm.TotalAlloc / uint64(consts.MB_BYTES)
+		monitorMem.System = rtm.Sys / uint64(consts.MB_BYTES)
 		asBytes, _ := json.Marshal(monitorMem)
-		ChannelLog("MemMonitor " + string(asBytes))
+		log.Println("MemMonitor MBs" + string(asBytes))
 	}
 }

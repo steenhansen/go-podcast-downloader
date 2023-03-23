@@ -33,16 +33,9 @@ func buttonIcon(fileName string) *fyne.StaticResource {
 }
 
 /*
-
-
-
-
-
  fyne bundle    -o ./src/gui/selecting/res-prog-icon.go           --package selecting ./src/gui/images/prog-icon.png
  fyne bundle    -o ./src/gui/selecting/res-go-back.go             --package selecting ./src/gui/images/go-back.png
  fyne bundle    -o ./src/gui/selecting/res-select-all.go          --package selecting ./src/gui/images/select-all.png
  fyne bundle    -o ./src/gui/selecting/res-select-none.go         --package selecting ./src/gui/images/select-none.png
  fyne bundle    -o ./src/gui/selecting/res-stop-downloading.go    --package selecting ./src/gui/images/stop-downloading.png
-
-
 */

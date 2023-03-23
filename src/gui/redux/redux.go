@@ -20,7 +20,6 @@ import (
 )
 
 func MenuUpdate(internetLoadChangable bool) {
-	// fmt.Println("ddd", internetLoadChangable)
 	if state.TheMediaWindow.Internetload == consts.HIGH_LOAD {
 		state.TheMediaWindow.Menu2High.Checked = true
 		state.TheMediaWindow.Menu2Medium.Checked = false
@@ -55,7 +54,7 @@ func aLoadDirectories() *fyne.Container {
 	state.TheMediaWindow.ProgPath = progBounds.ProgPath
 	podcastDirs, _, _, _ := podcasts.AllPodcasts(progBounds.ProgPath)
 	state.TheMediaWindow.PodcastDirs = podcastDirs
-	state.TheMediaWindow.LeftSide = selecting.DirPodcasts2(RedrawWindow)
+	state.TheMediaWindow.LeftSide = selecting.DirPodcasts(RedrawWindow)
 	rightContainer := container.NewVBox(widget.NewLabel("Adding ..."))
 	selecting.ChangeDebugMess("A_LOAD_DIRECTORIES")
 	state.TheMediaWindow.WhomBox.Hidden = true

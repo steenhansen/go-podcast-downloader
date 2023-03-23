@@ -16,6 +16,7 @@ import (
 	"podcast-downloader/src/dos/models"
 	"podcast-downloader/src/dos/rss"
 	"podcast-downloader/src/dos/stop"
+	"podcast-downloader/src/gui/values"
 
 	"github.com/eiannone/keyboard"
 )
@@ -53,6 +54,7 @@ func Go_downloadMedia(ctx context.Context, curStat models.CurStat, mediaStream <
 				EnclosurePath: newMedia.EnclosurePath,
 				OrgErr:        err,
 			}
+			//values.An_exe_debug_error_message = "exe_debug Go_downloadMedia - " + err.Error()
 			errorStream <- mediaError
 		} else if ctx.Err() == nil && writtenBytes > 0 {
 			afterDownloadEpisodeEvent(newMedia.EnclosureUrl)
@@ -82,7 +84,12 @@ func createChannels(podcastData models.PodcastData, progBounds models.ProgBounds
 			EnclosurePath: "",
 			OrgErr:        err,
 		}
+		//values.An_exe_debug_error_message = "exe_debug createChannels -  out" + err.Error()
+		if err.Error() == values.NO_KEYBOARD_IN_GUI_EXE {
+			mediaError.OrgErr = flaws.NoGuiKeyboard
+		}
 		errorStream <- mediaError
+
 	}
 	go stop.Go_ctxDone(ctxMedias)
 	go stop.Go_seriousError(ctxMedias, cancelMedias, errorStream, seriousStream, signalEndSerious, downloadEpisodeErrorEvent)

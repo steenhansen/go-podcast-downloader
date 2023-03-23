@@ -23,8 +23,6 @@ https://raw.githubusercontent.com/steenhansen/go-podcast-downloader/main/src/dos
 func setUp() models.ProgBounds {
 	progPath := misc.CurDir()
 
-	fmt.Println("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII", progPath)
-
 	os.Remove(progPath + "/missing-file-r/not-missing.txt")
 	progBounds := test_helpers.TestBounds(progPath)
 
@@ -68,8 +66,7 @@ func TestMissingFile_r(t *testing.T) {
 	}
 	globals.Console.Clear()
 	getMenuChoice := test_helpers.KeyboardMenuChoice_1
-	actualAdds, podcastResults := terminal.AfterMenu(progBounds, keyStreamTest, getMenuChoice, rss.HttpReal)
-	fmt.Println("my podcastResults", podcastResults)
+	actualAdds, _ := terminal.AfterMenu(progBounds, keyStreamTest, getMenuChoice, rss.HttpReal)
 	actualConsole := globals.Console.All()
 	actualBads := globals.Faults.All()
 	if test_helpers.NotSameTrimmed(actualMenu, expectedMenu) {

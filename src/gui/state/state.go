@@ -1,7 +1,6 @@
 package state
 
 import (
-	"fmt"
 	"podcast-downloader/src/dos/consts"
 	"podcast-downloader/src/dos/misc"
 	"podcast-downloader/src/dos/models"
@@ -13,7 +12,26 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var GUI_DEBUG = false
+func GetRssFile(dirName string) ([]string, []string) {
+	//	cursor := desktop.Cursor()
+	//	cursor := desktop.Cursor()
+	//desktop.Cursor.Push(cursor.CursorWait)
+	//TheMediaWindow.FyneWindow.SetIcon(desktop.HResizeCursor)   //.Cursor(CursorWait)
+
+	//TheMediaWindow.FyneWindow.SetC
+	//cursor := desktop.Cursor(desktop.DefaultCursor)
+
+	//	xx := TheMediaWindow.FyneWindow.Canvas()
+	//desktop.StandardCursor.Image(desktop.HResizeCursor)
+	rssFilePath := TheMediaWindow.ProgPath + "/" + dirName + "/" + consts.URL_OF_RSS_FN
+	_, urlStr, _ := podcasts.IsForceTitle(rssFilePath)
+	TheMediaWindow.PodcastUrl = urlStr
+	_, mediaTitles, rssFiles, _, _ := podcasts.ReadRssUrl(urlStr, rss.HttpReal)
+
+	//desktop.StandardCursor.Image(desktop.VResizeCursor)
+
+	return mediaTitles, rssFiles
+}
 
 type StateKind int
 
@@ -71,8 +89,6 @@ type MediaWindow struct {
 	SelectAllOrNoneBox *fyne.Container
 	StopDownloadBox    *fyne.Container
 
-	WhomDownloadLbl *widget.Label
-
 	KeyStream    chan string
 	SpinChar     string
 	Internetload string
@@ -119,7 +135,7 @@ var TheMediaWindow = MediaWindow{
 	ChosenFnames: nil,
 	KeyStream:    nil,
 	SpinChar:     "|",
-	Internetload: consts.HIGH_LOAD,
+	Internetload: consts.DEFAULT_LOAD,
 
 	Menue1Add:   nil,
 	Menu2High:   nil,
@@ -137,8 +153,6 @@ func AllSelected(redrawWindow func(StateKind)) {
 		for index := range TheMediaWindow.ChosenFnames {
 			TheMediaWindow.ChosenFnames[index] = true
 		}
-		fmt.Println("I_CHOOSEN_FILENAMES_MANY A")
-
 		redrawWindow(I_CHOOSEN_FILENAMES_MANY)
 	}
 }
@@ -168,14 +182,6 @@ func SetRssType(dirName string) {
 	}
 }
 
-func GetRssFile(dirName string) ([]string, []string) {
-	rssFilePath := TheMediaWindow.ProgPath + "/" + dirName + "/" + consts.URL_OF_RSS_FN
-	_, urlStr, _ := podcasts.IsForceTitle(rssFilePath)
-	TheMediaWindow.PodcastUrl = urlStr
-	_, mediaTitles, rssFiles, _, _ := podcasts.ReadRssUrl(urlStr, rss.HttpReal)
-	return mediaTitles, rssFiles
-}
-
 const FILENAME_TYPE = "Use Filenames"
 const TITLE_TYPE = "Use Episode Titles"
 
@@ -203,7 +209,6 @@ func FileOrTitle(redrawWindow func(StateKind)) *fyne.Container {
 				if episodeSelected {
 					numberSelected++
 					if numberSelected > 1 {
-						fmt.Println("I_CHOOSEN_FILENAMES_MANY C")
 						redrawWindow(I_CHOOSEN_FILENAMES_MANY)
 						return
 					}

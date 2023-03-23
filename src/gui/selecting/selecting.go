@@ -18,15 +18,21 @@ import (
 )
 
 func ChangeDebugMess(reduxState string) {
-	state.TheMediaWindow.DebugState.Text = reduxState
-	state.TheMediaWindow.DebugState.Refresh()
+	if values.GUI_DEBUG {
+		if values.An_exe_debug_error_message != "" {
+			state.TheMediaWindow.DebugState.Text = values.An_exe_debug_error_message
+		} else {
+			state.TheMediaWindow.DebugState.Text = reduxState
+		}
+		state.TheMediaWindow.DebugState.Refresh()
+	}
 }
 
 func debugState() *fyne.Container {
 	debugLabel := widget.NewLabel("-current-redux-state-")
 	horDebug := container.NewCenter(debugLabel)
 	state.TheMediaWindow.DebugState = debugLabel
-	if !state.GUI_DEBUG {
+	if !values.GUI_DEBUG {
 		horDebug.Hidden = true
 	}
 	return horDebug
@@ -41,17 +47,17 @@ func declareWhom() *fyne.Container {
 	return horWhom
 }
 
-func DirPodcasts2(redrawWindow func(state.StateKind)) *fyne.Container {
-	podcastButtons := container.NewVBox()
-	podcastButtons.Add(debugState())
+func DirPodcasts(redrawWindow func(state.StateKind)) *fyne.Container {
+	actionButtons := container.NewVBox()
+	actionButtons.Add(debugState())
 
-	podcastButtons.Add(backButton(redrawWindow))
-	podcastButtons.Add(declareWhom())
-	podcastButtons.Add(titleOrFname(redrawWindow))
-	podcastButtons.Add(allNone(redrawWindow))
-	podcastButtons.Add(stopDownload(redrawWindow))
+	actionButtons.Add(backButton(redrawWindow))
+	actionButtons.Add(declareWhom())
+	actionButtons.Add(titleOrFname(redrawWindow))
+	actionButtons.Add(allNone(redrawWindow))
+	actionButtons.Add(stopDownload(redrawWindow))
 
-	podcastButtons22 := container.NewVBox()
+	thePodcasts := container.NewVBox()
 	for _, podcastName := range state.TheMediaWindow.PodcastDirs {
 		closedName := podcastName
 		podcastButton := widget.NewButton(closedName, func() {
@@ -66,12 +72,12 @@ func DirPodcasts2(redrawWindow func(state.StateKind)) *fyne.Container {
 			downloadMess := `Downloading "` + closedName + `"`
 			state.TheMediaWindow.WhomButton.SetText(downloadMess)
 		})
-		podcastButtons22.Add(podcastButton)
+		thePodcasts.Add(podcastButton)
 	}
-	state.TheMediaWindow.PodcastList = podcastButtons22
-	podcastButtons.Add(podcastButtons22)
-	podcastButtons.Add(startDownload(redrawWindow))
-	leftScroll := container.NewVScroll(podcastButtons)
+	state.TheMediaWindow.PodcastList = thePodcasts
+	actionButtons.Add(thePodcasts)
+	actionButtons.Add(startDownload(redrawWindow))
+	leftScroll := container.NewVScroll(actionButtons)
 	leftContainer := container.NewMax(leftScroll)
 	return leftContainer
 }

@@ -26,7 +26,7 @@ func setUp() models.ProgBounds {
 	progBounds := test_helpers.TestBounds(progPath)
 	progBounds.LoadOption = consts.HIGH_LOAD // slow down so can stop after one file read
 	globals.LogChannels = true
-	misc.StartLog("../../../" + consts.CHANNEL_LOG_NAME)
+	misc.StartLog("../../../" + consts.LOG_NAME)
 	return progBounds
 }
 

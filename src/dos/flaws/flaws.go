@@ -10,7 +10,8 @@ import (
 type errorKind int
 
 const (
-	sKeyStop errorKind = iota + 1
+	noGuiKeyboard errorKind = iota + 1
+	sKeyStop
 	timeoutStop
 	httpFault
 	exceedRetry
@@ -52,10 +53,11 @@ func IsSerious(err error) bool {
 }
 
 var (
-	SKeyStop    = FlawError{kindError: sKeyStop}
-	TimeoutStop = FlawError{kindError: timeoutStop}
-	HttpFault   = FlawError{kindError: httpFault}
-	ExceedRetry = FlawError{kindError: exceedRetry}
+	NoGuiKeyboard = FlawError{kindError: sKeyStop}
+	SKeyStop      = FlawError{kindError: sKeyStop}
+	TimeoutStop   = FlawError{kindError: timeoutStop}
+	HttpFault     = FlawError{kindError: httpFault}
+	ExceedRetry   = FlawError{kindError: exceedRetry}
 
 	BadChoice       = FlawError{kindError: badChoice}
 	BadFlagSerious  = FlawError{kindError: badFlagSerious}
@@ -93,6 +95,8 @@ func (flaw FlawError) MakeFlaw(baseMess string) FlawError {
 
 func (flaw FlawError) Error() string {
 	switch flaw.kindError {
+	case noGuiKeyboard:
+		return "Gui Exe had no keyboard"
 	case sKeyStop:
 		stopMess := "podcast '%s' was stopped by the '" + consts.STOP_KEY_LOWER + "' key being pressed"
 		return fmt.Sprintf(stopMess, flaw.errMess)

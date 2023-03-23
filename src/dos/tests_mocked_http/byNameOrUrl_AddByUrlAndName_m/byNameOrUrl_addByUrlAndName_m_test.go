@@ -89,7 +89,6 @@ func Test_2_ByNameOrUrl_AddByUrlAndName(t *testing.T) {
 	keyStreamTest := make(chan string)
 	globals.Console.Clear()
 	actualAdds, podcastResults := console.ByNameOrUrl(cleanArgs, progBounds, keyStreamTest, httpTest)
-	fmt.Println("actualAdds", actualAdds)
 	err := podcastResults.SeriousError
 	if err != nil {
 		t.Fatal(err)
