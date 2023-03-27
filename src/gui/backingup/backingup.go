@@ -146,7 +146,7 @@ func CallTerminalDownloading(redrawWindow func(state.StateKind), keyStreamTest c
 			state.TheMediaWindow.FyneWindow.SetTitle(spinningSlashes)
 		} else {
 			state.TheMediaWindow.SpinChar = spinningSlashes
-			redrawWindow(state.K_ARE_DOWNLOADING) // redraw window since files have changed
+			redrawWindow(state.J_ARE_DOWNLOADING) // redraw window since files have changed
 		}
 	}
 
@@ -158,5 +158,5 @@ func CallTerminalDownloading(redrawWindow func(state.StateKind), keyStreamTest c
 	podcastResults := processes.BackupPodcast(urlStr, podcastData, progBounds, keyStreamTest, rss.HttpReal, afterDownloadEpisodeEvent, downloadEpisodeErrorEvent)
 	state.TheMediaWindow.DownloadResults = podcastResults
 	state.TheMediaWindow.PodcastUrl = urlStr
-	redrawWindow(state.L_STOPPING)
+	redrawWindow(state.K_STOPPING)
 }

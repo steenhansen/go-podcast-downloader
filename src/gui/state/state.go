@@ -13,23 +13,12 @@ import (
 )
 
 func GetRssFile(dirName string) ([]string, []string) {
-	//	cursor := desktop.Cursor()
-	//	cursor := desktop.Cursor()
-	//desktop.Cursor.Push(cursor.CursorWait)
-	//TheMediaWindow.FyneWindow.SetIcon(desktop.HResizeCursor)   //.Cursor(CursorWait)
-
-	//TheMediaWindow.FyneWindow.SetC
-	//cursor := desktop.Cursor(desktop.DefaultCursor)
-
-	//	xx := TheMediaWindow.FyneWindow.Canvas()
-	//desktop.StandardCursor.Image(desktop.HResizeCursor)
+	TheMediaWindow.BusyCursor = true
 	rssFilePath := TheMediaWindow.ProgPath + "/" + dirName + "/" + consts.URL_OF_RSS_FN
 	_, urlStr, _ := podcasts.IsForceTitle(rssFilePath)
 	TheMediaWindow.PodcastUrl = urlStr
 	_, mediaTitles, rssFiles, _, _ := podcasts.ReadRssUrl(urlStr, rss.HttpReal)
-
-	//desktop.StandardCursor.Image(desktop.VResizeCursor)
-
+	TheMediaWindow.BusyCursor = false
 	return mediaTitles, rssFiles
 }
 
@@ -38,20 +27,19 @@ type StateKind int
 const (
 	A_LOAD_DIRECTORIES StateKind = iota + 1
 	B_NOTHING_SELECTED
-	C_GETTING_RSS
 
-	D_CHOOSEN_TITLES_NONE
-	E_CHOOSEN_TITLES_ONE
-	F_CHOOSEN_TITLES_MANY
+	C_CHOOSEN_TITLES_NONE
+	D_CHOOSEN_TITLES_ONE
+	E_CHOOSEN_TITLES_MANY
 
-	G_CHOOSEN_FILENAMES_NONE
-	H_CHOOSEN_FILENAMES_ONE
-	I_CHOOSEN_FILENAMES_MANY
+	F_CHOOSEN_FILENAMES_NONE
+	G_CHOOSEN_FILENAMES_ONE
+	H_CHOOSEN_FILENAMES_MANY
 
-	J_START_DOWNLOADING
-	K_ARE_DOWNLOADING
-	L_STOPPING
-	M_REPORTING
+	I_START_DOWNLOADING
+	J_ARE_DOWNLOADING
+	K_STOPPING
+	L_REPORTING
 )
 
 type MediaWindow struct {
@@ -97,6 +85,8 @@ type MediaWindow struct {
 	Menu2High   *fyne.MenuItem
 	Menu2Medium *fyne.MenuItem
 	Menu2Low    *fyne.MenuItem
+
+	BusyCursor bool
 }
 
 var TheMediaWindow = MediaWindow{
@@ -141,6 +131,7 @@ var TheMediaWindow = MediaWindow{
 	Menu2High:   nil,
 	Menu2Medium: nil,
 	Menu2Low:    nil,
+	BusyCursor:  false,
 }
 
 func AllSelected(redrawWindow func(StateKind)) {
@@ -148,12 +139,12 @@ func AllSelected(redrawWindow func(StateKind)) {
 		for index := range TheMediaWindow.ChosenTitles {
 			TheMediaWindow.ChosenTitles[index] = true
 		}
-		redrawWindow(F_CHOOSEN_TITLES_MANY)
+		redrawWindow(E_CHOOSEN_TITLES_MANY)
 	} else {
 		for index := range TheMediaWindow.ChosenFnames {
 			TheMediaWindow.ChosenFnames[index] = true
 		}
-		redrawWindow(I_CHOOSEN_FILENAMES_MANY)
+		redrawWindow(H_CHOOSEN_FILENAMES_MANY)
 	}
 }
 
@@ -162,12 +153,12 @@ func NoneSelected(redrawWindow func(StateKind)) {
 		for index := range TheMediaWindow.ChosenTitles {
 			TheMediaWindow.ChosenTitles[index] = false
 		}
-		redrawWindow(D_CHOOSEN_TITLES_NONE)
+		redrawWindow(C_CHOOSEN_TITLES_NONE)
 	} else {
 		for index := range TheMediaWindow.ChosenFnames {
 			TheMediaWindow.ChosenFnames[index] = false
 		}
-		redrawWindow(G_CHOOSEN_FILENAMES_NONE)
+		redrawWindow(F_CHOOSEN_FILENAMES_NONE)
 	}
 }
 
@@ -199,7 +190,7 @@ func FileOrTitle(redrawWindow func(StateKind)) *fyne.Container {
 				if episodeSelected {
 					numberSelected++
 					if numberSelected > 1 {
-						redrawWindow(F_CHOOSEN_TITLES_MANY)
+						redrawWindow(E_CHOOSEN_TITLES_MANY)
 						return
 					}
 				}
@@ -209,7 +200,7 @@ func FileOrTitle(redrawWindow func(StateKind)) *fyne.Container {
 				if episodeSelected {
 					numberSelected++
 					if numberSelected > 1 {
-						redrawWindow(I_CHOOSEN_FILENAMES_MANY)
+						redrawWindow(H_CHOOSEN_FILENAMES_MANY)
 						return
 					}
 				}
@@ -218,16 +209,16 @@ func FileOrTitle(redrawWindow func(StateKind)) *fyne.Container {
 
 		if numberSelected == 1 {
 			if TheMediaWindow.ForceTitleOverFname {
-				redrawWindow(E_CHOOSEN_TITLES_ONE)
+				redrawWindow(D_CHOOSEN_TITLES_ONE)
 			} else {
-				redrawWindow(H_CHOOSEN_FILENAMES_ONE)
+				redrawWindow(G_CHOOSEN_FILENAMES_ONE)
 			}
 			return
 		}
 		if TheMediaWindow.ForceTitleOverFname {
-			redrawWindow(D_CHOOSEN_TITLES_NONE)
+			redrawWindow(C_CHOOSEN_TITLES_NONE)
 		} else {
-			redrawWindow(G_CHOOSEN_FILENAMES_NONE)
+			redrawWindow(F_CHOOSEN_FILENAMES_NONE)
 		}
 	})
 	fileTitle.Horizontal = true

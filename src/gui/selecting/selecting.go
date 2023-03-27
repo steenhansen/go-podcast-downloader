@@ -1,12 +1,11 @@
 package selecting
 
 import (
-	"image/color"
-	"podcast-downloader/src/gui/state"
-	"podcast-downloader/src/gui/values"
-
 	"podcast-downloader/src/dos/media"
 	"podcast-downloader/src/dos/rss"
+	"podcast-downloader/src/gui/colors"
+	"podcast-downloader/src/gui/state"
+	"podcast-downloader/src/gui/values"
 
 	"os"
 
@@ -68,7 +67,7 @@ func DirPodcasts(redrawWindow func(state.StateKind)) *fyne.Container {
 			state.TheMediaWindow.ChosenFnames = make([]bool, numberEpisodes)
 			state.TheMediaWindow.ChosenTitles = make([]bool, numberEpisodes)
 			state.SetRssType(closedName)
-			redrawWindow(state.G_CHOOSEN_FILENAMES_NONE)
+			redrawWindow(state.F_CHOOSEN_FILENAMES_NONE)
 			downloadMess := `Downloading "` + closedName + `"`
 			state.TheMediaWindow.WhomButton.SetText(downloadMess)
 		})
@@ -86,7 +85,7 @@ func backButton(redrawWindow func(state.StateKind)) *fyne.Container {
 	var backIcon *fyne.StaticResource
 
 	if values.UseDyanmicButtonIcons {
-		backIcon = buttonIcon("go-back.png")
+		backIcon = ButtonIcon("go-back.png")
 	} else {
 		backIcon = resourceGoBackPng
 	}
@@ -99,11 +98,15 @@ func backButton(redrawWindow func(state.StateKind)) *fyne.Container {
 	return horBack
 }
 
+func BB() *fyne.StaticResource {
+	return resourceGoBackPng
+}
+
 // copy dos/tests_mocked_http/pressStop_m/pressStop_m_test.go
 func stopDownload(redrawWindow func(state.StateKind)) *fyne.Container {
 	var stopIcon *fyne.StaticResource
 	if values.UseDyanmicButtonIcons {
-		stopIcon = buttonIcon("stop-downloading.png")
+		stopIcon = ButtonIcon("stop-downloading.png")
 	} else {
 		stopIcon = resourceStopDownloadingPng
 	}
@@ -120,7 +123,7 @@ func stopDownload(redrawWindow func(state.StateKind)) *fyne.Container {
 func allNone(redrawWindow func(state.StateKind)) *fyne.Container {
 	var allIcon *fyne.StaticResource
 	if values.UseDyanmicButtonIcons {
-		allIcon = buttonIcon("select-all.png")
+		allIcon = ButtonIcon("select-all.png")
 	} else {
 		allIcon = resourceSelectAllPng
 	}
@@ -131,7 +134,7 @@ func allNone(redrawWindow func(state.StateKind)) *fyne.Container {
 
 	var noneIcon *fyne.StaticResource
 	if values.UseDyanmicButtonIcons {
-		noneIcon = buttonIcon("select-none.png")
+		noneIcon = ButtonIcon("select-none.png")
 	} else {
 		noneIcon = resourceSelectNonePng
 	}
@@ -144,13 +147,10 @@ func allNone(redrawWindow func(state.StateKind)) *fyne.Container {
 	return selectAllNone
 }
 
-var TRANSLUCENT_BACKGROUND = color.NRGBA{R: 0, G: 255, B: 0, A: 127} // see-through green for background of download button
-var BLACK_DOWNLOAD = color.NRGBA{R: 0, G: 0, B: 0, A: 255}           // black text for download button
-
 func startDownload(redrawWindow func(state.StateKind)) *fyne.Container {
 	var downloadResource *fyne.StaticResource
 	if values.UseDyanmicButtonIcons {
-		downloadResource = buttonIcon("prog-icon.png")
+		downloadResource = ButtonIcon("prog-icon.png")
 	} else {
 		downloadResource = resourceProgIconPng
 	}
@@ -158,10 +158,10 @@ func startDownload(redrawWindow func(state.StateKind)) *fyne.Container {
 	indentedDownloadIcon := container.NewHBox(downloadIcon, downloadIcon)
 
 	emptyDownloadBtn := widget.NewButton("", func() {
-		redrawWindow(state.J_START_DOWNLOADING)
+		redrawWindow(state.I_START_DOWNLOADING)
 	})
-	btnColor := canvas.NewRectangle(TRANSLUCENT_BACKGROUND)
-	btnText := canvas.NewText("Download Podcast Episodes", BLACK_DOWNLOAD)
+	btnColor := canvas.NewRectangle(colors.TRANSLUCENT_BACKGROUND)
+	btnText := canvas.NewText("Download Podcast Episodes", colors.BLACK_DOWNLOAD)
 	btnText.Alignment = fyne.TextAlignCenter
 	btnText.TextStyle = fyne.TextStyle{Bold: true}
 	downloadBox := container.New(

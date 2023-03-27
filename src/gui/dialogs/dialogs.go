@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"net/url"
 
+	"podcast-downloader/src/gui/colors"
 	"podcast-downloader/src/gui/values"
 
 	"fyne.io/fyne/v2"
@@ -48,23 +49,23 @@ func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 
 	if name == theme.ColorNameDisabled {
 		if variant == theme.VariantLight {
-			return DISABLED_LIGHT_CHECKBOX_TEXT
+			return colors.DISABLED_LIGHT_CHECKBOX_TEXT
 		}
-		return DISABLED_DARK_CHECKBOX_TEXT
+		return colors.DISABLED_DARK_CHECKBOX_TEXT
 	}
 
 	if name == theme.ColorNameButton {
 		if variant == theme.VariantLight {
-			return BUTTON_LIGHT_COLOR
+			return colors.BUTTON_LIGHT_COLOR
 		}
-		return BUTTON_DARK_COLOR
+		return colors.BUTTON_DARK_COLOR
 	}
 
 	if name == theme.ColorNameForeground {
 		if variant == theme.VariantLight {
-			return BLACK_TEXT
+			return colors.BLACK_TEXT
 		}
-		return WHITE_TEXT
+		return colors.WHITE_TEXT
 	}
 
 	if name == theme.ColorNameDisabledButton {
@@ -72,23 +73,23 @@ func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 	}
 
 	if name == theme.ColorNamePrimary {
-		return SELECTED_RADIO_CHEK
+		return colors.SELECTED_RADIO_CHEK
 	}
 
 	if name == theme.ColorNameInputBorder {
-		return CHECKBOX_PERIMETER
+		return colors.CHECKBOX_PERIMETER
 	}
 
 	if name == theme.ColorNameFocus {
-		return CURRENT_FOCUS_CIRCLE
+		return colors.CURRENT_FOCUS_CIRCLE
 	}
 
 	if name == theme.ColorNameHover {
-		return HOVERING_CIRCLE
+		return colors.HOVERING_CIRCLE
 	}
 
 	if name == theme.ColorNameInputBackground {
-		return UN_SELECTED_RADIO_CHEK
+		return colors.UN_SELECTED_RADIO_CHEK
 	}
 
 	return theme.DefaultTheme().Color(name, variant)
@@ -105,10 +106,10 @@ func cancelAdd(podcastUrl string, fyneWindow fyne.Window, err error) {
 
 func aboutDialog(fyneWindow fyne.Window) {
 	aboutMess := "Podcast-Downloader"
-	var git, _ = url.Parse("https://github.com/steenhansen/go-podcast-downloader")
+	var gitRepo, _ = url.Parse("https://github.com/steenhansen/go-podcast-downloader")
 	aboutLabel1 := widget.NewLabel("This is both a console and Windows")
 	aboutLabel2 := widget.NewLabel("podcast downloader written in Go 1.20")
-	hyperlink3 := widget.NewHyperlink("GitHub Repository", git)
+	hyperlink3 := widget.NewHyperlink("GitHub Repository", gitRepo)
 	aboutLabels := container.NewVBox()
 	aboutLabels.Add(aboutLabel1)
 	aboutLabels.Add(aboutLabel2)

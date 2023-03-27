@@ -15,7 +15,7 @@ import (
 	"podcast-downloader/src/dos/help"
 )
 
-func main() { // console version
+func main_gui_is_set_for_building() { // console version
 	initialize.AddNasa()
 	diskSize, progBounds, cleanArgs := misc.InitProg()
 	keyStreamTest := make(chan string)

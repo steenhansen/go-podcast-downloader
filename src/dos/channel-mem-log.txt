@@ -1,50 +1,53 @@
-2023/03/23 14:18:42 --------------------------Start Log --------------------------
-2023/03/23 14:18:42 BackupPodcast START
-2023/03/23 14:18:42 	 Go_ctxDone START
-2023/03/23 14:18:42 				 Go_downloadMedia START 1
-2023/03/23 14:18:42 				 Go_downloadMedia START 11
-2023/03/23 14:18:42 			 Go_deriveFilenames START
-2023/03/23 14:18:42 				 Go_downloadMedia START 2
-2023/03/23 14:18:42 				 Go_downloadMedia START 3
-2023/03/23 14:18:42 				 Go_downloadMedia START 4
-2023/03/23 14:18:42 				 Go_downloadMedia START 5
-2023/03/23 14:18:42 				 Go_downloadMedia START 6
-2023/03/23 14:18:42 				 Go_downloadMedia START 7
-2023/03/23 14:18:42 				 Go_downloadMedia START 8
-2023/03/23 14:18:42 				 Go_downloadMedia START 9
-2023/03/23 14:18:42 				 Go_downloadMedia START 10
-2023/03/23 14:18:42 			 Go_seriousError START
-2023/03/23 14:18:42 		 Go_stopKey START
-2023/03/23 14:18:42 		 TESTING - downloading stopped by simulated key press of 'S'
-2023/03/23 14:18:42 				 Go_downloadMedia START 12
-2023/03/23 14:18:42 				 Go_downloadMedia START 13
-2023/03/23 14:18:42 				 Go_downloadMedia START 14
-2023/03/23 14:18:42 	 Go_ctxDone END
-2023/03/23 14:18:42 				 Go_downloadMedia START 16
-2023/03/23 14:18:42 		 Go_stopKey already STOPPED waiting for <-signalEndStop
-2023/03/23 14:18:42 				 Go_downloadMedia START 15
-2023/03/23 14:18:42 						 Go_deriveFilenames 1 
-2023/03/23 14:18:42 BackupPodcast Go_deriveFilenames done
-2023/03/23 14:18:42  Go_downloadMedia close(mediaStream)
-2023/03/23 14:18:42 				 Go_downloadMedia END 15
-2023/03/23 14:18:42 				 Go_downloadMedia END 14
-2023/03/23 14:18:42 				 Go_downloadMedia END 13
-2023/03/23 14:18:42 				 Go_downloadMedia END 12
-2023/03/23 14:18:42 				 Go_downloadMedia END 11
-2023/03/23 14:18:42 				 Go_downloadMedia END 10
-2023/03/23 14:18:42 				 Go_downloadMedia END 8
-2023/03/23 14:18:42 				 Go_downloadMedia END 7
-2023/03/23 14:18:42 				 Go_downloadMedia END 2
-2023/03/23 14:18:42 				 Go_downloadMedia END 1
-2023/03/23 14:18:42 				 Go_downloadMedia END 6
-2023/03/23 14:18:42 				 Go_downloadMedia END 5
-2023/03/23 14:18:42 				 Go_downloadMedia END 4
-2023/03/23 14:18:42 				 Go_downloadMedia END 3
-2023/03/23 14:18:42 BackupPodcast Go_downloadMedia done
-2023/03/23 14:18:42 BackupPodcast all channels done
-2023/03/23 14:18:42 BackupPodcast serious error
-2023/03/23 14:18:42 BackupPodcast models.PodcastResults
-2023/03/23 14:18:42 BackupPodcast END
-2023/03/23 14:18:42 				 Go_downloadMedia END 9
-2023/03/23 14:18:42 				 Go_downloadMedia END 0
-2023/03/23 14:18:42 			 Go_seriousError <-signalEndSerious
+2023/03/27 12:40:26 --------------------------Start Log --------------------------
+2023/03/27 12:40:27 BackupPodcast START
+2023/03/27 12:40:27 	 Go_ctxDone START
+2023/03/27 12:40:27 			 Go_deriveFilenames START
+2023/03/27 12:40:27 				 Go_downloadMedia START 1
+2023/03/27 12:40:27 			 Go_seriousError START
+2023/03/27 12:40:27 		 Go_stopKey START
+2023/03/27 12:40:27 		 TESTING - downloading stopped by simulated key press of 'S'
+2023/03/27 12:40:27 				 Go_downloadMedia START 2
+2023/03/27 12:40:27 				 Go_downloadMedia START 3
+2023/03/27 12:40:27 				 Go_downloadMedia START 4
+2023/03/27 12:40:27 				 Go_downloadMedia START 5
+2023/03/27 12:40:27 				 Go_downloadMedia START 6
+2023/03/27 12:40:27 				 Go_downloadMedia START 7
+2023/03/27 12:40:27 				 Go_downloadMedia START 8
+2023/03/27 12:40:27 				 Go_downloadMedia START 9
+2023/03/27 12:40:27 				 Go_downloadMedia START 10
+2023/03/27 12:40:27 				 Go_downloadMedia START 11
+2023/03/27 12:40:27 				 Go_downloadMedia START 12
+2023/03/27 12:40:27 				 Go_downloadMedia START 13
+2023/03/27 12:40:27 				 Go_downloadMedia START 14
+2023/03/27 12:40:27 				 Go_downloadMedia START 15
+2023/03/27 12:40:27 				 Go_downloadMedia START 16
+2023/03/27 12:40:27 		 Go_stopKey already STOPPED waiting for <-signalEndStop
+2023/03/27 12:40:27 	 Go_ctxDone END
+2023/03/27 12:40:27 						 Go_deriveFilenames 1 
+2023/03/27 12:40:27 BackupPodcast Go_deriveFilenames done
+2023/03/27 12:40:27  Go_downloadMedia close(mediaStream)
+2023/03/27 12:40:27 				 Go_downloadMedia END 15
+2023/03/27 12:40:27 				 Go_downloadMedia END 13
+2023/03/27 12:40:27 				 Go_downloadMedia END 12
+2023/03/27 12:40:27 				 Go_downloadMedia END 11
+2023/03/27 12:40:27 				 Go_downloadMedia END 14
+2023/03/27 12:40:27 				 Go_downloadMedia END 1
+2023/03/27 12:40:27 				 Go_downloadMedia END 9
+2023/03/27 12:40:27 				 Go_downloadMedia END 10
+2023/03/27 12:40:27 				 Go_downloadMedia END 8
+2023/03/27 12:40:27 				 Go_downloadMedia END 7
+2023/03/27 12:40:27 				 Go_downloadMedia END 6
+2023/03/27 12:40:27 				 Go_downloadMedia END 5
+2023/03/27 12:40:27 				 Go_downloadMedia END 4
+2023/03/27 12:40:27 				 Go_downloadMedia END 3
+2023/03/27 12:40:27 				 Go_downloadMedia END 2
+2023/03/27 12:40:27 				 Go_downloadMedia END 0
+2023/03/27 12:40:27 BackupPodcast Go_downloadMedia done
+2023/03/27 12:40:27 BackupPodcast all channels done
+2023/03/27 12:40:27 BackupPodcast serious error
+2023/03/27 12:40:27 BackupPodcast models.PodcastResults
+2023/03/27 12:40:27 BackupPodcast END
+2023/03/27 12:40:27 		 Go_stopKey STOPPED finished
+2023/03/27 12:40:27 		 Go_stopKey END
+2023/03/27 12:40:27 			 Go_seriousError <-signalEndSerious
+2023/03/27 12:40:27 			 Go_seriousError END

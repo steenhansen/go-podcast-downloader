@@ -8,7 +8,7 @@ import (
 	"podcast-downloader/src/gui/values"
 )
 
-func mainX() { // GUI version
+func main() { // GUI version
 
 	if values.UseDyanmicButtonIcons {
 		fmt.Println("Debugging A - values.UseDyanmicButtonIcons = true ")

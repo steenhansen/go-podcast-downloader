@@ -5,4 +5,4 @@ Website = "https://github.com/steenhansen/go-podcast-downloader"
   Name = "Gui-Podcast-Downloader"
   ID = "podcast-downloader"
   Version = "1.0.0"
-  Build = 4
+  Build = 5

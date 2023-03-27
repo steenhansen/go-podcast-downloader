@@ -1,6 +1,7 @@
 package values
 
 const UseDyanmicButtonIcons = false
+
 const WINDOW_DEFAULT_TITLE = "Backup Podcasts"
 
 const NO_KEYBOARD_IN_GUI_EXE = "The handle is invalid."

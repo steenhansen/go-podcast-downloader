@@ -20,7 +20,9 @@ console-downloader.go
     > go mod tidy
 ```
 
-## Running GUI From Source 
+## Running GUI From Source
+
+#### This takes a long time the first time
 ```
     > go run ./gui-downloader.go
 ```

@@ -1,7 +1,13 @@
 package redux
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"image"
+	"image/png"
+	"log"
+	"os"
 	"podcast-downloader/src/dos/consts"
 	"podcast-downloader/src/dos/initialize"
 	"podcast-downloader/src/dos/media"
@@ -16,6 +22,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -80,28 +87,14 @@ func bNothingSelected() *fyne.Container {
 	return rightContainer
 }
 
-func cGettingRSS() *fyne.Container {
-	readingPodcast := "Reading RSS feed of " + state.TheMediaWindow.CurPodcastDir
-	rightContainer := container.NewPadded(widget.NewLabel(readingPodcast))
-	selecting.ChangeDebugMess("C_GETTING_RSS")
-	state.TheMediaWindow.WhomBox.Hidden = true
-	state.TheMediaWindow.TitleOrFnameBox.Hidden = true
-	state.TheMediaWindow.BackBox.Hidden = false
-	state.TheMediaWindow.StartDownloadBox.Hidden = true
-	state.TheMediaWindow.SelectAllOrNoneBox.Hidden = true
-	state.TheMediaWindow.StopDownloadBox.Hidden = true
-	state.TheMediaWindow.PodcastList.Hidden = true
-	return rightContainer
-}
-
 func dNoChosenTitles() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("D_CHOOSEN_TITLES_NONE")
+	selecting.ChangeDebugMess("C_CHOOSEN_TITLES_NONE")
 	banner := "Chosen filenames are derived from episode titles"
 	return noneChosenYet(banner)
 }
 
 func gNoFilenamesChosen() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("G_CHOOSEN_FILENAMES_NONE")
+	selecting.ChangeDebugMess("F_CHOOSEN_FILENAMES_NONE")
 	banner := "Chosen filenames are actual files in RSS"
 	return noneChosenYet(banner)
 }
@@ -128,25 +121,25 @@ func noneChosenYet(banner string) (*fyne.Container, bool) {
 }
 
 func eOneTitleChosen() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("E_CHOOSEN_TITLES_ONE")
+	selecting.ChangeDebugMess("D_CHOOSEN_TITLES_ONE")
 	banner := "The filename is derived from episode titles"
 	return atLeastOne(banner)
 }
 
 func hOneFilenameChosen() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("H_CHOOSEN_FILENAMES_ONE")
+	selecting.ChangeDebugMess("G_CHOOSEN_FILENAMES_ONE")
 	banner := "The filename is actual filename in RSS"
 	return atLeastOne(banner)
 }
 
 func iManyFilenamesChosen() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("I_CHOOSEN_FILENAMES_MANY")
+	selecting.ChangeDebugMess("H_CHOOSEN_FILENAMES_MANY")
 	banner := "The filenames are derived from episode titles"
 	return atLeastOne(banner)
 }
 
 func fManyChosenTitles() (*fyne.Container, bool) {
-	selecting.ChangeDebugMess("F_CHOOSEN_TITLES_MANY")
+	selecting.ChangeDebugMess("E_CHOOSEN_TITLES_MANY")
 	banner := "The filenames are actual filename in RSS"
 	return atLeastOne(banner)
 }
@@ -179,7 +172,7 @@ func jStartDownloading() *fyne.Container {
 	rssUrl := state.TheMediaWindow.PodcastUrl
 	forcingTitle := state.TheMediaWindow.ForceTitleOverFname
 	media.ReSaveFolder(forcingTitle, progPath, podTitle, rssUrl)
-	selecting.ChangeDebugMess("J_START_DOWNLOADING")
+	selecting.ChangeDebugMess("I_START_DOWNLOADING")
 	rightContainer := container.NewVBox(widget.NewLabel("Downloading ..."))
 	return rightContainer
 }
@@ -196,7 +189,7 @@ func kShowDownloading(redrawWindow func(state.StateKind)) *fyne.Container {
 	totCount := strconv.Itoa(totalCount)
 	downloadingTitle := " " + remCount + "/" + totCount + "   " + state.TheMediaWindow.SpinChar
 	state.TheMediaWindow.FyneWindow.SetTitle(downloadingTitle)
-	selecting.ChangeDebugMess("K_ARE_DOWNLOADING")
+	selecting.ChangeDebugMess("J_ARE_DOWNLOADING")
 	state.TheMediaWindow.WhomBox.Hidden = false
 	state.TheMediaWindow.TitleOrFnameBox.Hidden = true
 	state.TheMediaWindow.BackBox.Hidden = true
@@ -208,7 +201,7 @@ func kShowDownloading(redrawWindow func(state.StateKind)) *fyne.Container {
 }
 
 func lStopping() *fyne.Container {
-	selecting.ChangeDebugMess("L_STOPPING")
+	selecting.ChangeDebugMess("K_STOPPING")
 	state.TheMediaWindow.WhomBox.Hidden = false
 	state.TheMediaWindow.TitleOrFnameBox.Hidden = true
 	state.TheMediaWindow.BackBox.Hidden = true
@@ -221,7 +214,7 @@ func lStopping() *fyne.Container {
 }
 
 func mReporting() *fyne.Container {
-	selecting.ChangeDebugMess("M_REPORTING")
+	selecting.ChangeDebugMess("L_REPORTING")
 	state.TheMediaWindow.FyneWindow.SetTitle(values.WINDOW_DEFAULT_TITLE)
 	podcastResults := state.TheMediaWindow.DownloadResults
 	urlStr := state.TheMediaWindow.PodcastUrl
@@ -257,60 +250,98 @@ func RedrawWindow(newState state.StateKind) {
 	case state.B_NOTHING_SELECTED:
 		MenuUpdate(true)
 		rightContainer = bNothingSelected()
-	case state.C_GETTING_RSS:
-		MenuUpdate(true)
-		rightContainer = cGettingRSS()
-	case state.D_CHOOSEN_TITLES_NONE:
+	case state.C_CHOOSEN_TITLES_NONE:
 		MenuUpdate(true)
 		rightContainer, _ = dNoChosenTitles()
-	case state.E_CHOOSEN_TITLES_ONE:
+	case state.D_CHOOSEN_TITLES_ONE:
 		MenuUpdate(true)
 		rightContainer, _ = eOneTitleChosen()
-	case state.F_CHOOSEN_TITLES_MANY:
+	case state.E_CHOOSEN_TITLES_MANY:
 		MenuUpdate(true)
 		rightContainer, _ = fManyChosenTitles()
-	case state.G_CHOOSEN_FILENAMES_NONE:
+	case state.F_CHOOSEN_FILENAMES_NONE:
 		MenuUpdate(true)
 		rightContainer, allFnamesSame = gNoFilenamesChosen()
 		if allFnamesSame {
 			state.TheMediaWindow.TitleOrFnameRd.SetSelected(state.TITLE_TYPE)
 			return
 		}
-	case state.H_CHOOSEN_FILENAMES_ONE:
+	case state.G_CHOOSEN_FILENAMES_ONE:
 		MenuUpdate(true)
 		rightContainer, allFnamesSame = hOneFilenameChosen()
 		if allFnamesSame {
 			state.TheMediaWindow.TitleOrFnameRd.SetSelected(state.TITLE_TYPE)
 			return
 		}
-	case state.I_CHOOSEN_FILENAMES_MANY:
+	case state.H_CHOOSEN_FILENAMES_MANY:
 		MenuUpdate(true)
 		rightContainer, allFnamesSame = iManyFilenamesChosen()
 		if allFnamesSame {
 			state.TheMediaWindow.TitleOrFnameRd.SetSelected(state.TITLE_TYPE)
 			return
 		}
-	case state.J_START_DOWNLOADING:
+	case state.I_START_DOWNLOADING:
 		MenuUpdate(false)
 		rightContainer = jStartDownloading()
-	case state.K_ARE_DOWNLOADING:
+	case state.J_ARE_DOWNLOADING:
 		MenuUpdate(false)
 		rightContainer = kShowDownloading(RedrawWindow)
-	case state.L_STOPPING:
+	case state.K_STOPPING:
 		MenuUpdate(true)
 		rightContainer = lStopping()
-	case state.M_REPORTING:
+	case state.L_REPORTING:
 		MenuUpdate(true)
 		rightContainer = mReporting()
 	default:
 		fmt.Println("ERROR Unknown redux = ", newState)
 	}
 	leftContainer := state.TheMediaWindow.LeftSide
-	leftSplitRight := container.NewHSplit(leftContainer, rightContainer)
-	state.TheMediaWindow.FyneWindow.SetContent(leftSplitRight)
-	if newState == state.J_START_DOWNLOADING {
-		RedrawWindow(state.K_ARE_DOWNLOADING)
-	} else if newState == state.L_STOPPING {
-		RedrawWindow(state.M_REPORTING)
+	leftSplitRight2 := NewPointerHSplit(leftContainer, rightContainer)
+	state.TheMediaWindow.FyneWindow.SetContent(leftSplitRight2)
+
+	if newState == state.I_START_DOWNLOADING {
+		RedrawWindow(state.J_ARE_DOWNLOADING)
+	} else if newState == state.K_STOPPING {
+		RedrawWindow(state.L_REPORTING)
 	}
+}
+
+type PointerHSplit struct {
+	container.Split
+}
+
+func NewPointerHSplit(leading, trailing fyne.CanvasObject) *PointerHSplit {
+	hsplit := &PointerHSplit{}
+	hsplit.ExtendBaseWidget(hsplit) // n.b. no other way of doing busy mouse pointer
+	hsplit.Leading = leading
+	hsplit.Trailing = trailing
+	hsplit.Horizontal = true
+	return hsplit
+}
+
+type BusyCursor int
+
+func (d BusyCursor) Image() (image.Image, int, int) {
+	var busyCursor image.Image
+	if values.UseDyanmicButtonIcons {
+		curDir := misc.CurDir()
+		filePath := curDir + "/src/gui/images/busy-cursor.png"
+		iconFile, err := os.Open(filePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		r := bufio.NewReader(iconFile)
+		busyCursor, _ = png.Decode(r)
+	} else {
+		busyCursor, _, _ = image.Decode(bytes.NewReader(resourceBusyCursorPng.StaticContent))
+	}
+	return busyCursor, 0, 0
+}
+
+func (hs *PointerHSplit) Cursor() desktop.Cursor {
+	if state.TheMediaWindow.BusyCursor {
+		var busyCursor BusyCursor
+		return busyCursor
+	}
+	return desktop.DefaultCursor
 }
