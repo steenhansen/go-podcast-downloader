@@ -5,7 +5,11 @@
 <a name="screen-shot"></a>
 <a name="s"></a>
 ## Fyne Gui Version
-![Selecting NASA Image of the Day episodes](/src/gui/images/gui-nasa.png)
+
+<img src="./src/gui/images/tall-go.webp" width="800">
+
+
+
 
 ## Console Version
 ![Console Menu](/src/dos/images/menu.png)
